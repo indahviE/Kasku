@@ -11,18 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kelas_user', function (Blueprint $table) {
+        Schema::create('wali_kelas', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('kelas_id');
             $table->unsignedBigInteger('user_id');
-            $table->enum('role_di_kelas', ['bendahara', 'siswa']);
-            $table->timestamps();
+            $table->int('nip');
+            $table->string('no_hp');
+             
 
-            $table->foreign('kelas_id')->references('id')->on('kelas')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-
-            //1 user cm bs 1x dikelas yg sm
-            $table->unique(['kelas_id', 'user_id']);
+            $table->foreign('kelas_id')->references('id')->on('kelas')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
@@ -31,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kelas_user');
+        Schema::dropIfExists('wali_kelas');
     }
 };

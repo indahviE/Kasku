@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('tanggal_bayar');
             $table->enum('metode', ['tunai', 'transfer'])->default('tunai');
             $table->enum('status', ['lunas', 'belum', 'nunggak'])->default('tunai')->default('belum');
-            $table->string('bukti bayar');
+            $table->string('bukti_bayar');
             $table->timestamps();
 
             $table->foreign('tagihan_id')->references('id')->on('tagihan')->onDelete('cascade');
