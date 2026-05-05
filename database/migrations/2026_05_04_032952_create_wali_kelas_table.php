@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('kelas_id');
             $table->unsignedBigInteger('user_id');
-            $table->int('nip');
+            $table->bigInteger('nip');
             $table->string('no_hp');
              
 
