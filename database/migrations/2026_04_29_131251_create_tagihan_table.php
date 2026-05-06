@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('nominal', 10, 2);
             $table->date('periode');
             
-            $table->date('batas bayar');
+            $table->date('batas_bayar');
             $table->timestamps();
 
             $table->foreign('kelas_id')->references('id')->on('kelas')->onDelete('cascade');
