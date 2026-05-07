@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('jml_bayar', 10, 2);
             $table->date('tanggal_bayar');
             $table->enum('metode', ['tunai', 'transfer'])->default('tunai');
-            $table->enum('status', ['lunas', 'belum', 'nunggak'])->default('tunai')->default('belum');
+            $table->enum('status', ['lunas', 'belum', 'nunggak'])->default('belum');
             $table->string('bukti_bayar');
             $table->timestamps();
 

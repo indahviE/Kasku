@@ -1,7 +1,64 @@
 <?php
 
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\KasController;
+use App\Http\Controllers\KelasController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    //kelola user
+    Route::get('/users', [AdminController::class, 'listUser'])->name('users');
+    Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
+    Route::get('/users/edit', [AdminController::class, 'editUser'])->name('users.edit');
+
+    Route::post('/users/store', [AdminController::class, 'storeUser'])->name('users.store');
+    Route::post('/users/update/{id}', [AdminController::class, 'updateUser'])->name('users.update');
+    Route::post('/users/delete/{id}', [AdminController::class, 'deleteUser'])->name('users.store');
+
+    //kelola kls
+    Route::get('/kelas', [KelasController::class, 'listKelas'])->name('kelas');
+    Route::get('/kelas/create', [KelasController::class, 'createKelas'])->name('kelas.create');
+    Route::get('/kelas/edit', [KelasController::class, 'editKelas'])->name('kelas.edit');
+
+    Route::post('/kelas/store', [KelasController::class, 'storeKelas'])->name('kelas.store');
+    Route::post('/kelas/update/{id}', [KelasController::class, 'updateKelas'])->name('kelas.update');
+    Route::post('/kelas/delete/{id}', [KelasController::class, 'deleteKelas'])->name('kelas.delete');
+
+    Route::post('/kelas/{id}/generate-code', [AdminController::class, 'generateClassCode'])->name('generate-code');
+});
+
+Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(function () {
+    //kas masuk ya
+    Route::get('/kasMasuk', [KasController::class, 'viewKasMasuk'])->name('kas_masuk');
+    Route::get('/kasMasuk/create', [KasController::class, 'createKasMasuk'])->name('kas_masuk.create');
+    Route::get('/kasMasuk/edit', [KasController::class, 'editKasMasuk'])->name('kas_masuk.edit');
+
+    Route::post('/kasMasuk/store', [KasController::class, 'storeKasMasuk'])->name('kas_masuk.store');
+    Route::post('/kasMasuk/update/{id}', [KasController::class, 'updateKasMasuk'])->name('kas_masuk.update');
+    Route::post('/kasMasuk/delete', [KasController::class, 'deleteKasMasuk'])->name('kas_masuk.delete');
+
+    //kas pengeluaran
+    Route::get('/kasKeluar', [KasController::class, 'viewKasKeluar'])->name('kas_keluar');
+    Route::get('/kasKeluar/create', [KasController::class, 'createKasKeluar'])->name('kas_keluar.create');
+    Route::get('/kasKeluar/edit', [KasController::class, 'editKasKeluar'])->name('kas_keluar.edit');
+
+    Route::post('/kasKeluar/store', [KasController::class, 'storeKasMasuk'])->name('kas_keluar.store');
+    Route::post('/kasKeluar/update/{id}', [KasController::class, 'updateKasKeluar'])->name('kas_keluar.update');
+    Route::post('/kasKeluar/delete', [KasController::class, 'deleteKasKeluar'])->name('kas_keluar.delete');
+});
+require __DIR__.'/auth.php';
