@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class AdminController extends Controller
 {
     public function listUser(Request $request) {
-        $roleFilter = $request->role();
+        $roleFilter = $request->get('role');
         $query = User::with('kelas');
 
         if($roleFilter) {

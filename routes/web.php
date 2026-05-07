@@ -23,7 +23,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     //kelola user
     Route::get('/users', [AdminController::class, 'listUser'])->name('users');
-    
+
     //kelola kls
     Route::get('/kelas', [KelasController::class, 'listKelas'])->name('kelas');
     Route::get('/kelas/create', [KelasController::class, 'createKelas'])->name('kelas.create');
