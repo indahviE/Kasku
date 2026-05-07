@@ -16,6 +16,10 @@ class DatabaseSeeder extends Seeder
         AdminSeeder::class, 
         KelasSeeder::class,
         SiswaSeeder::class,
+        TagihanSeeder::class,
+        WaliKelasSeeder::class,
+        PengeluaranSeeder::class,
+        PembayaranSeeder::class,
     ]);
 }
 }
