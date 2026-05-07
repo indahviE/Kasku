@@ -23,13 +23,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     //kelola user
     Route::get('/users', [AdminController::class, 'listUser'])->name('users');
-    Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
-    Route::get('/users/edit', [AdminController::class, 'editUser'])->name('users.edit');
-
-    Route::post('/users/store', [AdminController::class, 'storeUser'])->name('users.store');
-    Route::post('/users/update/{id}', [AdminController::class, 'updateUser'])->name('users.update');
-    Route::post('/users/delete/{id}', [AdminController::class, 'deleteUser'])->name('users.store');
-
+    
     //kelola kls
     Route::get('/kelas', [KelasController::class, 'listKelas'])->name('kelas');
     Route::get('/kelas/create', [KelasController::class, 'createKelas'])->name('kelas.create');
