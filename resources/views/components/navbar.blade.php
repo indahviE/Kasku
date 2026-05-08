@@ -46,7 +46,7 @@
                     Sign In
                 </button></a>
 
-                <a href="/register"></a><button class="px-6 py-2 rounded-full bg-black text-white text-sm font-medium hover:bg-gray-800 transition">
+                <a href="/register"><button class="px-6 py-2 rounded-full bg-black text-white text-sm font-medium hover:bg-gray-800 transition">
                     Sign Up
                 </button></a>
 
