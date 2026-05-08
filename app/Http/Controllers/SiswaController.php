@@ -4,36 +4,33 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 use App\Models\Siswa;
-use App\Models\Transaksi;
+use App\Models\Pembayaran;
+use App\Models\Pengeluaran;
+use App\Models\Tagihan;
 
 class SiswaController extends Controller
 {
-
     public function index()
     {
         $user = Auth::user();
 
-        // Ambil data siswa
         $siswa = Siswa::where('user_id', $user->id)->first();
 
-        // Total kas masuk
-        $kasMasuk = Transaksi::where('jenis', 'masuk')
-            ->where('status', 'success')
+        $kasMasuk = Pembayaran::where('status', 'success')
             ->sum('jumlah');
 
-        $kasKeluar = Transaksi::where('jenis', 'keluar')
-            ->where('status', 'success')
-            ->sum('jumlah');
+        $kasKeluar = Pengeluaran::sum('jumlah');
 
         $saldoKas = $kasMasuk - $kasKeluar;
 
-        $riwayat = Transaksi::where('user_id', $user->id)
+        $riwayat = Pembayaran::where('user_id', $user->id)
             ->latest()
             ->take(5)
             ->get();
 
-        $tunggakan = Transaksi::where('user_id', $user->id)
+        $tunggakan = Tagihan::where('user_id', $user->id)
             ->where('status', 'belum_bayar')
             ->sum('jumlah');
 
@@ -49,7 +46,7 @@ class SiswaController extends Controller
 
     public function riwayat()
     {
-        $riwayat = Transaksi::where('user_id', Auth::id())
+        $riwayat = Pembayaran::where('user_id', Auth::id())
             ->latest()
             ->get();
 
@@ -58,7 +55,7 @@ class SiswaController extends Controller
 
     public function tunggakan()
     {
-        $tunggakan = Transaksi::where('user_id', Auth::id())
+        $tunggakan = Tagihan::where('user_id', Auth::id())
             ->where('status', 'belum_bayar')
             ->get();
 
@@ -67,7 +64,7 @@ class SiswaController extends Controller
 
     public function laporanKas()
     {
-        $laporan = Transaksi::where('status', 'success')
+        $laporan = Pembayaran::where('status', 'success')
             ->latest()
             ->get();
 
@@ -90,10 +87,9 @@ class SiswaController extends Controller
         $bukti = $request->file('bukti_pembayaran')
             ->store('bukti_pembayaran', 'public');
 
-        Transaksi::create([
+        Pembayaran::create([
             'user_id' => Auth::id(),
             'jumlah' => $request->jumlah,
-            'jenis' => 'masuk',
             'metode_pembayaran' => $request->metode_pembayaran,
             'bukti_pembayaran' => $bukti,
             'status' => 'menunggu_verifikasi',
@@ -106,10 +102,10 @@ class SiswaController extends Controller
 
     public function detailPembayaran($id)
     {
-        $transaksi = Transaksi::where('user_id', Auth::id())
+        $pembayaran = Pembayaran::where('user_id', Auth::id())
             ->findOrFail($id);
 
-        return view('siswa.detail_pembayaran', compact('transaksi'));
+        return view('siswa.detail_pembayaran', compact('pembayaran'));
     }
 
     public function logout(Request $request)
@@ -117,6 +113,7 @@ class SiswaController extends Controller
         Auth::logout();
 
         $request->session()->invalidate();
+
         $request->session()->regenerateToken();
 
         return redirect('/login');
