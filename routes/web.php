@@ -9,9 +9,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('home');
 });
+
 Route::get('/login', function () {
     return view('auth.login');
 });
+
 Route::get('/register', function () {
     return view('auth.register');
 });
@@ -27,6 +29,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+
     //kelola user
     Route::get('/users', [AdminController::class, 'listUser'])->name('users');
 
@@ -43,6 +46,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 });
 
 Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(function () {
+
+    //dashboard
+    Route::get('/dashboard', function () {
+        return view('bendahara.dashboard');
+    })->name('bendahara.dashboard');
+
     //kas masuk ya
     Route::get('/kasMasuk', [KasController::class, 'viewKasMasuk'])->name('kas_masuk');
     Route::get('/kasMasuk/create', [KasController::class, 'createKasMasuk'])->name('kas_masuk.create');
@@ -51,6 +60,8 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
     Route::post('/kasMasuk/store', [KasController::class, 'storeKasMasuk'])->name('kas_masuk.store');
     Route::post('/kasMasuk/update/{id}', [KasController::class, 'updateKasMasuk'])->name('kas_masuk.update');
     Route::post('/kasMasuk/delete', [KasController::class, 'deleteKasMasuk'])->name('kas_masuk.delete');
+
+
 
     //kas pengeluaran
     Route::get('/kasKeluar', [KasController::class, 'viewKasKeluar'])->name('kas_keluar');
@@ -61,4 +72,5 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
     Route::post('/kasKeluar/update/{id}', [KasController::class, 'updateKasKeluar'])->name('kas_keluar.update');
     Route::post('/kasKeluar/delete', [KasController::class, 'deleteKasKeluar'])->name('kas_keluar.delete');
 });
+
 require __DIR__.'/auth.php';
