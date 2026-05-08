@@ -74,4 +74,34 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
     Route::post('/kasKeluar/delete', [KasController::class, 'deleteKasKeluar'])->name('kas_keluar.delete');
 });
 
+    Route::middleware(['auth', 'role:siswa'])
+    ->prefix('siswa')
+    ->group(function () {
+
+    Route::get('/dashboard', [SiswaController::class, 'dashboard'])
+        ->name('siswa.dashboard');
+
+    Route::get('/riwayat', [SiswaController::class, 'riwayat'])
+        ->name('siswa.riwayat');
+
+    Route::get('/tunggakan', [SiswaController::class, 'tunggakan'])
+        ->name('siswa.tunggakan');
+
+    Route::get('/laporan-kas', [SiswaController::class, 'laporanKas'])
+        ->name('siswa.laporan_kas');
+
+    Route::get('/pembayaran', [SiswaController::class, 'pembayaran'])
+        ->name('siswa.pembayaran');
+
+    Route::post('/pembayaran/store', [SiswaController::class, 'simpanPembayaran'])
+        ->name('siswa.pembayaran.store');
+
+    Route::get('/detail-pembayaran/{id}', [SiswaController::class, 'detailPembayaran'])
+        ->name('siswa.detail_pembayaran');
+
+    Route::post('/logout', [SiswaController::class, 'logout'])
+        ->name('siswa.logout');
+});
+
+
 require __DIR__.'/auth.php';
