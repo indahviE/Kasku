@@ -78,8 +78,8 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
     ->prefix('siswa')
     ->group(function () {
 
-    Route::get('/dashboard', [SiswaController::class, 'dashboard'])
-        ->name('siswa.dashboard');
+    Route::get('/index', [SiswaController::class, 'index'])
+        ->name('siswa.index');
 
     Route::get('/riwayat', [SiswaController::class, 'riwayat'])
         ->name('siswa.riwayat');
