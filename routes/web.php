@@ -75,9 +75,7 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
     Route::post('/kasKeluar/delete', [KasController::class, 'deleteKasKeluar'])->name('kas_keluar.delete');
 });
 
-    Route::middleware(['auth', 'role:siswa'])
-    ->prefix('siswa')
-    ->group(function () {
+    Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
     Route::get('/index', [SiswaController::class, 'index'])
         ->name('siswa.index');
@@ -102,6 +100,7 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
 
     Route::post('/logout', [SiswaController::class, 'logout'])
         ->name('siswa.logout');
+
 });
 
 
