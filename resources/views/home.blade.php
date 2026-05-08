@@ -77,9 +77,9 @@
                                 class="w-full outline-none text-sm bg-transparent"
                             >
 
-                            <button class="bg-black text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition">
+                            <a href="/login"><button class="bg-black text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition">
                                 Get Started
-                            </button>
+                            </button></a>
 
                         </div>
 

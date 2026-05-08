@@ -42,13 +42,13 @@
             <!-- Button -->
             <div class="flex items-center gap-3">
 
-                <button class="px-6 py-2 rounded-full border border-gray-300 text-sm font-medium hover:bg-gray-100 transition">
+                <a href="/login"><button class="px-6 py-2 rounded-full border border-gray-300 text-sm font-medium hover:bg-gray-100 transition">
                     Sign In
-                </button>
+                </button></a>
 
-                <button class="px-6 py-2 rounded-full bg-black text-white text-sm font-medium hover:bg-gray-800 transition">
+                <a href="/register"></a><button class="px-6 py-2 rounded-full bg-black text-white text-sm font-medium hover:bg-gray-800 transition">
                     Sign Up
-                </button>
+                </button></a>
 
             </div>
 
