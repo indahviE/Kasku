@@ -2,7 +2,6 @@
 
 <div class="flex min-h-screen bg-[#f8fafc] font-sans text-slate-900">
     
-    <!-- Sidebar -->
     <div class="w-60 bg-[#0f172a] text-slate-400 flex flex-col sticky top-0 h-screen">
         <div class="p-5">
             <div class="flex items-center gap-3 text-white font-bold text-lg tracking-tight">
@@ -34,7 +33,6 @@
 
     <div class="flex-1">
         
-        <!-- Header -->
         <header class="bg-white/80 backdrop-blur-md sticky top-0 z-10 border-b border-slate-200 h-14 flex items-center justify-between px-8">
             <div class="flex items-center gap-2 text-xs font-medium text-slate-400">
                 <span>Pages</span>
@@ -46,7 +44,6 @@
                     <p class="text-xs font-bold text-slate-800 leading-none">Admin User</p>
                     <p class="text-[10px] text-green-500 font-medium">Online</p>
                 </div>
-                <!-- Profil Admin dengan Inisial -->
                 <div class="w-8 h-8 rounded-full bg-[#1B6578] border border-white shadow-sm flex items-center justify-center">
                     <span class="text-[10px] font-bold text-white uppercase">AD</span>
                 </div>
@@ -63,7 +60,7 @@
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                     <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total User</p>
                     <div class="flex items-end justify-between">
-                        <h3 class="text-2xl font-black text-slate-800 leading-none">{{ $users->count() }}</h3>
+                        <h3 class="text-2xl font-black text-slate-800 leading-none">{{ $users->total() }}</h3>
                         <span class="text-[10px] bg-blue-50 text-[#1B6578] px-2 py-0.5 rounded font-bold uppercase">Users</span>
                     </div>
                 </div>
@@ -107,7 +104,7 @@
                         <tbody class="divide-y divide-slate-100">
                             @forelse ($users as $user)
                                 <tr class="hover:bg-slate-50/50 transition-colors group">
-                                    <td class="px-6 py-3 text-xs text-slate-400 font-medium">#{{ $loop->iteration }}</td>
+                                    <td class="px-6 py-3 text-xs text-slate-400 font-medium">#{{ ($users->currentPage() - 1) * $users->perPage() + $loop->iteration }}</td>
                                     <td class="px-6 py-3">
                                         <div class="flex items-center gap-3">
                                             <div class="w-7 h-7 rounded-full bg-[#1B6578]/10 text-[#1B6578] flex items-center justify-center text-[10px] font-bold uppercase">
@@ -139,8 +136,15 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="bg-slate-50/50 p-3 border-t border-slate-100 text-[10px] text-slate-400 text-right font-medium">
-                    Menampilkan {{ $users->count() }} total data user
+
+                <div class="bg-slate-50/50 p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                        Menampilkan {{ $users->firstItem() }} - {{ $users->lastItem() }} dari {{ $users->total() }} data user
+                    </div>
+                    
+                    <div class="flex items-center">
+                        {{ $users->appends(request()->query())->links() }}
+                    </div>
                 </div>
             </div>
         </main>
