@@ -7,11 +7,13 @@ use App\Http\Controllers\KasController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BendaharaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('home');
 });
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store']);
@@ -49,32 +51,51 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(function () {
 
     //dashboard
-    Route::get('/dashboard', function () {
-        return view('bendahara.dashboard');
-    })->name('bendahara.dashboard');
+    Route::get('/dashboard', [BendaharaController::class, 'dashboard'])
+        ->name('bendahara.dashboard');
 
     //kas masuk ya
-    Route::get('/kasMasuk', [KasController::class, 'viewKasMasuk'])->name('kas_masuk');
-    Route::get('/kasMasuk/create', [KasController::class, 'createKasMasuk'])->name('kas_masuk.create');
-    Route::get('/kasMasuk/edit', [KasController::class, 'editKasMasuk'])->name('kas_masuk.edit');
+    Route::get('/kasMasuk', [BendaharaController::class, 'kasMasuk'])
+        ->name('kas_masuk');
 
-    Route::post('/kasMasuk/store', [KasController::class, 'storeKasMasuk'])->name('kas_masuk.store');
-    Route::post('/kasMasuk/update/{id}', [KasController::class, 'updateKasMasuk'])->name('kas_masuk.update');
-    Route::post('/kasMasuk/delete', [KasController::class, 'deleteKasMasuk'])->name('kas_masuk.delete');
+    Route::get('/kasMasuk/create', [KasController::class, 'createKasMasuk'])
+        ->name('kas_masuk.create');
+
+    Route::get('/kasMasuk/edit', [KasController::class, 'editKasMasuk'])
+        ->name('kas_masuk.edit');
+
+    Route::post('/kasMasuk/store', [KasController::class, 'storeKasMasuk'])
+        ->name('kas_masuk.store');
+
+    Route::post('/kasMasuk/update/{id}', [KasController::class, 'updateKasMasuk'])
+        ->name('kas_masuk.update');
+
+    Route::post('/kasMasuk/delete', [KasController::class, 'deleteKasMasuk'])
+        ->name('kas_masuk.delete');
 
 
 
     //kas pengeluaran
-    Route::get('/kasKeluar', [KasController::class, 'viewKasKeluar'])->name('kas_keluar');
-    Route::get('/kasKeluar/create', [KasController::class, 'createKasKeluar'])->name('kas_keluar.create');
-    Route::get('/kasKeluar/edit', [KasController::class, 'editKasKeluar'])->name('kas_keluar.edit');
+    Route::get('/kasKeluar', [BendaharaController::class, 'kasKeluar'])
+        ->name('kas_keluar');
 
-    Route::post('/kasKeluar/store', [KasController::class, 'storeKasMasuk'])->name('kas_keluar.store');
-    Route::post('/kasKeluar/update/{id}', [KasController::class, 'updateKasKeluar'])->name('kas_keluar.update');
-    Route::post('/kasKeluar/delete', [KasController::class, 'deleteKasKeluar'])->name('kas_keluar.delete');
+    Route::get('/kasKeluar/create', [KasController::class, 'createKasKeluar'])
+        ->name('kas_keluar.create');
+
+    Route::get('/kasKeluar/edit', [KasController::class, 'editKasKeluar'])
+        ->name('kas_keluar.edit');
+
+    Route::post('/kasKeluar/store', [KasController::class, 'storeKasMasuk'])
+        ->name('kas_keluar.store');
+
+    Route::post('/kasKeluar/update/{id}', [KasController::class, 'updateKasKeluar'])
+        ->name('kas_keluar.update');
+
+    Route::post('/kasKeluar/delete', [KasController::class, 'deleteKasKeluar'])
+        ->name('kas_keluar.delete');
 });
 
-    Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
+Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
     Route::get('/index', [SiswaController::class, 'index'])
         ->name('siswa.index');
@@ -101,6 +122,5 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
         ->name('siswa.logout');
 
 });
-
 
 require __DIR__.'/auth.php';
