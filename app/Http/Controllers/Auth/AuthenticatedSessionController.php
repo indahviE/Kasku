@@ -28,6 +28,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = Auth::user();
+
+        // Logika pengalihan berdasarkan role
+        if ($user->role === 'siswa') {
+            return redirect()->intended(route('siswa.index'));
+        }
+
         return redirect()->intended('/');
     }
 
