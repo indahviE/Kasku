@@ -3,40 +3,49 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Pembayaran;
+use App\Models\Pengeluaran;
 
 class BendaharaController extends Controller
 {
-    // Dashboard Bendahara
     public function dashboard()
     {
         return view('bendahara.dashboard');
     }
 
-    // Kas Masuk
     public function kasMasuk()
     {
-        return view('bendahara.kas-masuk');
+        $totalMasuk = Pembayaran::sum('jml_bayar') ?? 0;
+        $totalKeluar = Pengeluaran::sum('nominal') ?? 0;
+        $saldoAwal = 1000000;
+        $saldoKas = $totalMasuk - $totalKeluar;
+        $saldoAkhir = $saldoAwal + $saldoKas;
+        $jumlahTransaksi = Pembayaran::count() + Pengeluaran::count();
+
+        return view('bendahara.kas_masuk', compact(
+            'totalMasuk', 'totalKeluar', 'saldoKas',
+            'saldoAwal', 'saldoAkhir', 'jumlahTransaksi'
+        ));
     }
 
-    // Kas Keluar
     public function kasKeluar()
     {
-        return view('bendahara.kas-keluar');
+        $totalKeluar = Pengeluaran::sum('nominal') ?? 0;
+        $pengeluaran = Pengeluaran::latest()->get();
+
+        return view('bendahara.kas_keluar', compact('pengeluaran', 'totalKeluar'));
     }
 
-    // Laporan
     public function laporan()
     {
         return view('bendahara.laporan');
     }
 
-    // Transaksi
     public function transaksi()
     {
         return view('bendahara.transaksi');
     }
 
-    // Settings
     public function settings()
     {
         return view('bendahara.settings');
