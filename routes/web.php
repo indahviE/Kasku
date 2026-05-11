@@ -32,7 +32,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard.admin');
 
     //kelola kls
     Route::get('/kelas', [KelasController::class, 'listKelas'])->name('kelas');
