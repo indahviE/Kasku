@@ -34,7 +34,7 @@
 
         <div class="flex-1">
 
-            @include('layouts.navigation')
+
 
             <!-- Page Heading -->
             @isset($header)
