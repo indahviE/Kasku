@@ -14,7 +14,7 @@
         </div>
 
         <nav class="flex-1 px-3 space-y-1 mt-4">
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 py-2.5 px-4 rounded-xl hover:bg-slate-800 transition-all group">
+            <a href="{{ route('dashboard.admin') }}" class="flex items-center gap-3 py-2.5 px-4 rounded-xl hover:bg-slate-800 transition-all group">
                 <span class="text-sm font-medium group-hover:text-white">Dashboard</span>
             </a>
             <a href="#" class="flex items-center gap-3 py-2.5 px-4 rounded-xl bg-[#1B6578] text-white shadow-md shadow-[#1B6578]/20">
@@ -121,7 +121,7 @@
                 <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
                     <h3 class="font-bold text-slate-800">Data List User</h3>
 
-                    <form action="{{ route('dashboard') }}" method="GET" class="flex items-center gap-3">
+                    <form action="{{ route('dashboard.admin') }}" method="GET" class="flex items-center gap-3">
                         <label class="text-xs font-semibold text-slate-400 uppercase">Filter</label>
                         <select name="role" onchange="this.form.submit()" class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-medium focus:ring-2 focus:ring-[#1B6578]/20 focus:border-[#1B6578] outline-none bg-slate-50 transition-all cursor-pointer">
                             <option value="">Semua Role</option>
