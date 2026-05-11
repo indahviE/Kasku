@@ -1,7 +1,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <div class="flex min-h-screen bg-[#f8fafc] font-sans text-slate-900">
-    
+
     <div class="w-60 bg-[#0f172a] text-slate-400 flex flex-col sticky top-0 h-screen">
         <div class="p-5">
             <div class="flex items-center gap-3 text-white font-bold text-lg tracking-tight">
@@ -11,7 +11,7 @@
                 Admin Panel
             </div>
         </div>
-        
+
         <nav class="flex-1 px-3 space-y-1 mt-4">
             <a href="#" class="flex items-center gap-3 py-2.5 px-4 rounded-xl hover:bg-slate-800 transition-all group">
                 <span class="text-sm font-medium group-hover:text-white">Dashboard</span>
@@ -25,14 +25,17 @@
         </nav>
 
         <div class="p-4 border-t border-slate-800">
-            <a href="#" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:text-red-400 transition-colors text-xs font-semibold uppercase tracking-wider">
-                Logout
-            </a>
+        <form method="POST" action="{{ route('logout') }}" class="border-t border-gray-100">
+            @csrf
+            <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition font-medium">
+            Logout
+            </button>
+            </form>
         </div>
     </div>
 
     <div class="flex-1">
-        
+
         <header class="bg-white/80 backdrop-blur-md sticky top-0 z-10 border-b border-slate-200 h-14 flex items-center justify-between px-8">
             <div class="flex items-center gap-2 text-xs font-medium text-slate-400">
                 <span>Pages</span>
@@ -77,7 +80,7 @@
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
                     <h3 class="font-bold text-slate-800">Data List User</h3>
-                    
+
                     <form action="" method="GET" class="flex items-center gap-3">
                         <label class="text-xs font-semibold text-slate-400 uppercase">Filter</label>
                         <select name="role" onchange="this.form.submit()" class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-medium focus:ring-2 focus:ring-[#1B6578]/20 focus:border-[#1B6578] outline-none bg-slate-50 transition-all cursor-pointer">
@@ -141,7 +144,7 @@
                     <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                         Menampilkan {{ $users->firstItem() }} - {{ $users->lastItem() }} dari {{ $users->total() }} data user
                     </div>
-                    
+
                     <div class="flex items-center">
                         {{ $users->appends(request()->query())->links() }}
                     </div>
