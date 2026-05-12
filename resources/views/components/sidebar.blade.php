@@ -17,9 +17,9 @@
         <nav class="mt-16 space-y-3 text-[15px] font-semibold">
 
             <!-- DASHBOARD -->
-            <a href="{{ route('kas_masuk') }}"
+            <a href="{{ route('bendahara.dashboard') }}"
                class="flex items-center gap-3 px-4 py-3 rounded-xl transition
-               {{ request()->routeIs('kas_masuk') ? 'bg-[#E8F1F3] text-[#0F5D73]' : 'text-gray-500 hover:bg-[#F4F7F8] hover:text-[#0F5D73]' }}">
+               {{ request()->routeIs('bendahara.dashboard') ? 'bg-[#E8F1F3] text-[#0F5D73]' : 'text-gray-500 hover:bg-[#F4F7F8] hover:text-[#0F5D73]' }}">
                 <iconify-icon icon="solar:home-2-bold" class="text-[20px]"></iconify-icon>
                 Dashboard
             </a>
@@ -41,15 +41,17 @@
             </a>
 
             <!-- TRANSAKSI -->
-            <a href="#"
-               class="flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-500 hover:bg-[#F4F7F8] hover:text-[#0F5D73]">
+            <a href="{{ route('transaksi.index') }}"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+               {{ request()->routeIs('transaksi*') ? 'bg-[#E8F1F3] text-[#0F5D73]' : 'text-gray-500 hover:bg-[#F4F7F8] hover:text-[#0F5D73]' }}">
                 <iconify-icon icon="solar:clipboard-list-bold" class="text-[20px]"></iconify-icon>
                 Transaksi
             </a>
 
             <!-- LAPORAN -->
-            <a href="#"
-               class="flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-500 hover:bg-[#F4F7F8] hover:text-[#0F5D73]">
+            <a href="{{ route('laporan.index') }}"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition
+               {{ request()->routeIs('laporan*') ? 'bg-[#E8F1F3] text-[#0F5D73]' : 'text-gray-500 hover:bg-[#F4F7F8] hover:text-[#0F5D73]' }}">
                 <iconify-icon icon="solar:document-bold" class="text-[20px]"></iconify-icon>
                 Laporan
             </a>
