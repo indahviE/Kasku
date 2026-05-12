@@ -124,5 +124,12 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         ->name('siswa.logout');
 
 });
+Route::get('/kelola-kelas', function () {
+    return view('admin.kelas.kelola-kelas');
+});
+
+Route::get('/data-transaksi', function () {
+    return view('admin.data-transaksi');
+});
 
 require __DIR__.'/auth.php';
