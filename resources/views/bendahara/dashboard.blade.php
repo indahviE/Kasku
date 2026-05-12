@@ -38,25 +38,24 @@
 
 
 
-                <!-- DROPDOWN -->
-                <div x-data="{ open: false }" class="relative">
+                <!-- PROFILE DROPDOWN -->
+                <div class="relative group">
 
-                    <!-- BUTTON -->
-                    <button
-                        @click="open = !open"
-                        class="flex items-center gap-3 hover:bg-gray-50 px-2 py-1 rounded-xl transition">
+                    <button class="flex items-center gap-3">
 
                         <!-- PHOTO -->
-                        <div class="w-11 h-11 rounded-full bg-[#0F5D73]"></div>
+                        <div class="w-11 h-11 rounded-full bg-[#0F5D73] flex items-center justify-center text-white font-bold">
+                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                        </div>
 
                         <!-- USER -->
                         <div class="text-left">
                             <h1 class="text-[15px] font-bold text-gray-800 leading-none">
-                                Bendahara
+                                {{ Auth::user()->name }}
                             </h1>
 
                             <p class="text-[13px] text-gray-400 mt-1">
-                                Admin Kas
+                                Bendahara
                             </p>
                         </div>
 
@@ -68,57 +67,35 @@
 
                     </button>
 
+                    <!-- DROPDOWN -->
+                    <div class="absolute right-0 top-14 w-44 bg-white rounded-xl shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
 
-
-                    <!-- MENU -->
-                    <div
-                        x-show="open"
-                        @click.away="open = false"
-                        x-transition
-                        class="absolute right-0 top-16 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
-
-                        <!-- PROFILE -->
                         <a href="#"
-                            class="flex items-center gap-3 px-5 py-4 text-sm text-gray-700 hover:bg-gray-50 transition">
+                            class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-t-xl">
 
-                            <iconify-icon
-                                icon="solar:user-linear"
-                                class="text-[18px]">
-                            </iconify-icon>
-
+                            <iconify-icon icon="solar:user-linear"></iconify-icon>
                             Profile
+
                         </a>
 
-
-
-                        <!-- SETTINGS -->
                         <a href="#"
-                            class="flex items-center gap-3 px-5 py-4 text-sm text-gray-700 hover:bg-gray-50 transition">
+                            class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
 
-                            <iconify-icon
-                                icon="solar:settings-linear"
-                                class="text-[18px]">
-                            </iconify-icon>
-
+                            <iconify-icon icon="solar:settings-linear"></iconify-icon>
                             Settings
+
                         </a>
 
-
-
-                        <!-- LOGOUT -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
 
                             <button
                                 type="submit"
-                                class="w-full flex items-center gap-3 px-5 py-4 text-sm text-red-500 hover:bg-red-50 transition">
+                                class="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-500 hover:bg-red-50 rounded-b-xl">
 
-                                <iconify-icon
-                                    icon="solar:logout-2-linear"
-                                    class="text-[18px]">
-                                </iconify-icon>
-
+                                <iconify-icon icon="solar:logout-2-linear"></iconify-icon>
                                 Logout
+
                             </button>
                         </form>
 
@@ -137,7 +114,7 @@
             <div>
 
                 <h1 class="text-[32px] font-bold text-[#111827] tracking-tight">
-                    Selamat datang, Bendahara
+                    Selamat datang, Bendahara!
                 </h1>
 
                 <p class="text-gray-500 text-[15px] font-medium mt-2">
@@ -147,94 +124,103 @@
 
 
 
-            <!-- CARD -->
+            <!-- STAT CARDS -->
             <div class="grid grid-cols-4 gap-6 mt-8">
 
                 <!-- CARD 1 -->
-                <div class="bg-white rounded-2xl shadow-sm p-5 h-[145px]">
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
 
-                    <div class="flex items-center gap-2 text-[16px] font-semibold text-gray-700">
+                    <div class="flex items-center gap-3 mb-4">
 
-                        <div class="w-10 h-10 rounded-xl bg-[#E8F1F3] flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                             <iconify-icon
-                                icon="solar:wallet-money-bold"
-                                class="text-[22px] text-[#0F5D73]">
+                                icon="solar:wallet-bold"
+                                class="text-[20px] text-blue-500">
                             </iconify-icon>
                         </div>
 
-                        Saldo Kas
+                        <span class="text-gray-500 font-semibold">
+                            Saldo Kas
+                        </span>
                     </div>
 
-                    <h1 class="text-[#2D5BE3] text-[32px] font-bold tracking-tight mt-8">
+                    <p class="text-2xl font-bold text-[#0F5D73]">
                         Rp 2.500.000
-                    </h1>
+                    </p>
                 </div>
 
 
 
                 <!-- CARD 2 -->
-                <div class="bg-white rounded-2xl shadow-sm p-5 h-[145px]">
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
 
-                    <div class="flex items-center gap-2 text-[16px] font-semibold text-gray-700">
+                    <div class="flex items-center gap-3 mb-4">
 
-                        <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
                             <iconify-icon
                                 icon="solar:arrow-down-bold"
-                                class="text-[22px] text-green-600">
+                                class="text-[20px] text-green-500">
                             </iconify-icon>
                         </div>
 
-                        Total Kas Masuk
+                        <span class="text-gray-500 font-semibold">
+                            Total Kas Masuk
+                        </span>
                     </div>
 
-                    <h1 class="text-green-600 text-[32px] font-bold tracking-tight mt-8">
+                    <p class="text-2xl font-bold text-green-500">
                         Rp 2.000.000
-                    </h1>
+                    </p>
                 </div>
 
 
 
                 <!-- CARD 3 -->
-                <div class="bg-white rounded-2xl shadow-sm p-5 h-[145px]">
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
 
-                    <div class="flex items-center gap-2 text-[16px] font-semibold text-gray-700">
+                    <div class="flex items-center gap-3 mb-4">
 
-                        <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
                             <iconify-icon
                                 icon="solar:arrow-up-bold"
-                                class="text-[22px] text-red-500">
+                                class="text-[20px] text-red-500">
                             </iconify-icon>
                         </div>
 
-                        Total Kas Keluar
+                        <span class="text-gray-500 font-semibold">
+                            Total Kas Keluar
+                        </span>
                     </div>
 
-                    <h1 class="text-red-500 text-[32px] font-bold tracking-tight mt-8">
+                    <p class="text-2xl font-bold text-red-500">
                         Rp 500.000
-                    </h1>
+                    </p>
                 </div>
 
 
 
                 <!-- CARD 4 -->
-                <div class="bg-white rounded-2xl shadow-sm p-5 h-[145px]">
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
 
-                    <div class="flex items-center gap-2 text-[16px] font-semibold text-gray-700">
+                    <div class="flex items-center gap-3 mb-4">
 
-                        <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
                             <iconify-icon
                                 icon="solar:clipboard-list-bold"
-                                class="text-[22px] text-purple-600">
+                                class="text-[20px] text-purple-500">
                             </iconify-icon>
                         </div>
 
-                        Jumlah Transaksi
+                        <span class="text-gray-500 font-semibold">
+                            Jumlah Transaksi
+                        </span>
                     </div>
 
-                    <h1 class="text-purple-600 text-[32px] font-bold tracking-tight mt-8">
+                    <p class="text-2xl font-bold text-purple-500">
                         29
-                    </h1>
+                    </p>
                 </div>
+
             </div>
 
 
