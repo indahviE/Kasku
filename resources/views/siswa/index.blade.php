@@ -5,194 +5,465 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+        <script src="https://cdn.tailwindcss.com"></script>
 
-    @vite('resources/css/app.css')
-
-    {{-- Icons --}}
-    <script src="https://unpkg.com/lucide@latest"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-zinc-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-white min-h-screen text-gray-900">
 
-    <div class="w-full max-w-sm lg:max-w-5xl bg-zinc-200 rounded-[32px] overflow-hidden shadow-2xl relative">
+<div class="max-w-6xl mx-auto px-4 py-6">
 
-        <div class="flex min-h-[800px] lg:min-h-[700px]">
+<!-- TOP BAR -->
+<div class="flex items-center justify-between mb-6">
 
-            {{-- SIDEBAR DESKTOP --}}
-            <aside class="hidden lg:flex w-72 bg-white border-r border-zinc-200 p-6 flex-col justify-between">
+    <!-- NOTIFICATION -->
+    <button class="w-12 h-12 rounded-2xl border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-6 h-6 text-gray-700"
+             fill="none"
+             viewBox="0 0 24 24"
+             stroke="currentColor">
 
-                <div>
-                    <div class="flex items-center gap-3 mb-10">
-                        <div class="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center font-bold text-lg">
-                            N
-                        </div>
+            <path stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+    </button>
 
-                        <div>
-                            <h2 class="font-bold text-lg">Nixio AI</h2>
-                            <p class="text-sm text-zinc-500">Assistant Dashboard</p>
-                        </div>
-                    </div>
+<div class="relative">
 
-                    {{-- SEARCH DESKTOP --}}
-                    <div class="bg-zinc-100 rounded-2xl px-4 py-3 flex items-center gap-3 mb-8">
-                        <i data-lucide="search" class="w-5 h-5 text-zinc-500"></i>
-                        <input
-                            type="text"
-                            placeholder="Search"
-                            class="bg-transparent outline-none w-full text-sm"
-                        >
-                    </div>
+    <!-- BUTTON -->
+    <button id="accountBtn"
+        class="w-11 h-11 rounded-2xl border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition">
 
-                    <nav class="space-y-3">
-                        <button class="w-full flex items-center gap-3 bg-black text-white rounded-2xl px-4 py-4">
-                            <i data-lucide="sparkles"></i>
-                            <span>Ask AI</span>
-                        </button>
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-5 h-5 text-gray-700"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor">
 
-                        <button class="w-full flex items-center gap-3 bg-zinc-100 rounded-2xl px-4 py-4 hover:bg-zinc-200 transition">
-                            <i data-lucide="scan-search"></i>
-                            <span>Scan</span>
-                        </button>
+            <path stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20 21a8 8 0 10-16 0m12-11a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
 
-                        <button class="w-full flex items-center gap-3 bg-zinc-100 rounded-2xl px-4 py-4 hover:bg-zinc-200 transition">
-                            <i data-lucide="edit-3"></i>
-                            <span>Edit</span>
-                        </button>
-                    </nav>
-                </div>
+    </button>
 
-                <div class="bg-zinc-100 rounded-2xl p-4">
-                    <p class="text-sm text-zinc-500 mb-1">Current Plan</p>
-                    <h3 class="font-semibold">Free Version</h3>
-                </div>
-            </aside>
+    <!-- DROPDOWN -->
+    <div id="accountMenu"
+         class="hidden absolute right-0 mt-3 w-52 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden z-50">
 
+        <!-- USER INFO -->
+        <div class="px-4 py-3 border-b border-gray-100">
+            <p class="font-semibold text-sm">
+                {{ auth()->user()->name }}
+            </p>
 
-            {{-- MAIN CONTENT --}}
-            <main class="flex-1 p-5 lg:p-10 relative pb-32 lg:pb-10">
+            <p class="text-xs text-gray-500">
+                {{ auth()->user()->email }}
+            </p>
+        </div>
 
-                {{-- TOP BAR MOBILE --}}
-                <div class="flex items-center justify-between mb-10 lg:hidden">
-                    <button class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow">
-                        <i data-lucide="help-circle" class="w-4 h-4"></i>
-                    </button>
+        <!-- MANAGE ACCOUNT -->
+        <a href="/profile"
+           class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition">
 
-                    <button class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow relative">
-                        <i data-lucide="bell" class="w-4 h-4"></i>
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="w-5 h-5 text-gray-600"
+                 fill="none"
+                 viewBox="0 0 24 24"
+                 stroke="currentColor">
 
-                        <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-orange-500"></span>
-                    </button>
-                </div>
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5.121 17.804A9 9 0 1118.88 17.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
 
-                {{-- HEADER --}}
-                <div class="mb-8">
-                    <h2 class="text-3xl lg:text-5xl font-medium text-zinc-500">
-                        Hi Nixio,
-                    </h2>
+            <span class="text-sm font-medium">
+                Manage Account
+            </span>
+        </a>
 
-                    <h1 class="text-4xl lg:text-6xl font-bold leading-tight mt-1 max-w-2xl">
-                        How can I help you today?
-                    </h1>
-                </div>
+        <!-- LOGOUT -->
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
 
-                {{-- SEARCH DESKTOP (PINDAH KE ATAS SAAT LAPTOP) --}}
-                <div class="hidden lg:flex bg-white rounded-2xl px-5 py-4 items-center gap-3 max-w-2xl shadow-sm mb-10">
-                    <i data-lucide="search" class="w-5 h-5 text-zinc-500"></i>
+            <button type="submit"
+                class="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-500 transition">
 
-                    <input
-                        type="text"
-                        placeholder="Search anything..."
-                        class="bg-transparent outline-none w-full"
-                    >
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="w-5 h-5"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor">
 
-                    <button class="bg-black text-white rounded-xl px-5 py-2 text-sm hover:opacity-90 transition">
-                        Ask AI
-                    </button>
-                </div>
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v1"/>
+                </svg>
 
-                {{-- GRID MENU --}}
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <span class="text-sm font-medium">
+                    Logout
+                </span>
 
-                    <div class="bg-white rounded-3xl p-5 hover:-translate-y-1 transition duration-300 shadow-sm">
-                        <div class="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center mb-4">
-                            <i data-lucide="scan-search"></i>
-                        </div>
+            </button>
+        </form>
 
-                        <h3 class="font-semibold text-lg">Scan</h3>
-                        <p class="text-sm text-zinc-500 mt-1">
-                            Documents, ID cards, Sign and more.
-                        </p>
-                    </div>
+    </div>
 
-                    <div class="bg-white rounded-3xl p-5 hover:-translate-y-1 transition duration-300 shadow-sm">
-                        <div class="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center mb-4">
-                            <i data-lucide="edit-3"></i>
-                        </div>
+</div>
 
-                        <h3 class="font-semibold text-lg">Edit</h3>
-                        <p class="text-sm text-zinc-500 mt-1">
-                            Sign & edit text quickly.
-                        </p>
-                    </div>
+</div>
 
-                    <div class="bg-white rounded-3xl p-5 hover:-translate-y-1 transition duration-300 shadow-sm">
-                        <div class="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center mb-4">
-                            <i data-lucide="file-up"></i>
-                        </div>
+    <!-- HEADER -->
+    <div class="mb-6">
+     <p class="text-gray-400 text-3xl font-bold capitalize">
+    Hi {{ ucwords(strtolower(auth()->user()->name)) }},
+</p>
+        <h1 class="text-3xl md:text-4xl font-bold leading-tight mt-1">
+            How can I help you today?
+        </h1>
 
-                        <h3 class="font-semibold text-lg">Convert</h3>
-                        <p class="text-sm text-zinc-500 mt-1">
-                            PDF, DOCX, JPG, PNG.
-                        </p>
-                    </div>
+        <!-- SEARCH DESKTOP -->
+        <div class="hidden md:flex mt-5 items-center gap-3">
+            <div class="flex-1 relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M16 10.5a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z" />
+                    </svg>
+                </span>
 
-                    <div class="bg-white rounded-3xl p-5 hover:-translate-y-1 transition duration-300 shadow-sm">
-                        <div class="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center mb-4">
-                            <i data-lucide="sparkles"></i>
-                        </div>
+                <input
+                    type="text"
+                    placeholder="Search"
+                    class="w-full bg-gray-100 border border-gray-200 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-black"
+                >
+            </div>
 
-                        <h3 class="font-semibold text-lg">Ask AI</h3>
-                        <p class="text-sm text-zinc-500 mt-1">
-                            Summarize, translate and more.
-                        </p>
-                    </div>
-                </div>
-
-
-                {{-- BOTTOM BAR MOBILE --}}
-                <div class="lg:hidden fixed bottom-5 left-1/2 -translate-x-1/2 w-[92%] max-w-sm z-50">
-
-                    <div class="bg-white rounded-full shadow-2xl px-3 py-3 flex items-center gap-3">
-
-                        <button class="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center shrink-0">
-                            <i data-lucide="sparkles"></i>
-                        </button>
-
-                        <div class="flex-1 flex items-center gap-2 px-3">
-                            <i data-lucide="search" class="w-5 h-5 text-zinc-500"></i>
-
-                            <input
-                                type="text"
-                                placeholder="Search"
-                                class="w-full bg-transparent outline-none text-sm"
-                            >
-                        </div>
-
-                        <button class="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center shrink-0">
-                            <i data-lucide="mic"></i>
-                        </button>
-                    </div>
-                </div>
-
-            </main>
+            <!-- BLACK BUTTON -->
+            <button class="w-14 h-14 rounded-2xl bg-black flex items-center justify-center text-white hover:scale-105 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+            </button>
         </div>
     </div>
 
 
-    <script>
-        lucide.createIcons();
-    </script>
+    <!-- GRID CARDS -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <!-- CARD -->
+        <div class="bg-white border border-gray-200 rounded-3xl p-5 hover:shadow-lg transition cursor-pointer">
+            <div class="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
+                </svg>
+            </div>
+
+            <h2 class="font-semibold text-lg">Riwayat</h2>
+            <p class="text-sm text-gray-500 mt-1">
+                Data Pembayaran KasMu
+            </p>
+        </div>
+
+
+        <div class="bg-white border border-gray-200 rounded-3xl p-5 hover:shadow-lg transition cursor-pointer">
+          <div class="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+    
+    <svg xmlns="http://www.w3.org/2000/svg"
+         class="w-6 h-6 text-gray-700"
+         fill="none"
+         viewBox="0 0 24 24"
+         stroke="currentColor">
+
+        <path stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 10h18M7 15h2m2 0h2m-7 4h12a2 2 0 002-2V7
+              a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    </svg>
+
+</div>
+
+            <h2 class="font-semibold text-lg">Bayar</h2>
+            <p class="text-sm text-gray-500 mt-1">
+                Masukan Data Pembayaran
+            </p>
+        </div>
+
+
+        <div class="bg-white border border-gray-200 rounded-3xl p-5 hover:shadow-lg transition cursor-pointer">
+            <div class="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h16" />
+                </svg>
+            </div>
+
+            <h2 class="font-semibold text-lg">Data Kas</h2>
+            <p class="text-sm text-gray-500 mt-1">
+             Pemasukan & Pengeluaran Kas
+            </p>
+        </div>
+
+
+        <div class="bg-white border border-gray-200 rounded-3xl p-5 hover:shadow-lg transition cursor-pointer">
+            <div class="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z" />
+                </svg>
+            </div>
+
+            <h2 class="font-semibold text-lg">Pojok Diskusi</h2>
+            <p class="text-sm text-gray-500 mt-1">
+                Informasi Pengelolaan Saldo
+            </p>
+        </div>
+
+    </div>
+
+    <!-- LEADERBOARD CARD -->
+<div class="bg-white border border-gray-200 rounded-[2rem] p-6 mt-6 overflow-hidden">
+
+    <!-- HEADER -->
+    <div class="flex items-center justify-between mb-8">
+
+        <div>
+            <h2 class="text-2xl font-bold">
+                Top Kas Students
+            </h2>
+
+            <p class="text-sm text-gray-500 mt-1">
+                Siswa paling rajin bayar kas bulan ini
+            </p>
+        </div>
+
+        <!-- TROPHY -->
+        <div class="w-12 h-12 rounded-2xl bg-yellow-100 flex items-center justify-center">
+
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="w-6 h-6 text-yellow-500"
+                 fill="none"
+                 viewBox="0 0 24 24"
+                 stroke="currentColor">
+
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 19V6l12-3v13M9 19c0 1.105-1.79 2-4 2s-4-.895-4-2
+                      1.79-2 4-2 4 .895 4 2zm12-2c0 1.105-1.79 2-4 2s-4-.895-4-2
+                      1.79-2 4-2 4 .895 4 2z"/>
+            </svg>
+
+        </div>
+
+    </div>
+
+
+    <!-- PODIUM -->
+    <div class="flex items-end justify-center gap-4 md:gap-8">
+
+        <!-- 2ND PLACE -->
+        <div class="flex flex-col items-center">
+
+            <!-- AVATAR -->
+            <div class="w-16 h-16 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center shadow-sm">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="w-8 h-8 text-gray-600"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M20 21a8 8 0 10-16 0m12-11a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+
+            </div>
+
+            <!-- NAME -->
+            <h3 class="font-semibold mt-3">
+                Fajar
+            </h3>
+
+            <p class="text-sm text-gray-500">
+                11 Pembayaran
+            </p>
+
+            <!-- PODIUM -->
+            <div class="mt-4 w-24 h-32 rounded-t-3xl bg-gray-200 flex flex-col items-center justify-center">
+
+                <span class="text-3xl font-bold text-gray-700">
+                    2
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- 1ST PLACE -->
+        <div class="flex flex-col items-center -translate-y-6">
+
+            <!-- CROWN -->
+            <div class="mb-2">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="w-8 h-8 text-yellow-400"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M5 16L3 5l6 5 3-7 3 7 6-5-2 11H5z"/>
+                </svg>
+
+            </div>
+
+            <!-- AVATAR -->
+            <div class="w-20 h-20 rounded-3xl bg-yellow-100 border border-yellow-200 flex items-center justify-center shadow-lg">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="w-10 h-10 text-yellow-600"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M20 21a8 8 0 10-16 0m12-11a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+
+            </div>
+
+            <!-- NAME -->
+            <h3 class="font-bold text-lg mt-3">
+                Nixio
+            </h3>
+
+            <p class="text-sm text-gray-500">
+                12 Pembayaran
+            </p>
+
+            <!-- PODIUM -->
+            <div class="mt-4 w-28 h-44 rounded-t-[2rem] bg-black text-white flex flex-col items-center justify-center shadow-xl">
+
+                <span class="text-5xl font-bold">
+                    1
+                </span>
+
+                <span class="text-sm mt-2 text-gray-300">
+                    Best Student
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- 3RD PLACE -->
+        <div class="flex flex-col items-center">
+
+            <!-- AVATAR -->
+            <div class="w-16 h-16 rounded-2xl bg-orange-100 border border-orange-200 flex items-center justify-center shadow-sm">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="w-8 h-8 text-orange-500"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M20 21a8 8 0 10-16 0m12-11a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+
+            </div>
+
+            <!-- NAME -->
+            <h3 class="font-semibold mt-3">
+                Reyhan
+            </h3>
+
+            <p class="text-sm text-gray-500">
+                10 Pembayaran
+            </p>
+
+            <!-- PODIUM -->
+            <div class="mt-4 w-24 h-24 rounded-t-3xl bg-orange-200 flex flex-col items-center justify-center">
+
+                <span class="text-3xl font-bold text-orange-700">
+                    3
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+
+
+
+<!-- MOBILE BOTTOM SEARCH -->
+<div class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 md:hidden">
+
+    <div class="flex items-center gap-3">
+
+        <div class="flex-1 relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M16 10.5a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z" />
+                </svg>
+            </span>
+
+            <input
+                type="text"
+                placeholder="Search"
+                class="w-full bg-gray-100 border border-gray-200 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-black"
+            >
+        </div>
+
+        <button class="w-14 h-14 rounded-2xl bg-black flex items-center justify-center text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+        </button>
+
+    </div>
+
+</div>
 
 </body>
+
+@include('components.footer')
+
 </html>
+<script>
+    const accountBtn = document.getElementById('accountBtn');
+    const accountMenu = document.getElementById('accountMenu');
 
+    accountBtn.addEventListener('click', () => {
+        accountMenu.classList.toggle('hidden');
+    });
 
+    window.addEventListener('click', function(e) {
+        if (!accountBtn.contains(e.target) && !accountMenu.contains(e.target)) {
+            accountMenu.classList.add('hidden');
+        }
+    });
+</script>
