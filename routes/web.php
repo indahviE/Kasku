@@ -73,8 +73,6 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
     Route::post('/kasMasuk/delete', [KasController::class, 'deleteKasMasuk'])
         ->name('kas_masuk.delete');
 
-
-
     //kas pengeluaran
     Route::get('/kasKeluar', [BendaharaController::class, 'kasKeluar'])
         ->name('kas_keluar');
@@ -93,6 +91,10 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
 
     Route::post('/kasKeluar/delete', [KasController::class, 'deleteKasKeluar'])
         ->name('kas_keluar.delete');
+
+    // ← TAMBAHAN
+    Route::get('/transaksi', [KasController::class, 'indexTransaksi'])->name('transaksi.index');
+    Route::get('/laporan', [KasController::class, 'indexLaporan'])->name('laporan.index');
 });
 
 Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
