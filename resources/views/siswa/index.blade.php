@@ -226,189 +226,164 @@
 
     </div>
 
-    <!-- LEADERBOARD CARD -->
-<div class="bg-white border border-gray-200 rounded-[2rem] p-6 mt-6 overflow-hidden">
+<!-- LEADERBOARD -->
+<div class="relative overflow-hidden rounded-[2rem] border border-gray-200 bg-white p-6 mt-6 shadow-sm">
+
+    <!-- BACKGROUND EFFECT -->
+    <div class="absolute -top-20 -right-20 w-64 h-64 bg-gray-100 rounded-full blur-3xl opacity-60"></div>
+    <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-gray-100 rounded-full blur-3xl opacity-60"></div>
 
     <!-- HEADER -->
-    <div class="flex items-center justify-between mb-8">
+    <div class="relative flex items-start justify-between mb-8">
 
         <div>
-            <h2 class="text-2xl font-bold">
-                Top Kas Students
+            <h2 class="text-3xl font-bold leading-tight text-gray-900">
+                Weekly <br> Leaderboard
             </h2>
 
-            <p class="text-sm text-gray-500 mt-1">
-                Siswa paling rajin bayar kas bulan ini
+            <p class="text-gray-500 mt-3 text-sm md:text-base">
+                Siswa paling rajin bayar kas minggu ini
             </p>
         </div>
 
         <!-- TROPHY -->
-        <div class="w-12 h-12 rounded-2xl bg-yellow-100 flex items-center justify-center">
+      <!-- TROPHY -->
+<div class="w-40 h-40 flex items-center justify-center">
 
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 class="w-6 h-6 text-yellow-500"
-                 fill="none"
-                 viewBox="0 0 24 24"
-                 stroke="currentColor">
+    <img 
+        src="{{ asset('images/3D Trophy Icon Held by Hand in Isometric View.png') }}"
+        alt="Trophy"
+        class="w-full h-full object-contain"
+    >
 
-                <path stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 19V6l12-3v13M9 19c0 1.105-1.79 2-4 2s-4-.895-4-2
-                      1.79-2 4-2 4 .895 4 2zm12-2c0 1.105-1.79 2-4 2s-4-.895-4-2
-                      1.79-2 4-2 4 .895 4 2z"/>
-            </svg>
+</div>
+
+    </div>
+
+
+    <!-- LIST -->
+    <div class="relative space-y-4">
+
+        <!-- ITEM -->
+        <div class="flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 hover:shadow-md transition">
+
+            <div class="flex items-center gap-4">
+
+                <span class="text-4xl font-black text-black">
+                    #1
+                </span>
+
+                <div>
+                    <h3 class="font-semibold text-lg text-gray-900">
+                        Nixio
+                    </h3>
+
+                    <p class="text-gray-500 text-sm">
+                        XII RPL 1
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="text-right">
+
+                <p class="font-bold text-xl text-gray-900">
+                    12x
+                </p>
+
+                <p class="text-gray-500 text-sm">
+                    pembayaran
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- ITEM -->
+        <div class="flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 hover:shadow-md transition">
+
+            <div class="flex items-center gap-4">
+
+                <span class="text-4xl font-black text-gray-500">
+                    #2
+                </span>
+
+                <div>
+                    <h3 class="font-semibold text-lg text-gray-900">
+                        Fajar
+                    </h3>
+
+                    <p class="text-gray-500 text-sm">
+                        XI TKJ 2
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="text-right">
+
+                <p class="font-bold text-xl text-gray-900">
+                    11x
+                </p>
+
+                <p class="text-gray-500 text-sm">
+                    pembayaran
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- ITEM -->
+        <div class="flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 hover:shadow-md transition">
+
+            <div class="flex items-center gap-4">
+
+                <span class="text-4xl font-black text-orange-400">
+                    #3
+                </span>
+
+                <div>
+                    <h3 class="font-semibold text-lg text-gray-900">
+                        Reyhan
+                    </h3>
+
+                    <p class="text-gray-500 text-sm">
+                        XI RPL 2
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="text-right">
+
+                <p class="font-bold text-xl text-gray-900">
+                    10x
+                </p>
+
+                <p class="text-gray-500 text-sm">
+                    pembayaran
+                </p>
+
+            </div>
 
         </div>
 
     </div>
 
 
-    <!-- PODIUM -->
-    <div class="flex items-end justify-center gap-4 md:gap-8">
+    <!-- FOOTER -->
+    <div class="relative mt-8 text-center">
 
-        <!-- 2ND PLACE -->
-        <div class="flex flex-col items-center">
+        <p class="text-gray-400 text-sm">
+            Update leaderboard setiap bulan
+        </p>
 
-            <!-- AVATAR -->
-            <div class="w-16 h-16 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center shadow-sm">
-
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     class="w-8 h-8 text-gray-600"
-                     fill="none"
-                     viewBox="0 0 24 24"
-                     stroke="currentColor">
-
-                    <path stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M20 21a8 8 0 10-16 0m12-11a4 4 0 11-8 0 4 4 0 018 0z"/>
-                </svg>
-
-            </div>
-
-            <!-- NAME -->
-            <h3 class="font-semibold mt-3">
-                Fajar
-            </h3>
-
-            <p class="text-sm text-gray-500">
-                11 Pembayaran
-            </p>
-
-            <!-- PODIUM -->
-            <div class="mt-4 w-24 h-32 rounded-t-3xl bg-gray-200 flex flex-col items-center justify-center">
-
-                <span class="text-3xl font-bold text-gray-700">
-                    2
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <!-- 1ST PLACE -->
-        <div class="flex flex-col items-center -translate-y-6">
-
-            <!-- CROWN -->
-            <div class="mb-2">
-
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     class="w-8 h-8 text-yellow-400"
-                     fill="none"
-                     viewBox="0 0 24 24"
-                     stroke="currentColor">
-
-                    <path stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M5 16L3 5l6 5 3-7 3 7 6-5-2 11H5z"/>
-                </svg>
-
-            </div>
-
-            <!-- AVATAR -->
-            <div class="w-20 h-20 rounded-3xl bg-yellow-100 border border-yellow-200 flex items-center justify-center shadow-lg">
-
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     class="w-10 h-10 text-yellow-600"
-                     fill="none"
-                     viewBox="0 0 24 24"
-                     stroke="currentColor">
-
-                    <path stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M20 21a8 8 0 10-16 0m12-11a4 4 0 11-8 0 4 4 0 018 0z"/>
-                </svg>
-
-            </div>
-
-            <!-- NAME -->
-            <h3 class="font-bold text-lg mt-3">
-                Nixio
-            </h3>
-
-            <p class="text-sm text-gray-500">
-                12 Pembayaran
-            </p>
-
-            <!-- PODIUM -->
-            <div class="mt-4 w-28 h-44 rounded-t-[2rem] bg-black text-white flex flex-col items-center justify-center shadow-xl">
-
-                <span class="text-5xl font-bold">
-                    1
-                </span>
-
-                <span class="text-sm mt-2 text-gray-300">
-                    Best Student
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <!-- 3RD PLACE -->
-        <div class="flex flex-col items-center">
-
-            <!-- AVATAR -->
-            <div class="w-16 h-16 rounded-2xl bg-orange-100 border border-orange-200 flex items-center justify-center shadow-sm">
-
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     class="w-8 h-8 text-orange-500"
-                     fill="none"
-                     viewBox="0 0 24 24"
-                     stroke="currentColor">
-
-                    <path stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M20 21a8 8 0 10-16 0m12-11a4 4 0 11-8 0 4 4 0 018 0z"/>
-                </svg>
-
-            </div>
-
-            <!-- NAME -->
-            <h3 class="font-semibold mt-3">
-                Reyhan
-            </h3>
-
-            <p class="text-sm text-gray-500">
-                10 Pembayaran
-            </p>
-
-            <!-- PODIUM -->
-            <div class="mt-4 w-24 h-24 rounded-t-3xl bg-orange-200 flex flex-col items-center justify-center">
-
-                <span class="text-3xl font-bold text-orange-700">
-                    3
-                </span>
-
-            </div>
-
-        </div>
+        <p class="font-semibold mt-1 text-gray-900">
+            Kasku.com
+        </p>
 
     </div>
 
