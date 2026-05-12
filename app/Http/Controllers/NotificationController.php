@@ -13,9 +13,10 @@ use App\Models\Pengumuman;
 
 class SiswaController extends Controller
 {
-    public function index()
+    public function dashboard()
     {
         $user = Auth::user();
+
 
         $tunggakan = Tagihan::where('user_id', $user->id)
             ->where('status', 'belum_bayar')
@@ -108,6 +109,7 @@ class SiswaController extends Controller
             }
         }
 
+
         $pembayaranDitolak = Pembayaran::where('user_id', $user->id)
             ->where('status', 'ditolak')
             ->latest()
@@ -131,6 +133,7 @@ class SiswaController extends Controller
             }
         }
 
+
         $diskusiBaru = Diskusi::latest()->first();
 
         if ($diskusiBaru) {
@@ -148,6 +151,7 @@ class SiswaController extends Controller
                 ]);
             }
         }
+
 
         $pengumumanBaru = Pengumuman::latest()->first();
 
@@ -167,7 +171,6 @@ class SiswaController extends Controller
             }
         }
 
-
         $notifications = Notification::where(function ($query) use ($user) {
 
                 $query->where('user_id', $user->id)
@@ -185,11 +188,12 @@ class SiswaController extends Controller
             ->where('is_read', false)
             ->count();
 
-        return view('siswa.index', compact(
+        return view('siswa.dashboard', compact(
             'notifications',
             'unreadCount'
         ));
     }
+
 
     public function readNotification($id)
     {
