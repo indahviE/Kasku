@@ -7,6 +7,7 @@ use App\Models\Pembayaran;
 use App\Models\Pengeluaran;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;  // ← Tambah ini
 
 class AdminController extends Controller
 {
@@ -38,5 +39,26 @@ class AdminController extends Controller
             'roles' => $roles,
             'roleFilter' => $roleFilter
         ]);
+    }
+
+    // GENERATE CLASS CODE ← Tambah ini
+    public function generateClassCode(int $id)
+    {
+        $kelas = Kelas::findOrFail($id);
+        $oldCode = $kelas->code;
+        $newCode = $this->generateNewCode();
+
+        $kelas->update(['code' => $newCode]);
+
+        return redirect()->route('kelas')->with('success', "Kode kelas diperbarui dari $oldCode menjadi $newCode");
+    }
+
+    private function generateNewCode()
+    {
+        do {
+            $code = strtoupper(Str::random(6));
+        } while (Kelas::where('code', $code)->exists());
+
+        return $code;
     }
 }

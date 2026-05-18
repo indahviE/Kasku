@@ -14,22 +14,21 @@ class Kelas extends Model
     protected $fillable = [
         'nama_kelas',
         'tahun_ajaran',
-        'kode_kelas',
-        'status',
+        'code',
     ];
 
-    public function siswa()
+    public function users()
     {
-        return $this->hasMany(Siswa::class, 'kelas_id');
-    }
-
-    public function waliKelas()
-    {
-        return $this->hasOne(WaliKelas::class, 'kelas_id');
+        return $this->hasMany(User::class, 'kelas_id');
     }
 
     public function pengeluaran()
     {
         return $this->hasMany(Pengeluaran::class, 'kelas_id');
+    }
+
+    public function pembayaran()
+    {
+        return $this->hasMany(Pembayaran::class, 'kelas_id');
     }
 }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nama_kelas');
             $table->string('tahun_ajaran');
-            $table->string('kode_kelas')->unique();
+            $table->string('code')->unique();
             $table->enum('status', ['aktif', 'arsip'])->default('aktif');
             $table->timestamps();
         });
