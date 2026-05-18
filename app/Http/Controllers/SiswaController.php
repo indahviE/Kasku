@@ -31,7 +31,7 @@ class SiswaController extends Controller
             ->take(5)
             ->get();
 
-        $totalTagihanKelas = Tagihan::where('kelas_id', $siswa->kelas_id)->sum('nominal');
+        $totalTagihanKelas = Tagihan::where('user_id', $siswa->kelas_id)->sum('nominal');
         $totalSudahBayar = Pembayaran::where('user_id', $user->id)
             ->where('status', 'success')
             ->sum('jml_bayar');
