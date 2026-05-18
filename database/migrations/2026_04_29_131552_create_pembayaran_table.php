@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('pembayaran', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('tagihan_id');
+            $table->unsignedBigInteger('tagihan_id')->nullable();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('dicatat_oleh');
             $table->decimal('jml_bayar', 10, 2);
