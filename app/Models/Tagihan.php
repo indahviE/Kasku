@@ -12,7 +12,7 @@ class Tagihan extends Model
     protected $table = 'tagihan';
 
     protected $fillable = [
-        'kelas_id',
+        'user_id',
         'created_by',
         'nama_tagihan',
         'nominal',
@@ -20,9 +20,9 @@ class Tagihan extends Model
         'batas bayar', 
     ];
 
-    public function kelas()
+    public function user()
     {
-        return $this->belongsTo(Kelas::class, 'kelas_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function pembuat()

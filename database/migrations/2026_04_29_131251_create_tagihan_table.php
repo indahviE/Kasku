@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('tagihan', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('kelas_id');
+            $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('created_by');
             $table->string('nama_tagihan');
             $table->decimal('nominal', 10, 2);
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->date('batas_bayar');
             $table->timestamps();
 
-            $table->foreign('kelas_id')->references('id')->on('kelas')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
         });
     }

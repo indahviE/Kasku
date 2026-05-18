@@ -11,7 +11,7 @@ class TagihanSeeder extends Seeder
     {
         DB::table('tagihan')->insert([
             [
-                'kelas_id' => 1,
+                'user_id' => 1,
                 'created_by' => 1,
                 'nama_tagihan' => 'Uang Kas Mei 2026',
                 'nominal' => 50000,
@@ -21,7 +21,7 @@ class TagihanSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'kelas_id' => 1,
+                'user_id' => 1,
                 'created_by' => 1,
                 'nama_tagihan' => 'Iuran Perpisahan',
                 'nominal' => 150000,
@@ -31,7 +31,7 @@ class TagihanSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'kelas_id' => 2,
+                'user_id' => 2,
                 'created_by' => 2,
                 'nama_tagihan' => 'Uang Kas Mei 2026',
                 'nominal' => 50000,
@@ -41,7 +41,7 @@ class TagihanSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'kelas_id' => 1,
+                'user_id' => 1,
                 'created_by' => 3,
                 'nama_tagihan' => 'Foto Album Kenangan',
                 'nominal' => 100000,
