@@ -57,7 +57,7 @@ class SiswaController extends Controller
         $user = Auth::user();
         $siswa = Siswa::where('user_id', $user->id)->first();
 
-        $tunggakan = Tagihan::where('kelas_id', $siswa->kelas_id)->get();
+        $tunggakan = Tagihan::where('user_id', $siswa->user_id)->get();
 
         return view('siswa.tunggakan', compact('tunggakan'));
     }
