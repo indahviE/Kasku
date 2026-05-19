@@ -7,19 +7,19 @@ use App\Models\Pembayaran;
 use App\Models\Pengeluaran;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;  // ← Tambah ini
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
     public function dashboard(Request $request)
     {
-        // Summary data
+        // summary data
         $totalMasuk = Pembayaran::where('status', 'lunas')->sum('jml_bayar');
         $totalKeluar = Pengeluaran::sum('nominal');
         $saldoKeseluruhan = $totalMasuk - $totalKeluar;
         $jumlahKelas = Kelas::count();
 
-        // List user dengan filter
+        // list user
         $roleFilter = $request->get('role');
         $query = User::with('kelas');
 
@@ -41,7 +41,6 @@ class AdminController extends Controller
         ]);
     }
 
-    // GENERATE CLASS CODE ← Tambah ini
     public function generateClassCode(int $id)
     {
         $kelas = Kelas::findOrFail($id);

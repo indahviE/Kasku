@@ -30,18 +30,12 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-        // Redirect berdasarkan role
-        if ($user->role === 'admin') {
-            return redirect()->intended(route('dashboard.admin'));
-        } elseif ($user->role === 'bendahara') {
-            return redirect()->intended(route('bendahara.dashboard'));
-        } elseif ($user->role === 'siswa') {
-            return redirect()->intended(route('siswa.index'));
-        } elseif ($user->role === 'wali_kelas') {
-            return redirect()->intended(route('wali.dashboard'));
-        }
+        // Set session timeout (default 2 jam = 120 menit)
+        // Bisa di-customize di config/session.php
+        session(['last_activity' => now()]);
 
-        return redirect()->intended(route('home'));
+        // Redirect berdasarkan role
+        return redirect()->intended($user->getDashboardRoute());
     }
 
     /**
@@ -55,6 +49,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')->with('message', 'Anda telah berhasil logout');
     }
 }
