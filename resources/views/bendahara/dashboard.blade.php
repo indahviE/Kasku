@@ -1,428 +1,420 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Data Transaksi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-@section('content')
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f5f9; 
+        }
 
-<div class="flex min-h-screen bg-[#ECEFF4] font-['Inter']">
+        .sidebar {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
+            transition: all 0.3s ease;
+        }
 
-    <!-- CONTENT -->
-    <main class="flex-1">
+        .sidebar-item {
+            transition: all 0.3s ease;
+        }
 
-        <!-- TOPBAR -->
-        <div class="w-full h-[72px] bg-white border-b border-gray-200 px-7 flex items-center justify-between shadow-sm">
+        .sidebar-item.active {
+            background-color: rgba(45, 212, 191, 0.15); 
+            border-left: 4px solid #2dd4bf;
+            padding-left: calc(1.5rem - 4px);
+            color: #2dd4bf;
+        }
 
-            <!-- LEFT -->
-            <div>
-                <h1 class="text-[22px] font-bold text-gray-800">
-                    Dashboard
-                </h1>
+        .sidebar-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding-left: 1.75rem;
+        }
 
-                <p class="text-sm text-gray-400">
-                    Welcome back
-                </p>
+        .stat-card {
+            background: white;
+            border-radius: 16px; 
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #f1f5f9;
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .stat-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.balance-kas { background-color: #f0fdf4; color: #16a34a; }
+        .stat-icon.income { background-color: #ecfdf5; color: #059669; }
+        .stat-icon.expense { background-color: #fff1f2; color: #e11d48; }
+        .stat-icon.transaction { background-color: #f5f3ff; color: #4f46e5; }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            margin-top: 8px;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+
+        .dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #475569;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        .dropdown-item.logout {
+            color: #ef4444;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .dropdown-item.logout:hover {
+            background-color: #fef2f2;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px;
+            margin-bottom: 10px;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card { animation: slideIn 0.4s ease forwards; }
+        .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .stat-card:nth-child(2) { animation-delay: 0.1s; }
+        .stat-card:nth-child(3) { animation-delay: 0.15s; }
+        .stat-card:nth-child(4) { animation-delay: 0.2s; }
+        .content-card { animation: slideIn 0.5s ease forwards 0.25s both; }
+    </style>
+</head>
+<body>
+    <div class="flex h-screen overflow-hidden">
+        <div class="sidebar w-64 h-screen fixed left-0 top-0 text-white overflow-y-auto z-10">
+            <div class="p-6 border-b border-white border-opacity-5">
+                <div>
+                    <h1 class="font-bold text-base tracking-widest text-white">KASKU <span class="font-light text-teal-400">ONLINE</span></h1>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mt-0.5">Management System</p>
+                </div>
             </div>
 
+            <nav class="p-4">
+                <div class="space-y-1.5">
+                    <div class="sidebar-item active px-4 py-3 rounded-xl cursor-pointer">
+                        <span class="flex items-center gap-3 font-medium text-sm">
+                            <iconify-icon icon="lucide:layout-dashboard" width="18"></iconify-icon>
+                            Dashboard
+                        </span>
+                    </div>
 
+                    <div class="sidebar-item px-4 py-3 rounded-xl cursor-pointer text-slate-400 hover:text-white">
+                        <span class="flex items-center gap-3 font-medium text-sm">
+                            <iconify-icon icon="lucide:users" width="18"></iconify-icon>
+                            Kelola User
+                        </span>
+                    </div>
 
-            <!-- RIGHT -->
-            <div class="flex items-center gap-4">
+                    <div class="sidebar-item px-4 py-3 rounded-xl cursor-pointer text-slate-400 hover:text-white">
+                        <span class="flex items-center gap-3 font-medium text-sm">
+                            <iconify-icon icon="lucide:graduation-cap" width="18"></iconify-icon>
+                            Kelola Kelas
+                        </span>
+                    </div>
 
-                <!-- NOTIF -->
-                <button class="w-11 h-11 rounded-full bg-[#F5F7FA] flex items-center justify-center hover:bg-gray-100 transition">
-
-                    <iconify-icon
-                        icon="solar:bell-bold"
-                        class="text-[22px] text-gray-700">
-                    </iconify-icon>
-
-                </button>
-
-
-
-                <!-- PROFILE DROPDOWN -->
-                <div class="relative group">
-
-                    <button class="flex items-center gap-3">
-
-                        <!-- PHOTO -->
-                        <div class="w-11 h-11 rounded-full bg-[#0F5D73] flex items-center justify-center text-white font-bold">
-                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                        </div>
-
-                        <!-- USER -->
-                        <div class="text-left">
-                            <h1 class="text-[15px] font-bold text-gray-800 leading-none">
-                                {{ Auth::user()->name }}
-                            </h1>
-
-                            <p class="text-[13px] text-gray-400 mt-1">
-                                Bendahara
-                            </p>
-                        </div>
-
-                        <!-- ICON -->
-                        <iconify-icon
-                            icon="solar:alt-arrow-down-linear"
-                            class="text-[18px] text-gray-500">
-                        </iconify-icon>
-
-                    </button>
-
-                    <!-- DROPDOWN -->
-                    <div class="absolute right-0 top-14 w-44 bg-white rounded-xl shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-
-                        <a href="#"
-                            class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-t-xl">
-
-                            <iconify-icon icon="solar:user-linear"></iconify-icon>
-                            Profile
-
-                        </a>
-
-                        <a href="#"
-                            class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
-
-                            <iconify-icon icon="solar:settings-linear"></iconify-icon>
-                            Settings
-
-                        </a>
-
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <button
-                                type="submit"
-                                class="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-500 hover:bg-red-50 rounded-b-xl">
-
-                                <iconify-icon icon="solar:logout-2-linear"></iconify-icon>
-                                Logout
-
-                            </button>
-                        </form>
-
+                    <div class="sidebar-item px-4 py-3 rounded-xl cursor-pointer text-slate-400 hover:text-white">
+                        <span class="flex items-center gap-3 font-medium text-sm">
+                            <iconify-icon icon="lucide:arrow-left-right" width="18"></iconify-icon>
+                            Data Transaksi
+                        </span>
                     </div>
                 </div>
+            </nav>
 
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-white border-opacity-5 text-center">
+                <p class="text-[11px] text-slate-500 font-medium">© 2026 Admin Panel</p>
             </div>
         </div>
 
-
-
-        <!-- ISI -->
-        <div class="px-7 py-6">
-
-            <!-- HEADER -->
-            <div>
-
-                <h1 class="text-[32px] font-bold text-[#111827] tracking-tight">
-                    Selamat datang, Bendahara!
-                </h1>
-
-                <p class="text-gray-500 text-[15px] font-medium mt-2">
-                    Berikut ringkasan keuangan kelas bulan ini.
-                </p>
-            </div>
-
-
-
-            <!-- STAT CARDS -->
-            <div class="grid grid-cols-4 gap-6 mt-8">
-
-                <!-- CARD 1 -->
-                <div class="bg-white rounded-2xl p-6 shadow-sm">
-
-                    <div class="flex items-center gap-3 mb-4">
-
-                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <iconify-icon
-                                icon="solar:wallet-bold"
-                                class="text-[20px] text-blue-500">
-                            </iconify-icon>
-                        </div>
-
-                        <span class="text-gray-500 font-semibold">
-                            Saldo Kas
-                        </span>
-                    </div>
-
-                    <p class="text-2xl font-bold text-[#0F5D73]">
-                        Rp 2.500.000
-                    </p>
+        <div class="ml-64 w-full flex flex-col h-screen overflow-y-auto">
+            <nav class="navbar h-24 px-10 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md z-20">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-xl font-semibold text-slate-800 tracking-tight">Data Transaksi</h2>
                 </div>
 
-
-
-                <!-- CARD 2 -->
-                <div class="bg-white rounded-2xl p-6 shadow-sm">
-
-                    <div class="flex items-center gap-3 mb-4">
-
-                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                            <iconify-icon
-                                icon="solar:arrow-down-bold"
-                                class="text-[20px] text-green-500">
-                            </iconify-icon>
-                        </div>
-
-                        <span class="text-gray-500 font-semibold">
-                            Total Kas Masuk
-                        </span>
-                    </div>
-
-                    <p class="text-2xl font-bold text-green-500">
-                        Rp 2.000.000
-                    </p>
-                </div>
-
-
-
-                <!-- CARD 3 -->
-                <div class="bg-white rounded-2xl p-6 shadow-sm">
-
-                    <div class="flex items-center gap-3 mb-4">
-
-                        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                            <iconify-icon
-                                icon="solar:arrow-up-bold"
-                                class="text-[20px] text-red-500">
-                            </iconify-icon>
-                        </div>
-
-                        <span class="text-gray-500 font-semibold">
-                            Total Kas Keluar
-                        </span>
-                    </div>
-
-                    <p class="text-2xl font-bold text-red-500">
-                        Rp 500.000
-                    </p>
-                </div>
-
-
-
-                <!-- CARD 4 -->
-                <div class="bg-white rounded-2xl p-6 shadow-sm">
-
-                    <div class="flex items-center gap-3 mb-4">
-
-                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                            <iconify-icon
-                                icon="solar:clipboard-list-bold"
-                                class="text-[20px] text-purple-500">
-                            </iconify-icon>
-                        </div>
-
-                        <span class="text-gray-500 font-semibold">
-                            Jumlah Transaksi
-                        </span>
-                    </div>
-
-                    <p class="text-2xl font-bold text-purple-500">
-                        29
-                    </p>
-                </div>
-
-            </div>
-
-
-
-            <!-- GRAFIK -->
-            <div class="grid grid-cols-[2fr_1fr] gap-6 mt-8">
-
-                <!-- GRAFIK -->
-                <div class="bg-white rounded-2xl shadow-sm p-6">
-
-                    <div class="flex justify-between items-center">
-
-                        <div>
-                            <h1 class="text-[20px] font-bold text-gray-800">
-                                Grafik Arus Kas
-                            </h1>
-
-                            <p class="text-gray-400 text-sm mt-1">
-                                Statistik kas masuk & keluar
+                <div class="profile-dropdown">
+                    <button class="flex items-center gap-4 cursor-pointer focus:outline-none" onclick="toggleDropdown()">
+                        <div class="text-right">
+                            <p class="text-slate-800 font-semibold text-xs tracking-wide uppercase" id="profileName">MELINA DETIANA</p>
+                            <p class="text-emerald-500 font-semibold text-[10px] flex items-center justify-end gap-1 mt-0.5">
+                                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block animate-pulse"></span> Online
                             </p>
                         </div>
+                        <div class="w-10 h-10 bg-gradient-to-tr from-teal-400 to-emerald-400 rounded-full flex items-center justify-center font-semibold text-slate-900 text-sm shadow-md shadow-teal-500/10" id="profileInitial">M</div>
+                        <iconify-icon icon="lucide:chevron-down" width="16" class="text-slate-400"></iconify-icon>
+                    </button>
 
-                        <button class="border border-gray-200 rounded-xl px-5 py-2 text-sm text-gray-500 font-medium">
-                            7 Hari Terakhir
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <div class="dropdown-item">
+                            <iconify-icon icon="lucide:user" width="16"></iconify-icon>
+                            <span class="text-sm font-medium">Profil Saya</span>
+                        </div>
+                        <div class="dropdown-item">
+                            <iconify-icon icon="lucide:settings" width="16"></iconify-icon>
+                            <span class="text-sm font-medium">Pengaturan</span>
+                        </div>
+                        <div class="dropdown-item logout" onclick="handleLogout()">
+                            <iconify-icon icon="lucide:log-out" width="16"></iconify-icon>
+                            <span class="text-sm font-medium">Logout</span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="flex-1 p-8 max-w-[1600px] w-full mx-auto">
+                <div class="mb-8">
+                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight mb-1">Selamat datang, Bendahara</h1>
+                    <p class="text-sm text-slate-500 font-medium">Berikut ringkasan manajemen keuangan bulan ini secara real-time.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="stat-card">
+                        <div class="flex items-center gap-4">
+                            <div class="stat-icon balance-kas shadow-sm">
+                                <iconify-icon icon="lucide:wallet" width="22"></iconify-icon>
+                            </div>
+                            <div>
+                                <p class="text-slate-400 text-xs font-semibold tracking-wider uppercase mb-0.5">Saldo Kas</p>
+                                <p class="text-xl font-bold text-slate-800 tracking-tight">Rp 2.500.000</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="flex items-center gap-4">
+                            <div class="stat-icon income shadow-sm">
+                                <iconify-icon icon="lucide:arrow-down-left" width="22"></iconify-icon>
+                            </div>
+                            <div>
+                                <p class="text-slate-400 text-xs font-semibold tracking-wider uppercase mb-0.5">Total Kas Masuk</p>
+                                <p class="text-xl font-bold text-emerald-600 tracking-tight">Rp 2.000.000</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="flex items-center gap-4">
+                            <div class="stat-icon expense shadow-sm">
+                                <iconify-icon icon="lucide:arrow-up-right" width="22"></iconify-icon>
+                            </div>
+                            <div>
+                                <p class="text-slate-400 text-xs font-semibold tracking-wider uppercase mb-0.5">Total Kas Keluar</p>
+                                <p class="text-xl font-bold text-rose-600 tracking-tight">Rp 500.000</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="flex items-center gap-4">
+                            <div class="stat-icon transaction shadow-sm">
+                                <iconify-icon icon="lucide:activity" width="22"></iconify-icon>
+                            </div>
+                            <div>
+                                <p class="text-slate-400 text-xs font-semibold tracking-wider uppercase mb-0.5">Jumlah Transaksi</p>
+                                <p class="text-xl font-bold text-indigo-600 tracking-tight">29</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 content-card bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-base font-semibold text-slate-800 tracking-tight">Grafik Arus Kas</h3>
+                            <span class="text-[11px] font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full uppercase tracking-wider">7 Hari Terakhir</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="cashFlowChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="content-card bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-base font-semibold text-slate-800 tracking-tight mb-5">Ringkasan Bulan Ini</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center py-1">
+                                    <p class="text-slate-500 text-sm font-medium">Saldo Awal</p>
+                                    <p class="text-base font-bold text-slate-800">Rp 1.000.000</p>
+                                </div>
+                                <div class="flex justify-between items-center py-1">
+                                    <p class="text-slate-500 text-sm font-medium">Total Kas Masuk</p>
+                                    <p class="text-base font-bold text-emerald-600">Rp 5.000.000</p>
+                                </div>
+                                <div class="flex justify-between items-center py-1">
+                                    <p class="text-slate-500 text-sm font-medium">Total Kas Keluar</p>
+                                    <p class="text-base font-bold text-rose-600">Rp 2.500.000</p>
+                                </div>
+                                <div class="border-t border-dashed border-slate-200 my-2"></div>
+                                <div class="flex justify-between items-center py-1">
+                                    <p class="text-slate-900 text-sm font-bold">Saldo Akhir</p>
+                                    <p class="text-lg font-bold text-slate-900">Rp 3.500.000</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="w-full mt-6 px-4 py-3 bg-slate-900 text-white hover:bg-slate-800 rounded-xl font-semibold text-sm transition-all duration-200 shadow-md shadow-slate-900/10">
+                            Lihat Laporan Keuangan
                         </button>
                     </div>
-
-                    <div class="flex items-center gap-6 mt-8 ml-3">
-
-                        <div class="flex items-center gap-2 text-sm text-gray-500 font-medium">
-                            <div class="w-3 h-3 rounded-full bg-blue-500"></div>
-                            Kas Masuk
-                        </div>
-
-                        <div class="flex items-center gap-2 text-sm text-gray-500 font-medium">
-                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                            Kas Keluar
-                        </div>
-                    </div>
-
-                    <div class="relative h-[300px] mt-5">
-
-                        <div class="absolute inset-0 flex flex-col justify-between">
-                            <div class="border-b border-gray-100"></div>
-                            <div class="border-b border-gray-100"></div>
-                            <div class="border-b border-gray-100"></div>
-                            <div class="border-b border-gray-100"></div>
-                            <div class="border-b border-gray-100"></div>
-                        </div>
-
-                        <svg class="absolute inset-0 w-full h-full"
-                            viewBox="0 0 700 300"
-                            fill="none">
-
-                            <path
-                                d="M40 220
-                                   C90 180, 120 150, 170 160
-                                   C220 170, 250 110, 300 85
-                                   C350 110, 390 150, 430 160
-                                   C480 170, 540 110, 620 80"
-
-                                stroke="#3478F6"
-                                stroke-width="4"
-                                fill="none"
-                                stroke-linecap="round" />
-
-                            <path
-                                d="M40 260
-                                   C90 245, 120 220, 170 230
-                                   C220 240, 260 140, 300 125
-                                   C350 170, 390 230, 430 245
-                                   C500 260, 560 235, 620 220"
-
-                                stroke="#EF4444"
-                                stroke-width="4"
-                                fill="none"
-                                stroke-linecap="round" />
-                        </svg>
-                    </div>
                 </div>
 
-
-
-                <!-- RINGKASAN -->
-                <div class="bg-white rounded-2xl shadow-sm p-5">
-
-                    <h1 class="text-[20px] font-bold text-gray-800">
-                        Ringkasan Bulan Ini
-                    </h1>
-
-                    <div class="space-y-8 mt-8">
-
-                        <div class="flex justify-between text-[15px]">
-                            <span class="text-gray-500">Saldo Awal</span>
-                            <span class="font-semibold">Rp 1.000.000</span>
-                        </div>
-
-                        <div class="flex justify-between text-[15px]">
-                            <span class="text-gray-500">Kas Masuk</span>
-                            <span class="font-semibold text-[#2D5BE3]">
-                                Rp 5.000.000
-                            </span>
-                        </div>
-
-                        <div class="flex justify-between text-[15px]">
-                            <span class="text-gray-500">Kas Keluar</span>
-                            <span class="font-semibold text-red-500">
-                                Rp 2.500.000
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="bg-[#F5F7FA] rounded-2xl p-5 mt-8">
-
-                        <p class="text-gray-500 text-sm font-medium">
-                            Saldo Akhir
-                        </p>
-
-                        <h1 class="text-[#2D5BE3] text-[30px] font-bold mt-2">
-                            Rp 3.500.000
-                        </h1>
-                    </div>
-
-                    <button class="w-full mt-6 py-3 rounded-xl border border-[#A7C5FF] text-[#2D5BE3] font-semibold hover:bg-blue-50 transition">
-                        Lihat Laporan
-                    </button>
-                </div>
             </div>
-
-
-
-            <!-- TRANSAKSI -->
-            <div class="flex justify-between items-center mt-8 mb-4">
-
-                <h1 class="text-[20px] font-bold text-gray-800">
-                    Transaksi Terbaru
-                </h1>
-
-                <button class="text-[#2D5BE3] font-semibold text-sm">
-                    Lihat Semua
-                </button>
-            </div>
-
-
-
-            <!-- TABLE -->
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-
-                <table class="w-full">
-
-                    <thead class="bg-[#F9FAFB] border-b border-gray-100">
-
-                        <tr class="text-left text-gray-500 text-sm">
-
-                            <th class="px-6 py-5 font-semibold">Tanggal</th>
-                            <th class="px-6 py-5 font-semibold">Jenis</th>
-                            <th class="px-6 py-5 font-semibold">Keterangan</th>
-                            <th class="px-6 py-5 font-semibold">Kategori</th>
-                            <th class="px-6 py-5 font-semibold">Nominal</th>
-                            <th class="px-6 py-5 font-semibold">Oleh</th>
-
-                        </tr>
-                    </thead>
-
-                    <tbody class="text-[15px] text-gray-700">
-
-                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
-
-                            <td class="px-6 py-5">01 Mei 2026</td>
-
-                            <td class="px-6 py-5">
-                                <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-semibold">
-                                    Kas Masuk
-                                </span>
-                            </td>
-
-                            <td class="px-6 py-5">
-                                Pembayaran kas siswa
-                            </td>
-
-                            <td class="px-6 py-5">Kas</td>
-
-                            <td class="px-6 py-5 font-bold text-green-600">
-                                + Rp 100.000
-                            </td>
-
-                            <td class="px-6 py-5">Bendahara</td>
-                        </tr>
-
-                    </tbody>
-                </table>
-            </div>
-
-
-
-            <!-- FOOTER -->
-            <div class="text-center py-8 text-sm text-gray-400 font-medium">
-                © 2026 KASKU Online. All rights reserved.
-            </div>
-
         </div>
-    </main>
-</div>
+    </div>
 
-@endsection
+    <script>
+        const currentUser = {
+            name: document.getElementById('profileName').textContent,
+            initial: document.getElementById('profileInitial').textContent
+        };
+
+        (function setupDropdown() {
+            window.toggleDropdown = function() {
+                document.getElementById('dropdownMenu').classList.toggle('active');
+            };
+
+            document.addEventListener('click', function(event) {
+                const profileDropdown = document.querySelector('.profile-dropdown');
+                if (profileDropdown && !profileDropdown.contains(event.target)) {
+                    document.getElementById('dropdownMenu').classList.remove('active');
+                }
+            });
+        })();
+
+        function handleLogout() {
+            alert('Anda telah logout. Sampai jumpa!');
+        }
+
+        const ctx = document.getElementById('cashFlowChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['17 Mei', '18 Mei', '19 Mei', '20 Mei', '21 Mei', '22 Mei', '23 Mei'],
+                datasets: [
+                    {
+                        label: 'Kas Masuk',
+                        data: [500000, 750000, 750000, 1250000, 1000000, 900000, 1100000],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.01)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.35,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                    },
+                    {
+                        label: 'Kas Keluar',
+                        data: [250000, 400000, 250000, 850000, 250000, 200000, 350000],
+                        borderColor: '#f43f5e',
+                        backgroundColor: 'rgba(244, 63, 94, 0.01)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.35,
+                        pointBackgroundColor: '#f43f5e',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp ' + (value / 1000000).toFixed(1) + 'M';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
