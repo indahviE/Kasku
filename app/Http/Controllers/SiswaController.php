@@ -21,9 +21,7 @@ class SiswaController extends Controller
         }
 
         $kasMasuk = Pembayaran::where('status', 'success')->sum('jml_bayar');
-
         $kasKeluar = Pengeluaran::sum('nominal');
-
         $saldoKas = $kasMasuk - $kasKeluar;
 
         $riwayat = Pembayaran::where('user_id', $user->id)
@@ -55,8 +53,6 @@ class SiswaController extends Controller
     public function tunggakan()
     {
         $user = Auth::user();
-        $siswa = Siswa::where('user_id', $user->id)->first();
-
         $tunggakan = Tagihan::where('user_id', $user->id)->get();
 
         return view('siswa.tunggakan', compact('tunggakan'));
@@ -71,29 +67,30 @@ class SiswaController extends Controller
         return view('siswa.laporan_kas', compact('laporan'));
     }
 
-     public function pembayaran()
-{
-    $user = Auth::user();
+    public function pembayaran()
+    {
+        $user = Auth::user();
 
-    $semuaTagihan = Tagihan::where('user_id', $user->id)
-        ->orderBy('periode', 'asc')
-        ->get();
+        // Ambil ID tagihan yang sudah direspons (baik pending maupun success)
+        $sudahDibayar = Pembayaran::where('user_id', $user->id)
+            ->pluck('tagihan_id')
+            ->toArray();
 
-    $sudahDibayar = Pembayaran::where('user_id', $user->id)
-        ->pluck('tagihan_id')
-        ->toArray();
+        // Ambil tagihan yang memang belum pernah disentuh oleh user ini
+        $tagihanBelumBayar = Tagihan::where('user_id', $user->id)
+            ->whereNotIn('id', $sudahDibayar)
+            ->orderBy('periode', 'asc')
+            ->get();
 
-    $tagihanBelumBayar = $semuaTagihan->whereNotIn('id', $sudahDibayar);
+        $data_pembayaran = Pembayaran::where('user_id', $user->id)
+            ->latest()
+            ->get();
 
-    $data_pembayaran = Pembayaran::where('user_id', $user->id)
-        ->latest()
-        ->get();
-
-    return view('siswa.pembayaran', compact(
-        'tagihanBelumBayar',
-        'data_pembayaran'
-    ));
-}
+        return view('siswa.pembayaran', compact(
+            'tagihanBelumBayar',
+            'data_pembayaran'
+        ));
+    }
 
     public function simpanPembayaran(Request $request)
     {
