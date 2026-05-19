@@ -31,12 +31,12 @@ class SiswaController extends Controller
             ->take(5)
             ->get();
 
-        $totalTagihanKelas = Tagihan::where('user_id', $siswa->kelas_id)->sum('nominal');
+        $totalTagihanSiswa = Tagihan::where('user_id', $user->id)->sum('nominal');
         $totalSudahBayar = Pembayaran::where('user_id', $user->id)
             ->where('status', 'success')
             ->sum('jml_bayar');
 
-        $tunggakan = $totalTagihanKelas - $totalSudahBayar;
+        $tunggakan = $totalTagihanSiswa - $totalSudahBayar;
 
         return view('siswa.index', compact(
             'siswa', 'saldoKas', 'kasMasuk', 'kasKeluar', 'riwayat', 'tunggakan'
@@ -57,7 +57,7 @@ class SiswaController extends Controller
         $user = Auth::user();
         $siswa = Siswa::where('user_id', $user->id)->first();
 
-        $tunggakan = Tagihan::where('user_id', $siswa->user_id)->get();
+        $tunggakan = Tagihan::where('user_id', $user->id)->get();
 
         return view('siswa.tunggakan', compact('tunggakan'));
     }
