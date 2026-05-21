@@ -171,7 +171,7 @@
             </p>
         </div>
 
-        <a href="{{ route('siswa.pembayaran') }}">
+        <a href="{{ route('siswa.transaksi') }}">
         <div class="bg-white border border-gray-200 rounded-3xl p-5 hover:shadow-lg transition cursor-pointer">
           <div class="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
     
