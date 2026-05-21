@@ -31,21 +31,23 @@
                     <!-- NOMINAL -->
                     <div class="flex items-center gap-4">
 
-                        <div class="w-12 h-12 rounded-2xl bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
+        
+<div class="w-12 h-12 rounded-2xl bg-white border border-gray-200 flex items-center justify-center">
 
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 class="w-6 h-6 text-black"
-                                 fill="none"
-                                 viewBox="0 0 24 24"
-                                 stroke="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg"
+         class="w-5 h-5 text-black"
+         fill="none"
+         viewBox="0 0 24 24"
+         stroke="currentColor">
 
-                                <path stroke-linecap="round"
-                                      stroke-linejoin="round"
-                                      stroke-width="2"
-                                      d="M12 8c-1.657 0-3 1.12-3 2.5S10.343 13 12 13s3 1.12 3 2.5S13.657 18 12 18m0-10V6m0 12v-2m8-4a8 8 0 11-16 0 8 8 0 0116 0z"/>
-                            </svg>
+        <path stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.7"
+              d="M12 8c-1.657 0-3 1.12-3 2.5S10.343 13 12 13s3 1.12 3 2.5S13.657 18 12 18m0-10V6m0 12v-2m8-4a8 8 0 11-16 0 8 8 0 0116 0z"/>
 
-                        </div>
+    </svg>
+
+</div>
 
                         <div>
                             <p class="text-sm text-gray-400">
@@ -66,14 +68,14 @@
                         <div class="w-12 h-12 rounded-2xl bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
 
                             <svg xmlns="http://www.w3.org/2000/svg"
-                                 class="w-6 h-6 text-black"
+                                 class="w-5 h-5 text-black"
                                  fill="none"
                                  viewBox="0 0 24 24"
                                  stroke="currentColor">
 
                                 <path stroke-linecap="round"
                                       stroke-linejoin="round"
-                                      stroke-width="2"
+                                      stroke-width="1.5"
                                       d="M9 12l2 2 4-4m5-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
 
