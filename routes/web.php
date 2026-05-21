@@ -110,8 +110,8 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
     Route::get('/laporan-kas', [SiswaController::class, 'laporanKas'])
         ->name('siswa.laporan_kas');
 
-    Route::get('/pembayaran', [SiswaController::class, 'pembayaran'])
-        ->name('siswa.pembayaran');
+    Route::get('/transaksi', [SiswaController::class, 'pembayaran'])
+        ->name('siswa.transaksi');
 
     Route::post('/pembayaran/store', [SiswaController::class, 'simpanPembayaran'])
         ->name('siswa.pembayaran.store');

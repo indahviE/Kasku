@@ -86,7 +86,7 @@ class SiswaController extends Controller
             ->latest()
             ->get();
 
-        return view('siswa.pembayaran', compact(
+        return view('siswa.transaksi', compact(
             'tagihanBelumBayar',
             'data_pembayaran'
         ));
