@@ -43,23 +43,36 @@ class KelasController extends Controller
     {
         $id = $request->get('id');
         $kelas = Kelas::findOrFail($id);
-        return view('admin.update', ['kelas' => $kelas]);
+        return view('admin.kelas.edit', ['kelas' => $kelas]);
     }
 
-    public function updateKelas(Request $request, int $id)
+    public function updateKelas(Request $request, $id)
     {
         $kelas = Kelas::findOrFail($id);
-        $request->validate([
-            'nama_kelas' => 'required|string|max:255|unique:kelas,nama_kelas,' . $id,
-            'tahun_ajaran' => 'required|string|max:10'
+
+        $validated = $request->validate([
+            'nama_kelas' => [
+                'string',
+                'max:255',
+                'unique:kelas,nama_kelas,' . $id
+            ],
+            'tahun_ajaran' => [
+                'string',
+                'max:10'
+            ]
         ]);
 
-        $kelas->update([
-            'nama_kelas' => $request->nama_kelas,
-            'tahun_ajaran' => $request->tahun_ajaran
-        ]);
+        // ambil prefix dari code lama
+        $prefix = substr($kelas->code, 0, strrpos($kelas->code, '-'));
 
-        return redirect()->route('kelas')->with('success', 'Kelas berhasil ter-update');
+        // generate code baru
+        $validated['code'] = $this->generateUniqueCode($prefix);
+
+        // update data
+        $kelas->update($validated);
+
+        return redirect()->route('kelas')
+            ->with('success', 'Kelas berhasil diperbarui');
     }
 
     public function deleteKelas($id)
