@@ -11,12 +11,12 @@ class KelasController extends Controller
     public function listKelas()
     {
         $kelas = Kelas::withCount('users')->paginate(5);
-        return view('admin.kelas', ['kelas' => $kelas]);
+        return view('admin.kelas.view', ['kelas' => $kelas]);
     }
 
     public function createKelas()
     {
-        return view('admin.create');
+        return view('admin.kelas.create');
     }
 
     public function storeKelas(Request $request)
