@@ -71,12 +71,10 @@ class SiswaController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil ID tagihan yang sudah direspons (baik pending maupun success)
         $sudahDibayar = Pembayaran::where('user_id', $user->id)
             ->pluck('tagihan_id')
             ->toArray();
 
-        // Ambil tagihan yang memang belum pernah disentuh oleh user ini
         $tagihanBelumBayar = Tagihan::where('user_id', $user->id)
             ->whereNotIn('id', $sudahDibayar)
             ->orderBy('periode', 'asc')
