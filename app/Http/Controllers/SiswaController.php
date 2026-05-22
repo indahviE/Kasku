@@ -124,7 +124,7 @@ class SiswaController extends Controller
         $pembayaran = Pembayaran::where('user_id', Auth::id())
             ->findOrFail($id);
 
-        return view('siswa.detail_pembayaran', compact('pembayaran'));
+        return view('siswa.detail_transaksi', compact('pembayaran'));
     }
 
     public function logout(Request $request)
