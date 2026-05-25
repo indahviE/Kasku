@@ -47,6 +47,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/kelas/delete/{id}', [KelasController::class, 'deleteKelas'])->name('kelas.delete');
 
     Route::post('/kelas/{id}/generate-code', [AdminController::class, 'generateClassCode'])->name('generate-code');
+
+    // data transaksi
+    Route::get('/data-transaksi', function () {
+        return view('admin.data-transaksi');
+    })->name('data.transaksi');
 });
 
 Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(function () {
