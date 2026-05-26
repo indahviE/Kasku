@@ -25,7 +25,7 @@
     </h1>
 
     <div class="inline-flex items-center px-4 py-2 rounded-full border border-gray-300 text-xs font-semibold">
-        #1 WEBSITE KAS KELAS
+        1 WEBSITE KAS KELAS
     </div>
 
 </div>
@@ -181,6 +181,15 @@
                     >
                         Log In
                     </button>
+
+                    <div class="text-center mt-6">
+                        <p class="text-sm text-zinc-600">
+                            Don't have an account? 
+                            <a href="{{ route('register') }}" class="font-semibold text-black hover:underline transition">
+                                Register here
+                            </a>
+                        </p>
+                    </div>
 
                 </form>
 

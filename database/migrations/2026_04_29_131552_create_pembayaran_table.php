@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('tagihan_id')->nullable();
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('dicatat_oleh');
+            $table->unsignedBigInteger('dicatat_oleh')->nullable();
             $table->decimal('jml_bayar', 10, 2);
             $table->date('tanggal_bayar');
             $table->enum('metode', ['tunai', 'transfer'])->default('tunai');

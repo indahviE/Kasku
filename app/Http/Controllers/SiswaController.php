@@ -14,13 +14,14 @@ class SiswaController extends Controller
     public function index()
     {
         $user = Auth::user();
+
         $siswa = Siswa::where('user_id', $user->id)->first();
 
         if (!$siswa) {
-            return "Data profil siswa tidak ditemukan. Pastikan seeder sudah dijalankan.";
+            return redirect('/')->with('error', 'Profil siswa tidak ditemukan. Silakan hubungi admin.');
         }
 
-        $kasMasuk = Pembayaran::where('status', 'success')->sum('jml_bayar');
+        $kasMasuk = Pembayaran::where('status', 'lunas')->sum('jml_bayar');
         $kasKeluar = Pengeluaran::sum('nominal');
         $saldoKas = $kasMasuk - $kasKeluar;
 
@@ -30,14 +31,20 @@ class SiswaController extends Controller
             ->get();
 
         $totalTagihanSiswa = Tagihan::where('user_id', $user->id)->sum('nominal');
+
         $totalSudahBayar = Pembayaran::where('user_id', $user->id)
-            ->where('status', 'success')
+            ->where('status', 'lunas')
             ->sum('jml_bayar');
 
         $tunggakan = $totalTagihanSiswa - $totalSudahBayar;
 
         return view('siswa.index', compact(
-            'siswa', 'saldoKas', 'kasMasuk', 'kasKeluar', 'riwayat', 'tunggakan'
+            'siswa',
+            'saldoKas',
+            'kasMasuk',
+            'kasKeluar',
+            'riwayat',
+            'tunggakan'
         ));
     }
 
@@ -53,14 +60,27 @@ class SiswaController extends Controller
     public function tunggakan()
     {
         $user = Auth::user();
-        $tunggakan = Tagihan::where('user_id', $user->id)->get();
+
+        $tunggakan = Tagihan::where('user_id', $user->id)
+
+            // Hilangkan tagihan yang SUDAH pernah dibayar
+            ->whereDoesntHave('pembayaran', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+
+            ->with(['pembayaran' => function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            }])
+
+            ->orderBy('periode', 'desc')
+            ->get();
 
         return view('siswa.tunggakan', compact('tunggakan'));
     }
 
     public function laporanKas()
     {
-        $laporan = Pembayaran::where('status', 'success')
+        $laporan = Pembayaran::where('status', 'lunas')
             ->latest()
             ->get();
 
@@ -71,7 +91,9 @@ class SiswaController extends Controller
     {
         $user = Auth::user();
 
+        // Tagihan yang belum pernah dibayar
         $sudahDibayar = Pembayaran::where('user_id', $user->id)
+            ->whereNotNull('tagihan_id')
             ->pluck('tagihan_id')
             ->toArray();
 
@@ -93,23 +115,41 @@ class SiswaController extends Controller
     public function simpanPembayaran(Request $request)
     {
         $request->validate([
-            'tagihan_id' => 'required|exists:tagihan,id',
-            'jml_bayar' => 'required|numeric|min:1',
-            'metode' => 'required|in:tunai,transfer',
-            'bukti_bayar' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'tagihan_id'  => 'nullable|exists:tagihan,id',
+            'jml_bayar'   => 'required|numeric|min:1',
+            'metode'      => 'required|in:tunai,transfer',
+            'bukti_bayar' => 'required_if:metode,transfer|image|mimes:jpg,jpeg,png|max:2048',
+        ], [
+            'bukti_bayar.required_if' => 'Bukti pembayaran wajib diunggah jika memilih metode Transfer.',
+            'jml_bayar.required'      => 'Jumlah pembayaran tidak boleh kosong.'
         ]);
 
-        $pathBukti = $request->file('bukti_bayar')
-            ->store('bukti_pembayaran', 'public');
+        $namaFile = null;
+
+        if ($request->hasFile('bukti_bayar')) {
+            $pathBukti = $request->file('bukti_bayar')
+                ->store('bukti_pembayaran', 'public');
+
+            $namaFile = basename($pathBukti);
+        }
 
         Pembayaran::create([
+            // Bisa NULL kalau bayar langsung/manual
             'tagihan_id'    => $request->tagihan_id,
+
             'user_id'       => Auth::id(),
+            'dicatat_oleh'  => Auth::id(),
+
             'jml_bayar'     => $request->jml_bayar,
-            'tanggal_bayar' => now(),
+
+            'tanggal_bayar' => now()->format('Y-m-d'),
+
             'metode'        => $request->metode,
-            'status'        => 'belum',
-            'bukti_bayar'   => $pathBukti,
+
+            // pending / nunggak / lunas bebas nanti bendahara ubah
+            'status'        => 'nunggak',
+
+            'bukti_bayar'   => $namaFile,
         ]);
 
         return redirect()
@@ -128,6 +168,7 @@ class SiswaController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
