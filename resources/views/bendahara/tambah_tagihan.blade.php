@@ -117,7 +117,7 @@
 
                 </a>
 
-                <a href="{{ route('kas_masuk') }}"
+                <a href="{{ route('bendahara.kas_masuk') }}"
                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300">
 
                     <iconify-icon icon="solar:wallet-money-bold" class="text-[18px]"></iconify-icon>
@@ -125,7 +125,7 @@
 
                 </a>
 
-                <a href="{{ route('kas_keluar') }}"
+                <a href="{{ route('bendahara.kas_keluar') }}"
                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300">
 
                     <iconify-icon icon="solar:card-send-bold" class="text-[18px]"></iconify-icon>
@@ -307,19 +307,6 @@
                                        required>
 
                             </div>
-
-                        </div>
-
-                        <div>
-
-                            <label class="text-sm font-semibold text-slate-700 block mb-2">
-                                Deskripsi
-                            </label>
-
-                            <textarea name="deskripsi"
-                                      rows="5"
-                                      class="textarea"
-                                      placeholder="Tambahkan informasi tagihan..."></textarea>
 
                         </div>
 
