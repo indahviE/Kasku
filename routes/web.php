@@ -123,6 +123,9 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
     Route::get('/tunggakan', [SiswaController::class, 'tunggakan'])
         ->name('siswa.tunggakan');
+        
+    Route::get('/detail-tunggakan/{id}', [SiswaController::class, 'detailTagihan'])
+        ->name('siswa.detail_tagihan');
 
     Route::get('/laporan-kas', [SiswaController::class, 'laporanKas'])
         ->name('siswa.laporan_kas');
