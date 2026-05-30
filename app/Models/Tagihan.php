@@ -17,7 +17,7 @@ class Tagihan extends Model
         'nama_tagihan',
         'nominal',
         'periode',
-        'batas bayar', 
+        'batas_bayar', 
     ];
 
     public function user()

@@ -187,32 +187,32 @@
                 <div class="px-4 mt-6">
                     <nav class="space-y-1">
 
-                        <a href="#" class="sidebar-item sidebar-active">
+                        <a href="{{ route('bendahara.dashboard') }}" class="sidebar-item sidebar-active">
                             <iconify-icon icon="solar:home-2-bold" class="text-[18px]"></iconify-icon>
                             <span>Dashboard</span>
                         </a>
 
-                        <a href="#" class="sidebar-item">
+                        <a href="{{ route('bendahara.kas_masuk') }}" class="sidebar-item">
                             <iconify-icon icon="solar:wallet-money-bold" class="text-[18px]"></iconify-icon>
                             <span>Kas Masuk</span>
                         </a>
 
-                        <a href="#" class="sidebar-item">
+                        <a href="{{ route('bendahara.kas_keluar') }}" class="sidebar-item">
                             <iconify-icon icon="solar:card-send-bold" class="text-[18px]"></iconify-icon>
                             <span>Kas Keluar</span>
                         </a>
 
-                        <a href="#" class="sidebar-item">
+                        <a href="{{ route('bendahara.transaksi') }}" class="sidebar-item">
                             <iconify-icon icon="solar:clipboard-list-bold" class="text-[18px]"></iconify-icon>
                             <span>Transaksi</span>
                         </a>
 
-                        <a href="#" class="sidebar-item">
+                        <a href="{{ route('bendahara.tagihan') }}" class="sidebar-item">
                             <iconify-icon icon="solar:bill-list-bold" class="text-[18px]"></iconify-icon>
                             <span>Tagihan</span>
                         </a>
 
-                        <a href="#" class="sidebar-item">
+                        <a href="{{ route('bendahara.laporan') }}" class="sidebar-item">
                             <iconify-icon icon="solar:chart-bold" class="text-[18px]"></iconify-icon>
                             <span>Laporan</span>
                         </a>
@@ -222,7 +222,7 @@
             </div>
 
             <div class="p-4 border-t border-white/5">
-                <a href="#" class="sidebar-item">
+                <a href="{{ route('bendahara.pengaturan') }}" class="sidebar-item">
                     <iconify-icon icon="solar:settings-bold" class="text-[18px]"></iconify-icon>
                     <span>Pengaturan</span>
                 </a>
@@ -263,10 +263,10 @@
                     </button>
 
                     <div id="dropdownMenu" class="dropdown-menu absolute right-0 top-14 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-                        <a href="#" class="flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-slate-50 transition">
+                        <a href="{{ route('bendahara.profile') }}" class="flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-slate-50 transition">
                             <iconify-icon icon="solar:user-linear"></iconify-icon>Profile
                         </a>
-                        <a href="#" class="flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-slate-50 transition">
+                        <a href="{{ route('bendahara.pengaturan') }}" class="flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-slate-50 transition">
                             <iconify-icon icon="solar:settings-linear"></iconify-icon>Pengaturan
                         </a>
                         <button class="w-full flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-50 transition">

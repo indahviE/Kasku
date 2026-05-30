@@ -62,43 +62,77 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
 
     //kas masuk ya
     Route::get('/kasMasuk', [BendaharaController::class, 'kasMasuk'])
-        ->name('kas_masuk');
+        ->name('bendahara.kas_masuk');
 
     Route::get('/kasMasuk/create', [KasController::class, 'createKasMasuk'])
-        ->name('kas_masuk.create');
+        ->name('bendahara.kas_masuk.create');
 
     Route::get('/kasMasuk/edit', [KasController::class, 'editKasMasuk'])
-        ->name('kas_masuk.edit');
+        ->name('bendahara.kas_masuk.edit');
 
     Route::post('/kasMasuk/store', [KasController::class, 'storeKasMasuk'])
-        ->name('kas_masuk.store');
+        ->name('bendahara.kas_masuk.store');
 
     Route::post('/kasMasuk/update/{id}', [KasController::class, 'updateKasMasuk'])
-        ->name('kas_masuk.update');
+        ->name('bendahara.kas_masuk.update');
 
     Route::post('/kasMasuk/delete', [KasController::class, 'deleteKasMasuk'])
-        ->name('kas_masuk.delete');
-
+        ->name('bendahara.kas_masuk.delete');
 
 
     //kas pengeluaran
     Route::get('/kasKeluar', [BendaharaController::class, 'kasKeluar'])
-        ->name('kas_keluar');
+        ->name('bendahara.kas_keluar');
 
     Route::get('/kasKeluar/create', [KasController::class, 'createKasKeluar'])
-        ->name('kas_keluar.create');
+        ->name('bendahara.kas_keluar.create');
 
     Route::get('/kasKeluar/edit', [KasController::class, 'editKasKeluar'])
-        ->name('kas_keluar.edit');
+        ->name('bendahara.kas_keluar.edit');
 
     Route::post('/kasKeluar/store', [KasController::class, 'storeKasMasuk'])
-        ->name('kas_keluar.store');
+        ->name('bendahara.kas_keluar.store');
 
     Route::post('/kasKeluar/update/{id}', [KasController::class, 'updateKasKeluar'])
-        ->name('kas_keluar.update');
+        ->name('bendahara.kas_keluar.update');
 
     Route::post('/kasKeluar/delete', [KasController::class, 'deleteKasKeluar'])
-        ->name('kas_keluar.delete');
+        ->name('bendahara.kas_keluar.delete');
+
+
+    // transaksi
+    Route::get('/transaksi', [BendaharaController::class, 'transaksi'])
+        ->name('bendahara.transaksi');
+
+    // tagihan
+    Route::get('/tagihan', [BendaharaController::class, 'tagihan'])
+        ->name('bendahara.tagihan');
+
+    Route::get('/tagihan/create', [BendaharaController::class, 'createTagihan'])
+        ->name('bendahara.tagihan.create');
+
+    Route::get('/tagihan/edit', [BendaharaController::class, 'editTagihan'])
+        ->name('bendahara.tagihan.edit');
+
+    Route::post('/tagihan/store', [BendaharaController::class, 'storeTagihan'])
+        ->name('bendahara.tagihan.store');
+
+    Route::delete('/tagihan/{id}', [BendaharaController::class, 'destroyTagihan'])
+        ->name('bendahara.tagihan.destroy');
+
+
+    // laporan
+Route::get('/laporan', [BendaharaController::class, 'laporan'])
+    ->name('bendahara.laporan');
+
+// profile
+Route::get('/profile', [ProfileController::class, 'edit'])
+    ->name('bendahara.profile');
+
+// pengaturan
+Route::get('/pengaturan', [BendaharaController::class, 'settings'])
+    ->name('bendahara.pengaturan');
+
 });
 
 Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
@@ -126,7 +160,6 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
     Route::post('/logout', [SiswaController::class, 'logout'])
         ->name('siswa.logout');
-
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

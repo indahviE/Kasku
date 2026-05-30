@@ -30,7 +30,7 @@ class UserSeeder extends Seeder
         }
 
         $bendaharas = [
-            ['name' => 'NAFISAH ADELIA PUTRI', 'email' => 'nafisah@example.com', 'nis' => '12430136', 'password' => 'bendahara123'],
+            ['name' => 'NAFISAH ADELIA PUTRI', 'email' => 'nafisah@example.com', 'nis' => 'c', 'password' => 'bendahara123'],
             ['name' => 'FATHAN APRIAN', 'email' => 'fathan.aprian@example.com', 'nis' => '12430125', 'password' => 'bendahara123'],
         ];
 
