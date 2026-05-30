@@ -78,6 +78,24 @@ class SiswaController extends Controller
         return view('siswa.tunggakan', compact('tunggakan'));
     }
 
+    public function detailTagihan($id)
+    {
+
+        $tagihan = Tagihan::findOrFail($id);
+
+        $pembayaran = Pembayaran::where('tagihan_id', $tagihan->id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        $lunas = $pembayaran ? true : false;
+
+        return view('siswa.detail-tunggakan', compact(
+            'tagihan',
+            'pembayaran',
+            'lunas'
+        ));
+    }
+
     public function laporanKas()
     {
         $laporan = Pembayaran::where('status', 'lunas')

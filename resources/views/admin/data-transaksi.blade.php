@@ -130,8 +130,8 @@
         <nav class="flex-1 px-4 py-4 space-y-1">
 
             {{-- Dashboard Menu --}}
-            <a href="{{ route('dashboard.admin') }}" 
-               class="sidebar-item flex items-center gap-3 py-3 px-4 rounded-xl transition-all 
+            <a href="{{ route('dashboard.admin') }}"
+               class="sidebar-item flex items-center gap-3 py-3 px-4 rounded-xl transition-all
                {{ request()->routeIs('dashboard.admin') ? 'active bg-slate-800/60 text-white font-medium' : 'text-slate-400 hover:bg-slate-800/40 hover:text-white' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -140,8 +140,8 @@
             </a>
 
             {{-- Kelola Kelas Menu (Aktif jika berada di halaman list, create, atau edit kelas) --}}
-            <a href="{{ route('kelas') }}" 
-               class="sidebar-item flex items-center gap-3 py-3 px-4 rounded-xl transition-all 
+            <a href="{{ route('kelas') }}"
+               class="sidebar-item flex items-center gap-3 py-3 px-4 rounded-xl transition-all
                {{ request()->routeIs('kelas*') ? 'active bg-slate-800/60 text-white font-medium' : 'text-slate-400 hover:bg-slate-800/40 hover:text-white' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 114 0v2m-4 0h4m-4 0H5m12 0h3M12 7h1" />
@@ -150,7 +150,7 @@
             </a>
 
             {{-- Data Transaksi Menu (Saat ini diasumsikan menggunakan route dashboard atau pasif sementara) --}}
-            <a href="#" 
+            <a href="#"
                class="sidebar-item active flex items-center gap-3 py-3 px-4 rounded-xl bg-slate-800/60 text-white font-medium">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -172,6 +172,7 @@
 
     </div>
 
+    
     {{-- KONTEN UTAMA --}}
     <div class="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
 
@@ -270,49 +271,35 @@
                             <h3 class="text-base font-bold text-slate-800">Riwayat Transaksi</h3>
                             <p class="text-xs text-slate-400">Semua transaksi terbaru sistem kas sekolah</p>
                         </div>
-                        <button class="bg-[#1B6578] hover:bg-[#2a8fa3] text-white px-5 py-2.5 rounded-xl text-xs font-semibold tracking-wide shadow-md transition-all">
-                            + Tambah Transaksi
-                        </button>
                     </div>
 
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50/70 border-b border-slate-100 text-slate-500 font-bold text-xs uppercase tracking-wider">
-                                <tr>
-                                    <th class="px-6 py-4">No</th>
-                                    <th class="px-6 py-4">Nama Transaksi</th>
-                                    <th class="px-6 py-4">Tanggal</th>
-                                    <th class="px-6 py-4">Jenis</th>
-                                    <th class="px-6 py-4">Nominal</th>
-                                    <th class="px-6 py-4 text-center">Aksi</th>
+                        <thead class="bg-slate-50/70 border-b border-slate-100 text-slate-500 font-bold text-xs uppercase tracking-wider">
+                            <tr>
+                                <th class="px-6 py-4">No</th> <th class="px-6 py-4">Transaksi</th>
+                                <th class="px-6 py-4">Tanggal</th> <th class="px-6 py-4">Jenis</th>
+                                <th class="px-6 py-4">Kategori</th> <th class="px-6 py-4">Nominal</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100 text-slate-700 font-medium">
-                                <tr>
-                                    <td class="px-6 py-4 text-slate-400">1</td>
-                                    <td class="px-6 py-4 text-slate-900 font-semibold">Bayar Kas Kelas XII</td>
-                                    <td class="px-6 py-4 text-slate-500">22 Mei 2026</td>
-                                    <td class="px-6 py-4">
-                                        <span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[11px] font-bold">Masuk</span>
-                                    </td>
-                                    <td class="px-6 py-4 text-emerald-600 font-bold">Rp 50.000</td>
-                                    <td class="px-6 py-4 text-center">
-                                        <div class="flex justify-center gap-3">
-                                            <button class="hover:scale-110 transition-transform">✏️</button>
-                                            <button class="hover:scale-110 transition-transform">🗑️</button>
+                            <tbody class="divide-y divide-slate-100 text-slate-700 font-medium"> {{-- TRANSAKSI MASUK --}} <tr>
+                                <td class="px-6 py-4 text-slate-400">1</td> <td class="px-6 py-4">
+                                    <div> <p class="text-slate-900 font-semibold"> Bayar Kas Kelas XII </p> <p class="text-xs text-slate-400 mt-1"> Pembayaran kas bulanan siswa </p>
+                                    </div> </td>
+                                    <td class="px-6 py-4 text-slate-500"> 22 Mei 2026 </td> <td class="px-6 py-4"> <span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[11px] font-bold"> Uang Masuk </span> </td>
+                                    <td class="px-6 py-4"> <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[11px] font-bold"> Kas </span> </td>
+                                    <td class="px-6 py-4 text-emerald-600 font-bold"> + Rp 50.000 </td> </tr> {{-- TRANSAKSI KELUAR --}} <tr> <td class="px-6 py-4 text-slate-400">2</td>
+                                        <td class="px-6 py-4"> <div> <p class="text-slate-900 font-semibold"> Pembelian Sapu Kelas </p> <p class="text-xs text-slate-400 mt-1"> Pengeluaran alat kebersihan kelas </p> </div> </td> <td class="px-6 py-4 text-slate-500"> 23 Mei 2026 </td> <td class="px-6 py-4"> <span class="bg-red-50 text-red-600 px-3 py-1 rounded-full text-[11px] font-bold"> Uang Keluar </span> </td> <td class="px-6 py-4"> <span class="bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-[11px] font-bold"> Pengeluaran </span> </td> <td class="px-6 py-4 text-red-500 font-bold"> - Rp 20.000 </td> </tr>
+                                                        </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </main>
+
                                         </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-            </div>
-        </main>
-
-    </div>
-</div>
+                                    </div>
 
 <script>
 // Logic Dropdown Profile

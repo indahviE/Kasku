@@ -37,21 +37,33 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard.admin');
     Route::get('/kelola-user', [AdminController::class, 'kelolaUser'])->name('kelolaUser.admin');
 
-    //kelola kls
+    // KELOLA KELAS
     Route::get('/kelas', [KelasController::class, 'listKelas'])->name('kelas');
     Route::get('/kelas/create', [KelasController::class, 'createKelas'])->name('kelas.create');
     Route::get('/kelas/edit', [KelasController::class, 'editKelas'])->name('kelas.edit');
-
     Route::post('/kelas/store', [KelasController::class, 'storeKelas'])->name('kelas.store');
     Route::post('/kelas/update/{id}', [KelasController::class, 'updateKelas'])->name('kelas.update');
     Route::post('/kelas/delete/{id}', [KelasController::class, 'deleteKelas'])->name('kelas.delete');
-
     Route::post('/kelas/{id}/generate-code', [AdminController::class, 'generateClassCode'])->name('generate-code');
 
-    // data transaksi
-    Route::get('/data-transaksi', function () {
-        return view('admin.data-transaksi');
-    })->name('data.transaksi');
+    // KELOLA TRANSAKSI - DAFTAR
+    Route::get('/data-transaksi', [AdminController::class, 'daftarTransaksi'])->name('admin.daftar-transaksi');
+    Route::get('/transaksi/detail/{id}', [AdminController::class, 'detailTransaksi'])->name('admin.detail-transaksi');
+
+    // KELOLA TRANSAKSI - CRUD
+    Route::get('/transaksi/tambah', [AdminController::class, 'tambahTransaksi'])->name('admin.tambah-transaksi');
+    Route::post('/transaksi/simpan', [AdminController::class, 'simpanTransaksi'])->name('admin.simpan-transaksi');
+    Route::get('/transaksi/edit/{id}', [AdminController::class, 'editTransaksi'])->name('admin.edit-transaksi');
+    Route::post('/transaksi/update/{id}', [AdminController::class, 'updateTransaksi'])->name('admin.update-transaksi');
+    Route::delete('/transaksi/hapus/{id}', [AdminController::class, 'hapusTransaksi'])->name('admin.hapus-transaksi');
+
+    // KELOLA TRANSAKSI - APPROVAL
+    Route::post('/transaksi/approve/{id}', [AdminController::class, 'approveTransaksi'])->name('admin.approve-transaksi');
+    Route::post('/transaksi/reject/{id}', [AdminController::class, 'rejectTransaksi'])->name('admin.reject-transaksi');
+
+    // STATISTIK & EXPORT
+    Route::get('/transaksi/statistik', [AdminController::class, 'statistikTransaksi'])->name('admin.statistik-transaksi');
+    Route::get('/transaksi/export', [AdminController::class, 'exportTransaksi'])->name('admin.export-transaksi');
 });
 
 Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(function () {
@@ -145,6 +157,9 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
     Route::get('/tunggakan', [SiswaController::class, 'tunggakan'])
         ->name('siswa.tunggakan');
+        
+    Route::get('/detail-tunggakan/{id}', [SiswaController::class, 'detailTagihan'])
+        ->name('siswa.detail_tagihan');
 
     Route::get('/laporan-kas', [SiswaController::class, 'laporanKas'])
         ->name('siswa.laporan_kas');
