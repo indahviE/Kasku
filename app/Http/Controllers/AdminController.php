@@ -20,31 +20,51 @@ class AdminController extends Controller
      */
     public function dashboard(Request $request)
     {
-        // summary data
         $totalMasuk = Pembayaran::where('status', 'lunas')->sum('jml_bayar');
         $totalKeluar = Pengeluaran::sum('nominal');
         $saldoKeseluruhan = $totalMasuk - $totalKeluar;
         $jumlahKelas = Kelas::count();
 
-        // list user
+        // List user
         $roleFilter = $request->get('role');
         $query = User::with('kelas');
-
         if ($roleFilter) {
             $query->where('role', $roleFilter);
         }
-
         $users = $query->paginate(6);
         $roles = ['admin', 'bendahara', 'siswa', 'wali_kelas'];
 
+        // Grafik per bulan (tahun ini)
+        $tahun = date('Y');
+
+        $grafikMasuk = Pembayaran::where('status', 'lunas')
+            ->whereYear('tanggal_bayar', $tahun)
+            ->selectRaw('MONTH(tanggal_bayar) as bulan, SUM(jml_bayar) as total')
+            ->groupBy('bulan')
+            ->pluck('total', 'bulan');
+
+        $grafikKeluar = Pengeluaran::whereYear('tanggal', $tahun)
+            ->selectRaw('MONTH(tanggal) as bulan, SUM(nominal) as total')
+            ->groupBy('bulan')
+            ->pluck('total', 'bulan');
+
+        $dataMasuk = [];
+        $dataKeluar = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $dataMasuk[]  = $grafikMasuk[$i]  ?? 0;
+            $dataKeluar[] = $grafikKeluar[$i] ?? 0;
+        }
+
         return view('admin.index', [
-            'totalMasuk' => $totalMasuk,
-            'totalKeluar' => $totalKeluar,
+            'totalMasuk'       => $totalMasuk,
+            'totalKeluar'      => $totalKeluar,
             'saldoKeseluruhan' => $saldoKeseluruhan,
-            'jumlahKelas' => $jumlahKelas,
-            'users' => $users,
-            'roles' => $roles,
-            'roleFilter' => $roleFilter
+            'jumlahKelas'      => $jumlahKelas,
+            'users'            => $users,
+            'roles'            => $roles,
+            'roleFilter'       => $roleFilter,
+            'dataMasuk'        => $dataMasuk,
+            'dataKeluar'       => $dataKeluar,
         ]);
     }
 
