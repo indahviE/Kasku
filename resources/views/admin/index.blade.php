@@ -665,7 +665,7 @@
                         datasets: [
                             {
                                 label: 'Pemasukan',
-                                data: [12000000, 15500000, 14200000, 16800000, 13500000, 17200000, 15800000, 18500000, 16200000, 17800000, 19200000, 20500000],
+                                data: {!! json_encode($dataMasuk) !!},
                                 backgroundColor: '#10b981',
                                 borderColor: '#059669',
                                 borderWidth: 0,
@@ -674,7 +674,7 @@
                             },
                             {
                                 label: 'Pengeluaran',
-                                data: [5000000, 6200000, 5800000, 7100000, 5500000, 6800000, 6200000, 7500000, 6800000, 7200000, 7800000, 8500000],
+                                data: {!! json_encode($dataKeluar) !!},
                                 backgroundColor: '#ef4444',
                                 borderColor: '#dc2626',
                                 borderWidth: 0,
@@ -704,8 +704,10 @@
                                     font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" },
                                     color: '#94a3b8',
                                     callback: function(value) {
-                                        return 'Rp ' + (value / 1000000).toFixed(0) + 'M';
-                                    }
+                                    if (value >= 1000000) return 'Rp ' + (value/1000000).toFixed(1) + 'M';
+                                    if (value >= 1000)    return 'Rp ' + (value/1000).toFixed(0) + 'K';
+                                    return 'Rp ' + value;
+                                }
                                 },
                                 grid: {
                                     color: '#f1f5f9',

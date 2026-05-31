@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class AdminController extends Controller
 {
@@ -101,56 +102,78 @@ class AdminController extends Controller
      */
     public function daftarTransaksi(Request $request)
     {
-        $query = Transaksi::with(['user', 'kelas', 'approvedBy']);
+        $tahun = date('Y');
 
-        // Filter berdasarkan tipe transaksi
-        if ($request->has('tipe') && $request->tipe != '') {
-            $query->where('tipe_transaksi', $request->tipe);
+        // Ambil pembayaran lunas sebagai transaksi masuk
+        $masuk = Pembayaran::with(['siswa'])
+            ->where('status', 'lunas')
+            ->get()
+            ->map(fn($p) => [
+                'tipe'      => 'masuk',
+                'nominal'   => $p->jml_bayar,
+                'tanggal'   => $p->tanggal_bayar,
+                'keterangan'=> 'Pembayaran kas - ' . $p->metode,
+                'user'      => $p->siswa,
+                'kelas'     => null,
+            ]);
+
+        // Ambil pengeluaran sebagai transaksi keluar
+        $keluar = Pengeluaran::with(['kelas'])
+            ->get()
+            ->map(fn($p) => [
+                'tipe'      => 'keluar',
+                'nominal'   => $p->nominal,
+                'tanggal'   => $p->tanggal,
+                'keterangan'=> $p->keterangan,
+                'user'      => null,
+                'kelas'     => $p->kelas,
+            ]);
+
+        // Gabung dan urutkan by tanggal terbaru
+        $transaksi = $masuk->concat($keluar)->sortByDesc('tanggal')->values();
+        // Manual pagination
+        $perPage = 5;
+        $currentPage = request()->get('page', 1);
+        $items = $transaksi->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $transaksi = new LengthAwarePaginator(
+            $items,
+            $transaksi->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url()]
+        );
+
+        // Saldo
+        $totalMasuk  = Pembayaran::where('status', 'lunas')->sum('jml_bayar');
+        $totalKeluar = Pengeluaran::sum('nominal');
+        $saldo       = $totalMasuk - $totalKeluar;
+
+        // Grafik per bulan
+        $grafikMasuk = Pembayaran::where('status', 'lunas')
+            ->whereYear('tanggal_bayar', $tahun)
+            ->selectRaw('MONTH(tanggal_bayar) as bulan, SUM(jml_bayar) as total')
+            ->groupBy('bulan')
+            ->pluck('total', 'bulan');
+
+        $grafikKeluar = Pengeluaran::whereYear('tanggal', $tahun)
+            ->selectRaw('MONTH(tanggal) as bulan, SUM(nominal) as total')
+            ->groupBy('bulan')
+            ->pluck('total', 'bulan');
+
+        $dataMasuk = $dataKeluar = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $dataMasuk[]  = $grafikMasuk[$i]  ?? 0;
+            $dataKeluar[] = $grafikKeluar[$i] ?? 0;
         }
 
-        // Filter berdasarkan status
-        if ($request->has('status') && $request->status != '') {
-            $query->where('status', $request->status);
-        }
-
-        // Filter berdasarkan kelas
-        if ($request->has('kelas') && $request->kelas != '') {
-            $query->where('kelas_id', $request->kelas);
-        }
-
-        // Filter berdasarkan tanggal
-        if ($request->has('dari_tanggal') && $request->dari_tanggal != '') {
-            $query->whereDate('tanggal', '>=', $request->dari_tanggal);
-        }
-
-        if ($request->has('sampai_tanggal') && $request->sampai_tanggal != '') {
-            $query->whereDate('tanggal', '<=', $request->sampai_tanggal);
-        }
-
-        // Search berdasarkan keterangan atau kategori
-        if ($request->has('search') && $request->search != '') {
-            $query->where(function($q) use ($request) {
-                $q->where('kategori', 'like', '%' . $request->search . '%')
-                  ->orWhere('keterangan', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        $transaksi = $query->orderBy('tanggal', 'desc')->paginate(15);
-        $kelas = Kelas::all();
-
-        return view('admin.data-transaksi', compact('transaksi', 'kelas'));
+        return view('admin.data-transaksi', compact(
+            'transaksi',
+            'totalMasuk', 'totalKeluar', 'saldo',
+            'dataMasuk', 'dataKeluar'
+        ));
     }
 
-    /**
-     * Form tambah transaksi
-     */
-    public function tambahTransaksi()
-    {
-        $kelas = Kelas::all();
-        $user = User::where('role', 'siswa')->get();
-
-        return view('admin.tambah-transaksi', compact('kelas', 'user'));
-    }
 
     /**
      * Simpan transaksi baru
