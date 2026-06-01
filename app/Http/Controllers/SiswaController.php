@@ -8,45 +8,175 @@ use App\Models\Siswa;
 use App\Models\Pembayaran;
 use App\Models\Pengeluaran;
 use App\Models\Tagihan;
+use App\Models\Notifications;
+use App\Models\Diskusi;
+use App\Models\Pengumuman;
 
 class SiswaController extends Controller
 {
     public function index()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        $siswa = Siswa::where('user_id', $user->id)->first();
+    $siswa = Siswa::where('user_id', $user->id)->first();
 
-        if (!$siswa) {
-            return redirect('/')->with('error', 'Profil siswa tidak ditemukan. Silakan hubungi admin.');
-        }
-
-        $kasMasuk = Pembayaran::where('status', 'lunas')->sum('jml_bayar');
-        $kasKeluar = Pengeluaran::sum('nominal');
-        $saldoKas = $kasMasuk - $kasKeluar;
-
-        $riwayat = Pembayaran::where('user_id', $user->id)
-            ->latest()
-            ->take(5)
-            ->get();
-
-        $totalTagihanSiswa = Tagihan::where('user_id', $user->id)->sum('nominal');
-
-        $totalSudahBayar = Pembayaran::where('user_id', $user->id)
-            ->where('status', 'lunas')
-            ->sum('jml_bayar');
-
-        $tunggakan = $totalTagihanSiswa - $totalSudahBayar;
-
-        return view('siswa.index', compact(
-            'siswa',
-            'saldoKas',
-            'kasMasuk',
-            'kasKeluar',
-            'riwayat',
-            'tunggakan'
-        ));
+    if (!$siswa) {
+        return redirect('/')->with('error', 'Profil siswa tidak ditemukan. Silakan hubungi admin.');
     }
+
+    $kasMasuk = Pembayaran::where('status', 'lunas')->sum('jml_bayar');
+    $kasKeluar = Pengeluaran::sum('nominal');
+    $saldoKas = $kasMasuk - $kasKeluar;
+
+    $riwayat = Pembayaran::where('user_id', $user->id)
+        ->latest()
+        ->take(5)
+        ->get();
+
+    $totalTagihanSiswa = Tagihan::where('user_id', $user->id)->sum('nominal');
+
+    $totalSudahBayar = Pembayaran::where('user_id', $user->id)
+        ->where('status', 'lunas')
+        ->sum('jml_bayar');
+
+    $tunggakan = $totalTagihanSiswa - $totalSudahBayar;
+
+    $today = today();
+
+    if ($tunggakan > 0) {
+        $cekNotifTunggakan = Notifications::where('user_id', $user->id)
+            ->where('title', 'Menunggak Pembayaran')
+            ->whereDate('created_at', $today)
+            ->exists();
+
+        if (!$cekNotifTunggakan) {
+            Notifications::create([
+                'user_id'     => $user->id,
+                'title'       => 'Menunggak Pembayaran',
+                'message'     => 'Kamu masih memiliki tagihan uang kas yang belum dilunasi.',
+                'target_type' => 'personal',
+                'is_read'     => false,
+                'created_at'  => $today
+            ]);
+        }
+    }
+
+    $deadlineDekat = Tagihan::where('user_id', $user->id)
+        ->whereDate('batas_bayar', '<=', now()->addDays(3))
+        ->whereDate('batas_bayar', '>=', now())
+        ->exists();
+
+    if ($deadlineDekat) {
+        $cekNotifDeadline = Notifications::where('user_id', $user->id)
+            ->where('title', 'Deadline Pembayaran Dekat')
+            ->whereDate('created_at', $today)
+            ->exists();
+
+        if (!$cekNotifDeadline) {
+            Notifications::create([
+                'user_id'     => $user->id,
+                'title'       => 'Deadline Pembayaran Dekat',
+                'message'     => 'Segera lakukan pembayaran sebelum batas deadline berakhir.',
+                'target_type' => 'personal',
+                'is_read'     => false,
+                'created_at'  => $today
+            ]);
+        }
+    }
+
+    if (Tagihan::where('user_id', $user->id)->whereDate('created_at', $today)->exists()) {
+        $cekNotifTagihanBaru = Notifications::where('user_id', $user->id)
+            ->where('title', 'Ada Tagihan Baru')
+            ->whereDate('created_at', $today)
+            ->exists();
+
+        if (!$cekNotifTagihanBaru) {
+            Notifications::create([
+                'user_id'     => $user->id,
+                'title'       => 'Ada Tagihan Baru',
+                'message'     => 'Tagihan kas baru telah ditambahkan, silahkan periksa menu tagihan.',
+                'target_type' => 'personal',
+                'is_read'     => false,
+                'created_at'  => $today
+            ]);
+        }
+    }
+
+    if (Pembayaran::where('user_id', $user->id)->where('status', 'nunggak')->whereDate('created_at', $today)->exists()) {
+        $cekNotifTungguVerif = Notifications::where('user_id', $user->id)
+            ->where('title', 'Menunggu Verifikasi')
+            ->whereDate('created_at', $today)
+            ->exists();
+
+        if (!$cekNotifTungguVerif) {
+            Notifications::create([
+                'user_id'     => $user->id,
+                'title'       => 'Menunggu Verifikasi',
+                'message'     => 'Transaksi berhasil dikirim! Silakan tunggu konfirmasi dan verifikasi dari Bendahara.',
+                'target_type' => 'personal',
+                'is_read'     => false,
+                'created_at'  => $today
+            ]);
+        }
+    }
+
+    if (Pembayaran::where('user_id', $user->id)->where('status', 'lunas')->whereDate('updated_at', $today)->exists()) {
+        $cekNotifLunas = Notifications::where('user_id', $user->id)
+            ->where('title', 'Pembayaran Berhasil')
+            ->whereDate('created_at', $today)
+            ->exists();
+
+        if (!$cekNotifLunas) {
+            Notifications::create([
+                'user_id'     => $user->id,
+                'title'       => 'Pembayaran Berhasil',
+                'message'     => 'Pembayaran kas kamu berhasil dikonfirmasi dan dinyatakan Lunas oleh bendahara.',
+                'target_type' => 'personal',
+                'is_read'     => false,
+                'created_at'  => $today
+            ]);
+        }
+    }
+
+    if (Pembayaran::where('user_id', $user->id)->where('status', 'ditolak')->whereDate('updated_at', $today)->exists()) {
+        $cekNotifDitolak = Notifications::where('user_id', $user->id)
+            ->where('title', 'Pembayaran Ditolak')
+            ->whereDate('created_at', $today)
+            ->exists();
+
+        if (!$cekNotifDitolak) {
+            Notifications::create([
+                'user_id'     => $user->id,
+                'title'       => 'Pembayaran Ditolak',
+                'message'     => 'Pembayaran kamu ditolak. Silakan upload ulang bukti pembayaran yang valid.',
+                'target_type' => 'personal',
+                'is_read'     => false,
+                'created_at'  => $today
+            ]);
+        }
+    }
+
+    $notifications = Notifications::where(function ($query) use ($user) {
+            $query->where('user_id', $user->id)->orWhere('target_type', 'global');
+        })
+        ->latest()->take(10)->get();
+
+    $unreadCount = Notifications::where(function ($query) use ($user) {
+            $query->where('user_id', $user->id)->orWhere('target_type', 'global');
+        })
+        ->where('is_read', false)->count();
+
+    return view('siswa.index', compact(
+        'siswa',
+        'saldoKas',
+        'kasMasuk',
+        'kasKeluar',
+        'riwayat',
+        'tunggakan',
+        'notifications', 
+        'unreadCount'    
+    ));
+}
 
     public function riwayat()
     {
@@ -62,16 +192,12 @@ class SiswaController extends Controller
         $user = Auth::user();
 
         $tunggakan = Tagihan::where('user_id', $user->id)
-
-            // Hilangkan tagihan yang SUDAH pernah dibayar
             ->whereDoesntHave('pembayaran', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
-
             ->with(['pembayaran' => function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             }])
-
             ->orderBy('periode', 'desc')
             ->get();
 
@@ -98,18 +224,42 @@ class SiswaController extends Controller
 
     public function laporanKas()
     {
-        $laporan = Pembayaran::where('status', 'lunas')
+        // 1. Ambil data Kas Masuk (Pembayaran dengan status lunas)
+        $kasMasuk = Pembayaran::where('status', 'lunas')->sum('jml_bayar');
+
+        // 2. Ambil data Kas Keluar dari tabel Pengeluaran
+        $kasKeluar = Pengeluaran::sum('nominal');
+
+        // 3. Hitung Saldo Akhir saat ini
+        $saldoAkhir = $kasMasuk - $kasKeluar;
+
+        // 4. Saldo Awal (Bisa diset 0 jika dimulai dari nol, atau sesuaikan dengan kebijakan sistem kamu)
+        $saldoAwal = 0; 
+
+        // 5. Ambil semua list Riwayat Pemasukan dinamis (sertakan relasi user/siswa jika ada nama pembayar)
+        $riwayatPemasukan = Pembayaran::with('siswa')
+            ->where('status', 'lunas')
             ->latest()
             ->get();
 
-        return view('siswa.laporan_kas', compact('laporan'));
+        // 6. Ambil semua list Riwayat Pengeluaran dinamis
+        $riwayatPengeluaran = Pengeluaran::latest()->get();
+
+        // 7. Kirim semua variabel ke view siswa.laporan_kas
+        return view('siswa.laporan_kas', compact(
+            'saldoAwal',
+            'kasMasuk',       // Dikirim sebagai totalPemasukan di view
+            'kasKeluar',      // Dikirim sebagai totalPengeluaran di view
+            'saldoAkhir',
+            'riwayatPemasukan',
+            'riwayatPengeluaran'
+        ));
     }
 
     public function pembayaran()
     {
         $user = Auth::user();
 
-        // Tagihan yang belum pernah dibayar
         $sudahDibayar = Pembayaran::where('user_id', $user->id)
             ->whereNotNull('tagihan_id')
             ->pluck('tagihan_id')
@@ -152,21 +302,13 @@ class SiswaController extends Controller
         }
 
         Pembayaran::create([
-            // Bisa NULL kalau bayar langsung/manual
             'tagihan_id'    => $request->tagihan_id,
-
             'user_id'       => Auth::id(),
             'dicatat_oleh'  => Auth::id(),
-
             'jml_bayar'     => $request->jml_bayar,
-
             'tanggal_bayar' => now()->format('Y-m-d'),
-
             'metode'        => $request->metode,
-
-            // pending / nunggak / lunas bebas nanti bendahara ubah
             'status'        => 'nunggak',
-
             'bukti_bayar'   => $namaFile,
         ]);
 
@@ -182,6 +324,39 @@ class SiswaController extends Controller
 
         return view('siswa.detail_transaksi', compact('pembayaran'));
     }
+
+    public function readNotification($id)
+    {
+        Notifications::where('id', $id)
+            ->where(function($query) {
+                $query->where('user_id', Auth::id())->orWhere('target_type', 'global');
+            })
+            ->firstOrFail()
+            ->update(['is_read' => true]);
+
+        return back();
+    }
+
+    public function allNotifications()
+{
+    $user = Auth::user();
+
+    // Ambil SEMUA riwayat notifikasi tanpa limit 'take(10)' agar bisa discroll panjang
+    $allNotifications = Notifications::where(function ($query) use ($user) {
+            $query->where('user_id', $user->id)->orWhere('target_type', 'global');
+        })
+        ->latest()
+        ->get();
+
+    // Hitung jumlah yang belum dibaca untuk indikator badge angka balon
+    $unreadCount = Notifications::where(function ($query) use ($user) {
+            $query->where('user_id', $user->id)->orWhere('target_type', 'global');
+        })
+        ->where('is_read', false)
+        ->count();
+
+    return view('siswa.notifikasi', compact('allNotifications', 'unreadCount'));
+}
 
     public function logout(Request $request)
     {
