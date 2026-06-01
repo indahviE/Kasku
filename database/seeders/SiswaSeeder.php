@@ -11,7 +11,7 @@ class SiswaSeeder extends Seeder
     public function run(): void
     {
         // Ambil ID kelas XI RPL 2
-        $kelas = DB::table('kelas')->where('nama_kelas', 'XI RPL 2')->first();
+        $kelas = DB::table('kelas')->where('nama_kelas', 'XI-RPL-2')->first();
         $kelasId = $kelas ? $kelas->id : 1;
 
         $dataSiswa = [

@@ -8,6 +8,7 @@ use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BendaharaController;
+use App\Http\Controllers\WalkelController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -157,7 +158,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
     Route::get('/tunggakan', [SiswaController::class, 'tunggakan'])
         ->name('siswa.tunggakan');
-        
+
     Route::get('/detail-tunggakan/{id}', [SiswaController::class, 'detailTagihan'])
         ->name('siswa.detail_tagihan');
 
@@ -177,4 +178,11 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         ->name('siswa.logout');
 });
 
+Route::middleware(['auth', 'role:wali_kelas'])->prefix('wali')->group(function () {
+    Route::get('/dashboard', [WalkelController::class, 'dashboard'])->name('wali.dashboard');
+    Route::post('/siswa/{id}/jadikan-bendahara', [WalkelController::class, 'jadikanBendahara'])->name('wali.jadikan-bendahara');
+    Route::get('/rekap-pembayaran', [WalkelController::class, 'rekapPembayaran'])->name('wali.rekap-pembayaran');
+    Route::get('/tunggakan', [WalkelController::class, 'tunggakan'])->name('wali.tunggakan');
+    Route::get('/pengeluaran', [WalkelController::class, 'pengeluaran'])->name('wali.pengeluaran');
+});
 require __DIR__ . '/auth.php';

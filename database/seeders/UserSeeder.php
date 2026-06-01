@@ -6,17 +6,17 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class UserSeeder extends Seeder 
+class UserSeeder extends Seeder
 {
     public function run(): void
     {
         $admins = [
             [
-                'name' => 'Afika Awwaliyah Rozaaq S.Pd.', 
-                'email' => 'afika@example.com', 
-                'nis' => '11111111', 
+                'name' => 'Afika Awwaliyah Rozaaq S.Pd.',
+                'email' => 'afika@example.com',
+                'nis' => '11111111',
                 'role' => 'admin',
-                'password' => 'admin123' 
+                'password' => 'admin123'
             ],
         ];
 
@@ -38,7 +38,7 @@ class UserSeeder extends Seeder
             User::create([
                 'name'     => $bendahara['name'],
                 'email'    => $bendahara['email'],
-                'password' => Hash::make($bendahara['password']), 
+                'password' => Hash::make($bendahara['password']),
                 'role'     => 'bendahara',
             ]);
         }
@@ -89,10 +89,34 @@ class UserSeeder extends Seeder
                 User::create([
                     'name'     => $student['name'],
                     'email'    => strtolower(str_replace(' ', '.', explode(' ', $student['name'])[0])) . $student['nis'] . '@siswa.com',
-                    'password' => Hash::make($student['nis']), 
+                    'password' => Hash::make($student['nis']),
                     'role'     => 'siswa',
                 ]);
             }
+        }
+        $waliKelasData = [
+            ['name' => 'Riyan Triana',
+            'email' => 'riyan@example.com',
+            'password' => 'walikelas123',
+            'nip' => 198501012010011001,
+            'no_hp' => '081234567890',
+            'kelas_id' => 2],
+        ];
+
+        foreach ($waliKelasData as $wali) {
+            $user = User::create([
+                'name'     => $wali['name'],
+                'email'    => $wali['email'],
+                'password' => Hash::make($wali['password']),
+                'role'     => 'wali_kelas',
+            ]);
+
+            \App\Models\WaliKelas::create([
+                'user_id'  => $user->id,
+                'kelas_id' => $wali['kelas_id'],
+                'nip'      => $wali['nip'],
+                'no_hp'    => $wali['no_hp'],
+            ]);
         }
     }
 }
