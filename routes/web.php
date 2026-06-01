@@ -152,6 +152,11 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
     Route::get('/index', [SiswaController::class, 'index'])
         ->name('siswa.index');
+    
+    Route::patch('/notifikasi/read/{id}', [SiswaController::class, 'readNotification'])
+        ->name('siswa.notifikasi.read');
+
+    Route::get('/siswa.notifikasi', [SiswaController::class, 'allNotifications'])->name('siswa.notifikasi');
 
     Route::get('/riwayat', [SiswaController::class, 'riwayat'])
         ->name('siswa.riwayat');

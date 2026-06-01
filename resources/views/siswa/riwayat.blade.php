@@ -54,7 +54,7 @@
     <div class="mb-8">
         <p class="uppercase tracking-[0.2em] text-xs text-gray-400 font-semibold">PAYMENT HISTORY</p>
         <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Riwayat Pembayaran Kas</h1>
-        <p class="text-gray-500 mt-2 text-sm md:text-base">Pantau status validasi setoran kas kelas Anda di bawah ini.</p>
+        <p class="text-gray-500 mt-2 text-sm md:text-base">Pantau status validasi transfer QRIS mandiri serta riwayat setoran tunai Anda.</p>
     </div>
 
     @if(session('success'))
@@ -76,9 +76,9 @@
                     </svg>
                 </div>
                 <h3 class="text-lg font-bold text-gray-900">Belum Ada Transaksi</h3>
-                <p class="text-gray-500 text-sm mt-1 max-w-sm mx-auto">Anda belum pernah mengirimkan data pembayaran kas kelas.</p>
+                <p class="text-gray-500 text-sm mt-1 max-w-sm mx-auto">Anda belum pernah melakukan pembayaran QRIS mandiri atau penyetoran tunai.</p>
                 <a href="{{ route('siswa.transaksi') }}" class="inline-block mt-5 bg-black text-white text-sm font-semibold px-6 py-3 rounded-xl hover:scale-105 transition">
-                    Bayar Kas Sekarang
+                    Bayar Kas QRIS Sekarang
                 </a>
             </div>
         @else
@@ -101,12 +101,12 @@
                             <div>
                                 <div class="flex items-center gap-2 flex-wrap">
                                     <h3 class="font-bold text-lg text-gray-900">Rp {{ number_format($item->jml_bayar, 0, ',', '.') }}</h3>
-                                    <span class="text-xs uppercase bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-semibold tracking-wider">
-                                        {{ $item->metode }}
+                                    <span class="text-[10px] uppercase bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-semibold tracking-wider">
+                                        {{ $item->metode == 'transfer' ? 'QRIS' : 'Tunai Bendahara' }}
                                     </span>
                                 </div>
                                 <p class="text-xs text-gray-400 mt-1">
-                                    Dibuat: {{ \Carbon\Carbon::parse($item->created_at)->translatedFormat('d F Y, H:i') }} WIB
+                                    Waktu: {{ \Carbon\Carbon::parse($item->created_at)->translatedFormat('d F Y, H:i') }} WIB
                                 </p>
                             </div>
                         </div>
