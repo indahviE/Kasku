@@ -72,7 +72,6 @@
 
             {{-- LEFT --}}
             <div>
-
                 <p class="uppercase tracking-[0.2em] text-xs text-gray-400 font-semibold">
                     PAYMENT FORM
                 </p>
@@ -85,7 +84,6 @@
                 <p class="text-gray-500 mt-5 leading-relaxed text-sm md:text-base max-w-md">
                     Silahkan lakukan pembayaran melalui scan QRIS di samping, lalu unggah bukti pembayaran Anda untuk divalidasi.
                 </p>
-
             </div>
 
             {{-- RIGHT --}}
@@ -93,19 +91,13 @@
 
                 {{-- ERROR --}}
                 @if ($errors->any())
-
                     <div class="mb-5 p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl text-sm">
-
                         <ul class="list-disc list-inside">
-
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
-
                         </ul>
-
                     </div>
-
                 @endif
 
                 {{-- FORM --}}
@@ -125,28 +117,21 @@
 
                     {{-- QRIS --}}
                     <div class="mb-6">
-
                         <div class="rounded-3xl border border-gray-200 bg-gray-50 p-4 text-center">
-
                             <img src="{{ asset('images/QRIS FATHAN.png') }}"
                                  alt="QRIS"
                                  class="w-44 md:w-56 mx-auto object-contain">
-
                             <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 mt-4">
                                 Metode: Transfer (QRIS)
                             </p>
-
                         </div>
-
                     </div>
 
                     {{-- JUMLAH BAYAR --}}
                     <div class="mb-5">
-
                         <label class="text-sm text-gray-500 mb-2 block">
                             Jumlah Bayar (Rp)
                         </label>
-
                         <input
                             type="number"
                             name="jml_bayar"
@@ -155,28 +140,34 @@
                             placeholder="Masukkan nominal pembayaran"
                             class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-black"
                         >
-
                     </div>
 
-                    {{-- BUKTI (MODERN DROPZONE TAMPILAN MOBILE-FRIENDLY) --}}
+                    {{-- BUKTI (DROPZONE DRAG & DROP + PREVIEW) --}}
                     <div class="mb-6">
-
                         <label class="text-sm text-gray-500 mb-2 block">
                             Upload Bukti Pembayaran
                         </label>
 
-                        <label class="group flex flex-col items-center justify-center w-full h-36 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-black transition cursor-pointer p-4 text-center relative">
+                        <label id="dropzone" class="group flex flex-col items-center justify-center w-full min-h-36 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-black transition cursor-pointer p-4 text-center relative overflow-hidden">
                             
-                            <div class="flex flex-col items-center justify-center id="upload-placeholder">
+                            {{-- Tampilan Informasi Awal --}}
+                            <div id="upload-placeholder" class="flex flex-col items-center justify-center pointer-events-none">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-400 group-hover:text-black transition mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 <p class="text-sm text-gray-600 font-medium">
-                                    <span class="text-black font-semibold">Pilih Foto</span> atau Screenshot
+                                    <span class="text-black font-semibold">Seret & Lepas foto disini</span> atau Klik
                                 </p>
-                                <p id="file-name-display" class="text-xs text-gray-400 mt-1 max-w-[250px] truncate">
+                                <p class="text-xs text-gray-400 mt-1 max-w-[250px] truncate">
                                     Format: PNG, JPG, JPEG
                                 </p>
+                            </div>
+
+                            {{-- Tampilan Preview Gambar --}}
+                            <div id="preview-container" class="hidden w-full flex flex-col items-center gap-2 pointer-events-none">
+                                <img id="image-preview" src="#" alt="Pratinjau Bukti" class="max-h-48 rounded-xl object-contain shadow-sm border border-gray-200">
+                                <p id="file-name-display" class="text-xs text-emerald-600 font-semibold max-w-[250px] truncate"></p>
+                                <span class="text-xs text-gray-400 underline">Klik / seret file baru untuk mengganti</span>
                             </div>
 
                             <input
@@ -185,10 +176,9 @@
                                 name="bukti_bayar"
                                 accept="image/*"
                                 class="hidden"
-                                onchange="updateFileName(this)"
+                                onchange="handleFileSelect(this.files)"
                             >
                         </label>
-
                     </div>
 
                     {{-- BUTTON --}}
@@ -226,17 +216,76 @@
         }
     });
 
-    // SCRIPT MENGUBAH TEKS SAAT FILE DIPILIH
-    function updateFileName(input) {
-        const display = document.getElementById('file-name-display');
-        if (input.files && input.files.length > 0) {
-            display.innerText = "Terpilih: " + input.files[0].name;
-            display.classList.remove('text-gray-400');
-            display.classList.add('text-emerald-600', 'font-semibold');
+    // SCRIPT DRAG AND DROP & PREVIEW GAMBAR
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('bukti_bayar');
+
+    // Mencegah perilaku default browser (seperti membuka gambar otomatis di tab baru)
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    // Efek visual saat file diseret di atas Dropzone
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, () => {
+            dropzone.classList.add('border-black', 'bg-gray-100');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, () => {
+            dropzone.classList.remove('border-black', 'bg-gray-100');
+        }, false);
+    });
+
+    // Menangani file saat dilepas (Dropped)
+    dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files.length > 0) {
+            // Masukkan file hasil drag ke dalam input file HTML agar form bisa mengirimkannya
+            fileInput.files = files;
+            handleFileSelect(files);
+        }
+    });
+
+    // Memproses file untuk memunculkan gambar (Preview)
+    function handleFileSelect(files) {
+        const placeholder = document.getElementById('upload-placeholder');
+        const previewContainer = document.getElementById('preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const fileNameDisplay = document.getElementById('file-name-display');
+
+        if (files && files[0]) {
+            const file = files[0];
+
+            // Validasi sederhana memastikan yang dimasukkan adalah gambar
+            if (!file.type.startsWith('image/')) {
+                alert('Silakan masukkan file format gambar saja!');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                fileNameDisplay.innerText = "Terpilih: " + file.name;
+                
+                placeholder.classList.add('hidden');
+                previewContainer.classList.remove('hidden');
+            }
+            reader.readAsDataURL(file);
         } else {
-            display.innerText = "Format: PNG, JPG, JPEG";
-            display.classList.remove('text-emerald-600', 'font-semibold');
-            display.classList.add('text-gray-400');
+            imagePreview.src = "#";
+            fileNameDisplay.innerText = "";
+            placeholder.classList.remove('hidden');
+            previewContainer.classList.add('hidden');
         }
     }
 </script>
