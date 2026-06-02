@@ -76,7 +76,8 @@
     <div class="space-y-4">
         @forelse ($tunggakan as $item)
             @php
-                $lunas = $item->pembayaran->where('status', 'lunas')->count() > 0;
+                // Menggunakan properti status string langsung dari hasil DB::table join
+                $lunas = ($item->status === 'lunas');
             @endphp
 
             <div class="border border-gray-200 rounded-3xl p-5 bg-white hover:shadow-md transition">
@@ -140,14 +141,16 @@
                         </div>
 
                         <div class="flex items-center gap-2 ml-auto sm:ml-0">
+                            {{-- Mengarahkan ke route 'siswa.pembayaran' dengan melemparkan tagihan_id --}}
                             @if(!$lunas)
-                                <a href="{{ route('siswa.transaksi', ['tagihan_id' => $item->id, 'nominal' => $item->nominal]) }}"
+                                <a href="{{ route('siswa.transaksi', ['tagihan_id' => $item->tagihan_id]) }}"
                                    class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition shadow-sm shadow-blue-100">
                                     Bayar (QRIS)
                                 </a>
                             @endif
                             
-                            <a href="{{ route('siswa.detail_tagihan', ['id' => $item->id]) }}"
+                            {{-- Mengarahkan ke route detail bawaan controller dengan tagihan_id --}}
+                            <a href="{{ route('siswa.detail_tagihan', ['id' => $item->tagihan_id]) }}"
                                class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-gray-100 text-gray-800 text-xs font-semibold hover:bg-gray-200 transition">
                                 Detail
                             </a>

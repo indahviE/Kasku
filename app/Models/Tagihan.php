@@ -34,4 +34,9 @@ class Tagihan extends Model
     {
         return $this->hasMany(Pembayaran::class, 'tagihan_id');
     }
+
+    public function tunggakan() 
+    {
+        return $this->hasMany(Tunggakan::class, 'tagihan_id', 'id');
+    }
 }

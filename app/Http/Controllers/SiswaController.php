@@ -33,7 +33,9 @@ class SiswaController extends Controller
             ->take(5)
             ->get();
 
-        $totalTagihanSiswa = Tagihan::where('user_id', $user->id)->sum('nominal');
+        $totalTagihanSiswa = Tagihan::whereHas('tunggakan', function($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->sum('nominal');
 
         $totalSudahBayar = Pembayaran::where('user_id', $user->id)
             ->where('status', 'lunas')
@@ -189,18 +191,23 @@ class SiswaController extends Controller
 
     public function tunggakan()
     {
-        $user = Auth::user();
-
-        $tunggakan = Tagihan::where('user_id', $user->id)
-            ->whereDoesntHave('pembayaran', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
-            ->with(['pembayaran' => function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            }])
-            ->orderBy('periode', 'desc')
+        // Mengambil data tunggakan milik siswa yang login dan join dengan data induk tagihan
+        $tunggakan = \DB::table('tunggakan')
+            ->join('tagihan', 'tunggakan.tagihan_id', '=', 'tagihan.id')
+            ->where('tunggakan.user_id', Auth::id())
+            ->select(
+                'tunggakan.id as tunggakan_id',
+                'tunggakan.status',
+                'tagihan.id as tagihan_id',
+                'tagihan.nama_tagihan',
+                'tagihan.nominal',
+                'tagihan.periode',
+                'tagihan.batas_bayar'
+            )
+            ->orderBy('tunggakan.status', 'desc') // Memunculkan status 'belum_bayar' di atas
             ->get();
 
+        // Mengarahkan ke file view tunggakan bawaan websitemu
         return view('siswa.tunggakan', compact('tunggakan'));
     }
 
@@ -248,17 +255,14 @@ class SiswaController extends Controller
         ));
     }
 
-    public function pembayaran()
+    public function pembayaran(Request $request)
     {
         $user = Auth::user();
 
-        $sudahDibayar = Pembayaran::where('user_id', $user->id)
-            ->whereNotNull('tagihan_id')
-            ->pluck('tagihan_id')
-            ->toArray();
-
-        $tagihanBelumBayar = Tagihan::where('user_id', $user->id)
-            ->whereNotIn('id', $sudahDibayar)
+        // Mengambil daftar tagihan dari tabel tunggakan siswa yang statusnya belum_bayar
+        $tagihanBelumBayar = Tagihan::whereHas('tunggakan', function($query) use ($user) {
+                $query->where('user_id', $user->id)->where('status', 'belum_bayar');
+            })
             ->orderBy('periode', 'asc')
             ->get();
 
@@ -266,10 +270,13 @@ class SiswaController extends Controller
             ->latest()
             ->get();
 
-        return view('siswa.transaksi', compact(
-            'tagihanBelumBayar',
-            'data_pembayaran'
-        ));
+        // Ambil data tagihan spesifik jika siswa datang dari klik tombol "Bayar (QRIS)"
+        $tagihanTerpilih = null;
+        if ($request->has('tagihan_id')) {
+            $tagihanTerpilih = Tagihan::find($request->query('tagihan_id'));
+        }
+
+        return view('siswa.transaksi', compact('tagihanBelumBayar', 'data_pembayaran', 'tagihanTerpilih'));
     }
 
     public function simpanPembayaran(Request $request)
