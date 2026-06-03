@@ -147,6 +147,101 @@
                     </div>
                 </div>
 
+                {{-- SUMMARY CARDS --}}
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
+
+                    {{-- Total Siswa --}}
+                    <div class="bg-white rounded-2xl border border-slate-100 p-5 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 right-0 h-[3px] bg-[#1D9E75] rounded-t-2xl"></div>
+                        <div class="w-9 h-9 rounded-xl bg-[#E1F5EE] flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5 text-[#0F6E56]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-1">Total Siswa</p>
+                        <p class="text-xl font-semibold text-[#0F6E56]">{{ $siswa->count() }}</p>
+                        <div class="mt-2 inline-flex items-center gap-1 text-[11px] bg-[#E1F5EE] text-[#0F6E56] px-2 py-0.5 rounded-full">
+                            {{ $jumlahBendahara }}/2 bendahara
+                        </div>
+                    </div>
+
+                    {{-- Sudah Bayar --}}
+                    <div class="bg-white rounded-2xl border border-slate-100 p-5 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 right-0 h-[3px] bg-[#378ADD] rounded-t-2xl"></div>
+                        <div class="w-9 h-9 rounded-xl bg-[#E6F1FB] flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5 text-[#185FA5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-1">Sudah Bayar</p>
+                        <p class="text-xl font-semibold text-[#185FA5]">{{ $jumlahLunas }}</p>
+                        <div class="mt-2 inline-flex items-center gap-1 text-[11px] bg-[#E6F1FB] text-[#185FA5] px-2 py-0.5 rounded-full">
+                            {{ $siswa->count() > 0 ? round($jumlahLunas / $siswa->count() * 100) : 0 }}% siswa
+                        </div>
+                    </div>
+
+                    {{-- Belum Bayar --}}
+                    <div class="bg-white rounded-2xl border border-slate-100 p-5 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 right-0 h-[3px] bg-[#BA7517] rounded-t-2xl"></div>
+                        <div class="w-9 h-9 rounded-xl bg-[#FAEEDA] flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5 text-[#854F0B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-1">Belum Bayar</p>
+                        <p class="text-xl font-semibold text-[#854F0B]">{{ $jumlahBelumBayar }}</p>
+                        <div class="mt-2 inline-flex items-center gap-1 text-[11px] bg-[#FAEEDA] text-[#854F0B] px-2 py-0.5 rounded-full">
+                            perlu ditagih
+                        </div>
+                    </div>
+
+                    {{-- Kas Masuk --}}
+                    <div class="bg-white rounded-2xl border border-slate-100 p-5 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 right-0 h-[3px] bg-[#1D9E75] rounded-t-2xl"></div>
+                        <div class="w-9 h-9 rounded-xl bg-[#E1F5EE] flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5 text-[#0F6E56]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                            </svg>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-1">Kas Masuk</p>
+                        <p class="text-lg font-semibold text-[#0F6E56]">Rp {{ number_format($kasMasuk, 0, ',', '.') }}</p>
+                        <div class="mt-2 inline-flex items-center gap-1 text-[11px] bg-[#E1F5EE] text-[#0F6E56] px-2 py-0.5 rounded-full">
+                            total lunas
+                        </div>
+                    </div>
+
+                    {{-- Kas Keluar --}}
+                    <div class="bg-white rounded-2xl border border-slate-100 p-5 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 right-0 h-[3px] bg-[#D85A30] rounded-t-2xl"></div>
+                        <div class="w-9 h-9 rounded-xl bg-[#FAECE7] flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5 text-[#993C1D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-1">Kas Keluar</p>
+                        <p class="text-lg font-semibold text-[#993C1D]">Rp {{ number_format($kasKeluar, 0, ',', '.') }}</p>
+                        <div class="mt-2 inline-flex items-center gap-1 text-[11px] bg-[#FAECE7] text-[#993C1D] px-2 py-0.5 rounded-full">
+                            pengeluaran
+                        </div>
+                    </div>
+
+                    {{-- Tagihan Aktif --}}
+                    <div class="bg-white rounded-2xl border border-slate-100 p-5 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 right-0 h-[3px] bg-[#7F77DD] rounded-t-2xl"></div>
+                        <div class="w-9 h-9 rounded-xl bg-[#EEEDFE] flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5 text-[#534AB7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-1">Tagihan Aktif</p>
+                        <p class="text-xl font-semibold text-[#534AB7]">{{ $jumlahTagihanAktif }}</p>
+                        <div class="mt-2 inline-flex items-center gap-1 text-[11px] bg-[#EEEDFE] text-[#534AB7] px-2 py-0.5 rounded-full">
+                            bulan ini
+                        </div>
+                    </div>
+
+                </div>
+                {{-- END SUMMARY CARDS --}}
                 {{-- TABEL SISWA --}}
                 <div class="bg-white rounded-2xl border border-slate-200/50 shadow-sm overflow-hidden">
 

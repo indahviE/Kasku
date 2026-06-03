@@ -7,6 +7,10 @@ use App\Models\WaliKelas;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Pembayaran;
+use App\Models\Pengeluaran;
+use App\Models\Tagihan;
+use Illuminate\Support\Facades\DB;
 
 class WalkelController extends Controller
 {
@@ -21,12 +25,38 @@ class WalkelController extends Controller
             ->where('kelas_id', $wali->kelas_id)
             ->get();
 
+        // Tambahkan di method dashboard / index wali kelas:
+        $jumlahLunas = DB::table('tunggakan')
+            ->where('status', 'lunas')
+            ->whereIn('user_id', $siswa->pluck('user_id'))
+            ->distinct('user_id')
+            ->count('user_id');
+
+        $jumlahBelumBayar = DB::table('tunggakan')
+            ->where('status', 'belum_bayar')
+            ->whereIn('user_id', $siswa->pluck('user_id'))
+            ->distinct('user_id')
+            ->count('user_id');
+
+        $kasMasuk  = Pembayaran::where('status', 'lunas')->sum('jml_bayar');
+        $kasKeluar = Pengeluaran::sum('nominal');
+
+        $jumlahTagihanAktif = Tagihan::whereMonth('batas_bayar', now()->month)
+            ->whereYear('batas_bayar', now()->year)
+            ->count();
         // Hitung jumlah bendahara di kelas ini
         $jumlahBendahara = $siswa->filter(
             fn($s) => $s->user->role === 'bendahara'
         )->count();
 
-        return view('admin.wali_kelas.dashboard', compact('wali', 'siswa', 'jumlahBendahara'));
+        return view('admin.wali_kelas.dashboard', compact('wali',
+        'siswa',
+        'jumlahBendahara',
+        'jumlahLunas',
+        'jumlahBelumBayar',
+        'jumlahTagihanAktif',
+        'kasKeluar',
+        'kasMasuk'));
     }
 
     /**
