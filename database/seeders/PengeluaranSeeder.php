@@ -12,7 +12,7 @@ class PengeluaranSeeder extends Seeder
         DB::table('pengeluaran')->insert([
             [
                 'kelas_id' => 1,
-                'dicatat_oleh' => 1,
+                'dicatat_oleh' => 3,
                 'nominal' => 25000.00,
                 'tanggal' => '2026-05-01',
                 'keterangan' => 'Pembelian Sapu dan Pengki',
@@ -21,7 +21,7 @@ class PengeluaranSeeder extends Seeder
             ],
             [
                 'kelas_id' => 1,
-                'dicatat_oleh' => 1,
+                'dicatat_oleh' => 2,
                 'nominal' => 15000.00,
                 'tanggal' => '2026-05-03',
                 'keterangan' => 'Isi Ulang Spidol Boardmarker',
@@ -38,7 +38,7 @@ class PengeluaranSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'kelas_id' => 1,
+                'kelas_id' => 2,
                 'dicatat_oleh' => 3,
                 'nominal' => 10000.00,
                 'tanggal' => '2026-05-07',

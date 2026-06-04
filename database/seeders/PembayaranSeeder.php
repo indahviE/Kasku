@@ -12,7 +12,7 @@ class PembayaranSeeder extends Seeder
         DB::table('pembayaran')->insert([
             [
                 'tagihan_id' => 1,
-                'user_id' => 1,
+                'user_id' => 6,
                 'dicatat_oleh' => 1,
                 'jml_bayar' => 50000.00,
                 'tanggal_bayar' => '2026-05-05',
@@ -24,7 +24,7 @@ class PembayaranSeeder extends Seeder
             ],
             [
                 'tagihan_id' => 1,
-                'user_id' => 2,
+                'user_id' => 10,
                 'dicatat_oleh' => 1,
                 'jml_bayar' => 50000.00,
                 'tanggal_bayar' => '2026-05-06',
@@ -36,7 +36,7 @@ class PembayaranSeeder extends Seeder
             ],
             [
                 'tagihan_id' => 2,
-                'user_id' => 1,
+                'user_id' => 12,
                 'dicatat_oleh' => 2,
                 'jml_bayar' => 150000.00,
                 'tanggal_bayar' => '2026-05-07',
@@ -48,7 +48,7 @@ class PembayaranSeeder extends Seeder
             ],
             [
                 'tagihan_id' => 1,
-                'user_id' => 3,
+                'user_id' => 4,
                 'dicatat_oleh' => 1,
                 'jml_bayar' => 0.00,
                 'tanggal_bayar' => '2026-05-07',
