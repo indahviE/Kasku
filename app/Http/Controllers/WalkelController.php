@@ -21,7 +21,7 @@ class WalkelController extends Controller
 
         $siswa = Siswa::with('user')
             ->where('kelas_id', $wali->kelas_id)
-            ->get();
+            ->paginate(5);
 
         $userIds = $siswa->pluck('user_id');
 
@@ -95,7 +95,7 @@ class WalkelController extends Controller
             ->with('success', "{$user->name} berhasil dijadikan bendahara");
     }
 
-public function transaksiKas()
+    public function transaksiKas(Request $request)
     {
         $wali    = WaliKelas::where('user_id', Auth::id())->firstOrFail();
         $siswa   = Siswa::with('user')->where('kelas_id', $wali->kelas_id)->get();
@@ -114,7 +114,7 @@ public function transaksiKas()
                 'metode'     => $p->metode,
             ]);
 
-            $keluar = Pengeluaran::with('pencatat') // ← Ganti 'user' jadi 'pencatat' sesuai model
+        $keluar = Pengeluaran::with('pencatat')
             ->where('kelas_id', $wali->kelas_id)
             ->get()
             ->map(fn($p) => [
@@ -122,17 +122,40 @@ public function transaksiKas()
                 'nominal'    => $p->nominal,
                 'tanggal'    => $p->tanggal,
                 'keterangan' => $p->keterangan,
-                // Ambil namanya lewat relasi 'pencatat' (kolom dicatat_oleh)
                 'nama'       => 'Bendahara (' . ($p->pencatat->name ?? 'Tidak Diketahui') . ')',
                 'metode'     => '-',
             ]);
 
         $allTransaksi = $masuk->concat($keluar)->sortByDesc('tanggal')->values();
+
+        // ---- FILTER LOGIC ----
+        $search = $request->get('search', '');
+        $dari   = $request->get('dari', '');
+        $sampai = $request->get('sampai', '');
+
+        if ($search) {
+            $allTransaksi = $allTransaksi->filter(function ($t) use ($search) {
+                return stripos($t['keterangan'], $search) !== false;
+            })->values();
+        }
+
+        if ($dari) {
+            $allTransaksi = $allTransaksi->filter(function ($t) use ($dari) {
+                return $t['tanggal'] >= $dari;
+            })->values();
+        }
+
+        if ($sampai) {
+            $allTransaksi = $allTransaksi->filter(function ($t) use ($sampai) {
+                return $t['tanggal'] <= $sampai;
+            })->values();
+        }
+
         $totalMasuk  = $masuk->sum('nominal');
         $totalKeluar = $keluar->sum('nominal');
         $saldo       = $totalMasuk - $totalKeluar;
 
-        // ---- PROSES PAGINASI MANUAL DISINI ----
+        // ---- PROSES PAGINASI MANUAL ----
         $perPage     = 5;
         $currentPage = Paginator::resolveCurrentPage();
         $collection  = collect($allTransaksi);
@@ -142,96 +165,120 @@ public function transaksiKas()
             $collection->count(),
             $perPage,
             $currentPage,
-            ['path' => Paginator::resolveCurrentPath()]
+            ['path' => Paginator::resolveCurrentPath(), 'query' => $request->query()]
         );
 
         return view('admin.wali_kelas.transaksi-kas', compact(
             'wali', 'transaksi', 'totalMasuk', 'totalKeluar', 'saldo'
         ));
     }
-public function rekapPembayaran()
-{
-    $wali    = WaliKelas::where('user_id', Auth::id())->firstOrFail();
-    $siswa   = Siswa::with('user')->where('kelas_id', $wali->kelas_id)->get();
-    $userIds = $siswa->pluck('user_id');
 
-    // Ambil semua tagihan unik berdasarkan nama
-    $tagihan = Tagihan::whereIn('user_id', $userIds)
-        ->orderBy('periode', 'desc')
-        ->get()
-        ->unique('nama_tagihan')
-        ->values();
+    public function rekapPembayaran()
+    {
+        $wali    = WaliKelas::where('user_id', Auth::id())->firstOrFail();
+        $siswa   = Siswa::with('user')->where('kelas_id', $wali->kelas_id)->get();
+        $userIds = $siswa->pluck('user_id');
 
-    $rekapTagihanRaw = $tagihan->map(function ($t) use ($userIds, $siswa) {
-        $sudahBayar = Pembayaran::where('tagihan_id', $t->id)
-            ->whereIn('user_id', $userIds)
-            ->where('status', 'lunas')
-            ->count();
-        $totalSiswa = $siswa->count();
-        return [
-            'tagihan'     => $t,
-            'sudah_bayar' => $sudahBayar,
-            'belum_bayar' => $totalSiswa - $sudahBayar,
-            'total_siswa' => $totalSiswa,
-            'persen'      => $totalSiswa > 0 ? round(($sudahBayar / $totalSiswa) * 100) : 0,
-        ];
-    });
+        // Ambil semua tagihan unik berdasarkan nama
+        $tagihan = Tagihan::whereIn('user_id', $userIds)
+            ->orderBy('periode', 'desc')
+            ->get()
+            ->unique('nama_tagihan')
+            ->values();
 
-    // Proses Paginasi Manual (5 data per halaman)
-    $perPage     = 5;
-    $currentPage = Paginator::resolveCurrentPage();
-    $collection  = collect($rekapTagihanRaw);
-
-    $rekapTagihan = new LengthAwarePaginator(
-        $collection->forPage($currentPage, $perPage)->values(),
-        $collection->count(),
-        $perPage,
-        $currentPage,
-        ['path' => Paginator::resolveCurrentPath()]
-    );
-
-    return view('admin.wali_kelas.rekap-pembayaran', compact('wali', 'rekapTagihan'));
-}
-
-public function tunggakan()
-{
-    $wali    = WaliKelas::where('user_id', Auth::id())->firstOrFail();
-    $siswa   = Siswa::with('user')->where('kelas_id', $wali->kelas_id)->get();
-    $userIds = $siswa->pluck('user_id');
-
-    $tagihanLewat = Tagihan::whereIn('user_id', $userIds)
-        ->where('batas_bayar', '<', now()->toDateString())
-        ->orderBy('batas_bayar', 'desc')
-        ->get()
-        // ->unique('nama_tagihan')
-        ->values();
-
-    $tunggakanRaw = [];
-    foreach ($tagihanLewat as $t) {
-        $belumBayar = $siswa->filter(function ($s) use ($t) {
-            return !Pembayaran::where('user_id', $s->user_id)
-                ->where('tagihan_id', $t->id)
+        $rekapTagihanRaw = $tagihan->map(function ($t) use ($userIds, $siswa) {
+            $sudahBayar = Pembayaran::where('tagihan_id', $t->id)
+                ->whereIn('user_id', $userIds)
                 ->where('status', 'lunas')
-                ->exists();
+                ->count();
+            $totalSiswa = $siswa->count();
+            return [
+                'tagihan'     => $t,
+                'sudah_bayar' => $sudahBayar,
+                'belum_bayar' => $totalSiswa - $sudahBayar,
+                'total_siswa' => $totalSiswa,
+                'persen'      => $totalSiswa > 0 ? round(($sudahBayar / $totalSiswa) * 100) : 0,
+            ];
         });
 
-        if ($belumBayar->count() > 0) {
-            $tunggakanRaw[] = ['tagihan' => $t, 'siswa' => $belumBayar];
-        }
+        // Proses Paginasi Manual (5 data per halaman)
+        $perPage     = 5;
+        $currentPage = Paginator::resolveCurrentPage();
+        $collection  = collect($rekapTagihanRaw);
+
+        $rekapTagihan = new LengthAwarePaginator(
+            $collection->forPage($currentPage, $perPage)->values(),
+            $collection->count(),
+            $perPage,
+            $currentPage,
+            ['path' => Paginator::resolveCurrentPath()]
+        );
+
+        return view('admin.wali_kelas.rekap-pembayaran', compact('wali', 'rekapTagihan'));
     }
 
-    $perPage     = 5;
-    $currentPage = Paginator::resolveCurrentPage();  // ← ini yang penting
-    $collection  = collect($tunggakanRaw);
+    public function tunggakan(Request $request)
+    {
+        $wali    = WaliKelas::where('user_id', Auth::id())->firstOrFail();
+        $siswa   = Siswa::with('user')->where('kelas_id', $wali->kelas_id)->get();
+        $userIds = $siswa->pluck('user_id');
 
-    $tunggakan = new LengthAwarePaginator(
-        $collection->forPage($currentPage, $perPage)->values(),
-        $collection->count(),
-        $perPage,
-        $currentPage,
-        ['path' => Paginator::resolveCurrentPath()]  // ← dan ini
-    );
+        $tagihanLewat = Tagihan::whereIn('user_id', $userIds)
+            ->where('batas_bayar', '<', now()->toDateString())
+            ->orderBy('batas_bayar', 'desc')
+            ->get()
+            ->values();
 
-    return view('admin.wali_kelas.tunggakan', compact('wali', 'tunggakan'));
-}
+        // ---- FILTER LOGIC ----
+        $search = $request->get('search', '');
+        $dari   = $request->get('dari', '');
+        $sampai = $request->get('sampai', '');
+
+        if ($search) {
+            $tagihanLewat = $tagihanLewat->filter(function ($t) use ($search) {
+                return stripos($t->nama_tagihan, $search) !== false;
+            })->values();
+        }
+
+        if ($dari) {
+            $tagihanLewat = $tagihanLewat->filter(function ($t) use ($dari) {
+                return $t->batas_bayar >= $dari;
+            })->values();
+        }
+
+        if ($sampai) {
+            $tagihanLewat = $tagihanLewat->filter(function ($t) use ($sampai) {
+                return $t->batas_bayar <= $sampai;
+            })->values();
+        }
+
+        $tunggakanRaw = [];
+        foreach ($tagihanLewat as $t) {
+            $belumBayar = $siswa->filter(function ($s) use ($t) {
+                return !Pembayaran::where('user_id', $s->user_id)
+                    ->where('tagihan_id', $t->id)
+                    ->where('status', 'lunas')
+                    ->exists();
+            });
+
+            if ($belumBayar->count() > 0) {
+                $tunggakanRaw[] = ['tagihan' => $t, 'siswa' => $belumBayar];
+            }
+        }
+
+        // ---- PROSES PAGINASI MANUAL ----
+        $perPage     = 5;
+        $currentPage = Paginator::resolveCurrentPage();
+        $collection  = collect($tunggakanRaw);
+
+        $tunggakan = new LengthAwarePaginator(
+            $collection->forPage($currentPage, $perPage)->values(),
+            $collection->count(),
+            $perPage,
+            $currentPage,
+            ['path' => Paginator::resolveCurrentPath(), 'query' => $request->query()]
+        );
+
+        return view('admin.wali_kelas.tunggakan', compact('wali', 'tunggakan'));
+    }
 }
