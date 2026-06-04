@@ -118,12 +118,58 @@
     tbody tr:hover { background-color: rgba(27, 101, 120, 0.03); }
 
     .rupiah { font-variant-numeric: tabular-nums; }
-</style>
 
-<div class="flex min-h-screen bg-gradient-subtle font-sans text-slate-900">
+    /* RULES KHUSUS PRATINJAU & CETAK PDF */
+    @media print {
+        @page {
+            size: A4 landscape;
+            margin: 15mm;
+        }
+        
+        /* Sembunyikan elemen aplikasi web yang tidak perlu dicetak */
+        #sidebar-container, 
+        #navbar-header, 
+        #exportPdfBtn, 
+        #pagination-container,
+        .gradient-bar-chart { 
+            display: none !important; 
+        }
+
+        /* Atur ulang container utama agar penuh memenuhi kertas */
+        body, .bg-gradient-subtle {
+            background: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        .flex-1, main, #pdf-content {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        /* Bersihkan efek bayangan box shadow untuk cetakan printer */
+        .card-hover, .bg-white, .shadow-sm {
+            box-shadow: none !important;
+            border: 1px solid #cbd5e1 !important;
+        }
+        
+        table {
+            page-break-inside: auto;
+        }
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+    }
+</style>
+</head>
+
+<body class="bg-gradient-subtle font-sans text-slate-900">
+<div class="flex min-h-screen">
 
     {{-- SIDEBAR --}}
-    <div class="w-64 bg-slate-900 text-slate-400 flex flex-col sticky top-0 h-screen border-r border-slate-800/50">
+    <div id="sidebar-container" class="w-64 bg-slate-900 text-slate-400 flex flex-col sticky top-0 h-screen border-r border-slate-800/50">
 
         {{-- Logo --}}
         <div class="p-6 border-b border-slate-800/50">
@@ -187,7 +233,7 @@
     <div class="flex-1 flex flex-col">
 
         {{-- NAVBAR --}}
-        <header class="bg-white/60 backdrop-blur-xl sticky top-0 z-40 border-b border-slate-200/50 h-16 flex items-center justify-between px-8 shadow-sm">
+        <header id="navbar-header" class="bg-white/60 backdrop-blur-xl sticky top-0 z-40 border-b border-slate-200/50 h-16 flex items-center justify-between px-8 shadow-sm">
             <div class="flex items-center gap-2 text-sm">
                 <span class="text-slate-500 font-medium">Pages</span>
                 <span class="text-slate-300">/</span>
@@ -237,7 +283,7 @@
         </header>
 
         {{-- CONTENT --}}
-        <main class="flex-1 p-8 overflow-y-auto">
+        <main id="pdf-content" class="flex-1 p-8 overflow-y-auto">
             <div class="max-w-7xl mx-auto space-y-6">
 
                 {{-- GRAFIK --}}
@@ -315,9 +361,19 @@
                 {{-- TABEL TRANSAKSI --}}
                 <div class="bg-white rounded-2xl border border-slate-200/50 shadow-sm overflow-hidden">
 
-                    <div class="p-6 border-b border-slate-100">
-                        <h3 class="text-lg font-display font-bold text-slate-900 mb-1">Riwayat Transaksi</h3>
-                        <p class="text-xs text-slate-500">Semua transaksi terbaru sistem kas sekolah</p>
+                    <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h3 class="text-lg font-display font-bold text-slate-900 mb-1">Riwayat Transaksi</h3>
+                            <p class="text-xs text-slate-500">Semua transaksi terbaru sistem kas sekolah</p>
+                        </div>
+                        <div>
+                            <button id="exportPdfBtn" class="flex items-center gap-2 bg-[#1B6578] hover:bg-[#2a8fa3] text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-md transition-all active:scale-95">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                Export PDF
+                            </button>
+                        </div>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -364,15 +420,16 @@
                                 @endforelse
                             </tbody>
                         </table>
+                        
                         {{-- Pagination --}}
-                    <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
-                        <p class="text-xs text-slate-500 font-medium">
-                            Menampilkan {{ $transaksi->firstItem() }} - {{ $transaksi->lastItem() }} dari {{ $transaksi->total() }} transaksi
-                        </p>
-                        <div>
-                            {{ $transaksi->links('pagination::tailwind') }}
+                        <div id="pagination-container" class="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+                            <p class="text-xs text-slate-500 font-medium">
+                                Menampilkan {{ $transaksi->firstItem() }} - {{ $transaksi->lastItem() }} dari {{ $transaksi->total() }} transaksi
+                            </p>
+                            <div>
+                                {{ $transaksi->links('pagination::tailwind') }}
+                            </div>
                         </div>
-                    </div>
                     </div>
 
                 </div>
@@ -387,16 +444,26 @@
 const profileBtn = document.getElementById('profileBtn');
 const dropdownMenu = document.getElementById('dropdownMenu');
 
-profileBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    dropdownMenu.classList.toggle('active');
-});
+if (profileBtn && dropdownMenu) {
+    profileBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('active');
+    });
 
-document.addEventListener('click', function(e) {
-    if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
-        dropdownMenu.classList.remove('active');
-    }
-});
+    document.addEventListener('click', function(e) {
+        if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.classList.remove('active');
+        }
+    });
+}
+
+// LOGIKA BARU: Driver Trigger Cetak Browser Asli
+const exportPdfBtn = document.getElementById('exportPdfBtn');
+if (exportPdfBtn) {
+    exportPdfBtn.addEventListener('click', function () {
+        window.print();
+    });
+}
 
 window.addEventListener('load', () => {
     const ctx = document.getElementById('financialChart');
@@ -467,3 +534,5 @@ window.addEventListener('load', () => {
     }
 });
 </script>
+</body>
+</html>
