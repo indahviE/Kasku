@@ -191,10 +191,16 @@ class SiswaController extends Controller
 
     public function tunggakan()
     {
-        // Mengambil data tunggakan milik siswa yang login dan join dengan data induk tagihan
         $tunggakan = \DB::table('tunggakan')
             ->join('tagihan', 'tunggakan.tagihan_id', '=', 'tagihan.id')
+            ->leftJoin('pembayaran', function($join) {
+                $join->on('tagihan.id', '=', 'pembayaran.tagihan_id')
+                     ->where('pembayaran.user_id', '=', Auth::id())
+                     ->whereIn('pembayaran.status', ['nunggak', 'lunas']);
+            })
             ->where('tunggakan.user_id', Auth::id())
+            ->where('tunggakan.status', 'belum_bayar')
+            ->whereNull('pembayaran.id') 
             ->select(
                 'tunggakan.id as tunggakan_id',
                 'tunggakan.status',
@@ -204,10 +210,9 @@ class SiswaController extends Controller
                 'tagihan.periode',
                 'tagihan.batas_bayar'
             )
-            ->orderBy('tunggakan.status', 'desc') // Memunculkan status 'belum_bayar' di atas
+            ->orderBy('tagihan.batas_bayar', 'asc')
             ->get();
 
-        // Mengarahkan ke file view tunggakan bawaan websitemu
         return view('siswa.tunggakan', compact('tunggakan'));
     }
 
@@ -259,9 +264,11 @@ class SiswaController extends Controller
     {
         $user = Auth::user();
 
-        // Mengambil daftar tagihan dari tabel tunggakan siswa yang statusnya belum_bayar
         $tagihanBelumBayar = Tagihan::whereHas('tunggakan', function($query) use ($user) {
                 $query->where('user_id', $user->id)->where('status', 'belum_bayar');
+            })
+            ->whereDoesntHave('pembayaran', function($query) use ($user) {
+                $query->where('user_id', $user->id)->whereIn('status', ['nunggak', 'lunas']);
             })
             ->orderBy('periode', 'asc')
             ->get();
@@ -270,7 +277,6 @@ class SiswaController extends Controller
             ->latest()
             ->get();
 
-        // Ambil data tagihan spesifik jika siswa datang dari klik tombol "Bayar (QRIS)"
         $tagihanTerpilih = null;
         if ($request->has('tagihan_id')) {
             $tagihanTerpilih = Tagihan::find($request->query('tagihan_id'));
