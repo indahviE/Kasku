@@ -195,6 +195,15 @@
         }
         .btn-reset:hover { background: var(--bg); border-color: #94A3B8; }
 
+        .btn-print {
+            padding: 8px 16px; border: none; border-radius: 8px;
+            font-size: 12px; font-weight: 600; cursor: pointer;
+            transition: all 0.15s; background: #3B82F6; color: #fff;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .btn-print:hover { background: #2563EB; }
+        .btn-print svg { width: 14px; height: 14px; }
+
         /* ── TABLE ── */
         .table-card {
             background: #fff; border-radius: 16px;
@@ -263,6 +272,30 @@
             position: absolute; top: 6px; right: 6px;
             width: 6px; height: 6px; border-radius: 50%;
             background: #EF4444; border: 2px solid #fff;
+        }
+
+        /* ── PRINT STYLES ── */
+        @media print {
+            * { background: transparent !important; color: black !important; box-shadow: none !important; text-shadow: none !important; }
+            body { margin: 0; padding: 0; }
+            .sidebar, .topbar, .filters-card, .pagination-wrap, .notif-btn, .profile-wrap { display: none !important; }
+            .main { flex: 1; padding: 0 !important; }
+            .content { padding: 0 !important; padding-top: 0 !important; }
+            .app-shell { display: block !important; }
+            .content-inner { max-width: 100% !important; }
+            .hero { background: transparent !important; border: 1px solid #333 !important; padding: 20px; margin-bottom: 20px; color: black; }
+            .hero::before, .hero::after { display: none !important; }
+            .hero-title { font-size: 18px; color: black; }
+            .hero-sub { color: #666; }
+            .stat-grid { display: none !important; }
+            .table-card { border: 1px solid #333 !important; }
+            table { width: 100%; font-size: 11px; }
+            th, td { border: 1px solid #333 !important; padding: 8px; text-align: left; }
+            thead tr { background: #f0f0f0 !important; }
+            tbody tr:hover td { background: transparent !important; }
+            .badge { border: 1px solid #333; background: white !important; color: black !important; }
+            .td-num { color: black; }
+            @page { margin: 10mm; size: A4; }
         }
     </style>
 </head>
@@ -353,18 +386,9 @@
             <div class="content-inner">
 
                 {{-- HERO --}}
-                <div class="hero flex justify-between items-center flex-wrap gap-4">
-                    <div>
-                        <div class="hero-title">{{ $wali->kelas->nama_kelas }}</div>
-                        <div class="hero-sub">Riwayat transaksi kas kelas</div>
-                    </div>
-                    <a href="{{ route('wali.cetak-transaksi-pdf', request()->all()) }}"
-                       class="inline-flex items-center gap-2 bg-white text-[#0E7C7B] hover:bg-[#EFF6FF] font-semibold text-xs px-4 py-2.5 rounded-lg shadow-sm transition-all duration-150">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                        </svg>
-                        Cetak PDF
-                    </a>
+                <div class="hero">
+                    <div class="hero-title">{{ $wali->kelas->nama_kelas }}</div>
+                    <div class="hero-sub">Riwayat transaksi kas kelas</div>
                 </div>
 
                 {{-- STAT CARDS --}}
@@ -416,10 +440,14 @@
                     </div>
                     <button type="submit" class="btn-filter">Filter</button>
                     <a href="{{ route('wali.transaksi-kas') }}" class="btn-reset">Reset</a>
+                    <button type="button" class="btn-print" id="printBtn" onclick="printTransaksi()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        Print PDF
+                    </button>
                 </form>
 
                 {{-- TABLE --}}
-                <div class="table-card">
+                <div class="table-card" id="printableTable">
                     <div class="table-head">
                         <div class="th-title">Riwayat Transaksi</div>
                         <div class="th-sub">Semua transaksi kas kelas {{ $wali->kelas->nama_kelas }}</div>
@@ -530,6 +558,11 @@ profileBtn.addEventListener('click', e => { e.stopPropagation(); dropdownMenu.cl
 document.addEventListener('click', e => {
     if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) dropdownMenu.classList.remove('open');
 });
+
+// Print Function
+function printTransaksi() {
+    window.print();
+}
 </script>
 </body>
 </html>

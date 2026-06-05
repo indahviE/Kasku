@@ -12,7 +12,6 @@ use App\Models\Pengeluaran;
 use App\Models\Tagihan;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
-use Barryvdh\DomPDF\Facade\Pdf; 
 
 class WalkelController extends Controller
 {
@@ -96,7 +95,7 @@ class WalkelController extends Controller
             ->with('success', "{$user->name} berhasil dijadikan bendahara");
     }
 
-public function transaksiKas(Request $request)
+    public function transaksiKas(Request $request)
     {
         $wali    = WaliKelas::where('user_id', Auth::id())->firstOrFail();
         $siswa   = Siswa::with('user')->where('kelas_id', $wali->kelas_id)->get();
@@ -172,72 +171,6 @@ public function transaksiKas(Request $request)
         return view('admin.wali_kelas.transaksi-kas', compact(
             'wali', 'transaksi', 'totalMasuk', 'totalKeluar', 'saldo'
         ));
-    }
-
-    // METHOD BARU UNTUK CETAK PDF
-    public function cetakTransaksiPdf(Request $request)
-    {
-        $wali    = WaliKelas::where('user_id', Auth::id())->firstOrFail();
-        $siswa   = Siswa::with('user')->where('kelas_id', $wali->kelas_id)->get();
-        $userIds = $siswa->pluck('user_id');
-
-        $masuk = Pembayaran::with(['siswa', 'tagihan'])
-            ->whereIn('user_id', $userIds)
-            ->where('status', 'lunas')
-            ->get()
-            ->map(fn($p) => [
-                'tipe'       => 'masuk',
-                'nominal'    => $p->jml_bayar,
-                'tanggal'    => $p->tanggal_bayar,
-                'keterangan' => $p->tagihan->nama_tagihan ?? 'Pembayaran kas',
-                'nama'       => $p->siswa->name ?? '-',
-                'metode'     => $p->metode,
-            ]);
-
-        $keluar = Pengeluaran::with('pencatat')
-            ->where('kelas_id', $wali->kelas_id)
-            ->get()
-            ->map(fn($p) => [
-                'tipe'       => 'keluar',
-                'nominal'    => $p->nominal,
-                'tanggal'    => $p->tanggal,
-                'keterangan' => $p->keterangan,
-                'nama'       => 'Bendahara (' . ($p->pencatat->name ?? 'Tidak Diketahui') . ')',
-                'metode'     => '-',
-            ]);
-
-        $allTransaksi = $masuk->concat($keluar)->sortByDesc('tanggal')->values();
-
-        // Tetap menerapkan filter yang aktif saat dicetak
-        $search = $request->get('search', '');
-        $dari   = $request->get('dari', '');
-        $sampai = $request->get('sampai', '');
-
-        if ($search) {
-            $allTransaksi = $allTransaksi->filter(function ($t) use ($search) {
-                return stripos($t['keterangan'], $search) !== false;
-            })->values();
-        }
-        if ($dari) {
-            $allTransaksi = $allTransaksi->filter(function ($t) use ($dari) {
-                return $t['tanggal'] >= $dari;
-            })->values();
-        }
-        if ($sampai) {
-            $allTransaksi = $allTransaksi->filter(function ($t) use ($sampai) {
-                return $t['tanggal'] <= $sampai;
-            })->values();
-        }
-
-        $totalMasuk  = $allTransaksi->where('tipe', 'masuk')->sum('nominal');
-        $totalKeluar = $allTransaksi->where('tipe', 'keluar')->sum('nominal');
-        $saldo       = $totalMasuk - $totalKeluar;
-
-        $pdf = Pdf::loadView('admin.wali_kelas.transaksi-pdf', compact(
-            'wali', 'allTransaksi', 'totalMasuk', 'totalKeluar', 'saldo', 'dari', 'sampai'
-        ));
-
-        return $pdf->download('Laporan_Transaksi_Kas_Kelas.pdf');
     }
 
     public function rekapPembayaran()
