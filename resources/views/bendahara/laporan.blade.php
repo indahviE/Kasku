@@ -41,7 +41,7 @@
             gap: 10px;
         }
 
-        .sidebar-item:hover {
+        .sidebar-item:not(.sidebar-active):hover {
             background: rgba(255, 255, 255, .02);
             transform: translateX(4px);
             color: #94a3b8;
@@ -253,10 +253,10 @@
                             <button class="period-btn" onclick="setPeriod(this,'3 Bulan')">3 Bulan</button>
                             <button class="period-btn" onclick="setPeriod(this,'Tahun Ini')">Tahun Ini</button>
                         </div>
-                        <button class="btn bg-slate-900 text-white" onclick="exportPDF()">
+                        <a href="{{ route('bendahara.laporan.export_pdf') }}" class="btn bg-slate-900 text-white">
                             <iconify-icon icon="solar:download-bold" class="text-[16px]"></iconify-icon>
                             Export PDF
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -272,10 +272,10 @@
                                 <iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon>
                             </button>
                         </div>
-                        <p class="text-[22px] font-bold text-slate-900">Rp 4.680<span class="text-slate-400">.000</span></p>
+                        <p class="text-[22px] font-bold text-slate-900">Rp {{ number_format($saldoAkhir, 0, ',', '.') }}</p>
                         <div class="flex items-center gap-2 mt-3">
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-green">↑ 12.1%</span>
-                            <span class="text-[11px] text-slate-400">vs bulan lalu</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $saldoAkhir >= 0 ? 'badge-green' : 'bg-rose-50 text-rose-600' }}">{{ $saldoAkhir >= 0 ? 'Aman' : 'Defisit' }}</span>
+                            <span class="text-[11px] text-slate-400">Total kas tersisa</span>
                         </div>
                     </div>
 
@@ -286,9 +286,11 @@
                                 <iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon>
                             </button>
                         </div>
-                        <p class="text-[22px] font-bold text-slate-900">Rp 2.800<span class="text-slate-400">.000</span></p>
+                        <p class="text-[22px] font-bold text-slate-900">Rp {{ number_format($totalMasuk, 0, ',', '.') }}</p>
                         <div class="flex items-center gap-2 mt-3">
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-green">↑ 6.3%</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $persenMasuk >= 0 ? 'badge-green' : 'bg-rose-50 text-rose-600' }}">
+                                {{ $persenMasuk >= 0 ? '↑' : '↓' }} {{ number_format(abs($persenMasuk), 1, ',', '.') }}%
+                            </span>
                             <span class="text-[11px] text-slate-400">vs bulan lalu</span>
                         </div>
                     </div>
@@ -300,9 +302,11 @@
                                 <iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon>
                             </button>
                         </div>
-                        <p class="text-[22px] font-bold text-slate-900">Rp 620<span class="text-slate-400">.000</span></p>
+                        <p class="text-[22px] font-bold text-slate-900">Rp {{ number_format($totalKeluar, 0, ',', '.') }}</p>
                         <div class="flex items-center gap-2 mt-3">
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-red">↑ 2.4%</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $persenKeluar > 0 ? 'bg-rose-50 text-rose-600' : 'badge-green' }}">
+                                {{ $persenKeluar > 0 ? '↑' : '↓' }} {{ number_format(abs($persenKeluar), 1, ',', '.') }}%
+                            </span>
                             <span class="text-[11px] text-slate-400">vs bulan lalu</span>
                         </div>
                     </div>
@@ -314,10 +318,10 @@
                                 <iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon>
                             </button>
                         </div>
-                        <p class="text-[22px] font-bold text-slate-900">Rp 1.200<span class="text-slate-400">.000</span></p>
+                        <p class="text-[22px] font-bold text-slate-900">Rp {{ number_format($totalTagihan, 0, ',', '.') }}</p>
                         <div class="flex items-center gap-2 mt-3">
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-green">↑ 8.7%</span>
-                            <span class="text-[11px] text-slate-400">vs bulan lalu</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-green">Keseluruhan</span>
+                            <span class="text-[11px] text-slate-400">Tagihan terdata</span>
                         </div>
                     </div>
 
@@ -457,7 +461,7 @@
                             <h2 class="text-[16px] font-bold text-slate-900">Riwayat Transaksi</h2>
                             <p class="text-xs text-slate-400 mt-0.5">Seluruh data transaksi kas kelas</p>
                         </div>
-                        <span class="text-xs font-semibold text-teal-600 bg-teal-50 px-3 py-1.5 rounded-full">3 transaksi</span>
+                        <span class="text-xs font-semibold text-teal-600 bg-teal-50 px-3 py-1.5 rounded-full">{{ $transaksiList->count() }} transaksi</span>
                     </div>
 
                     <!-- TABLE -->
@@ -470,119 +474,69 @@
                                     <th class="text-left px-6 py-3.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Tanggal</th>
                                     <th class="text-left px-6 py-3.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Nominal</th>
                                     <th class="text-left px-6 py-3.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Status</th>
-                                    <th class="text-center px-6 py-3.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-
-                                <tr class="table-row border-b border-slate-50">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center">
-                                                <iconify-icon icon="solar:wallet-money-bold" class="text-teal-500 text-[17px]"></iconify-icon>
+                                @forelse($transaksiList as $transaksi)
+                                    <tr class="table-row border-b border-slate-50 hover:bg-slate-50/50 transition">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                @if($transaksi->jenis == 'masuk')
+                                                    <div class="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center">
+                                                        <iconify-icon icon="solar:wallet-money-bold" class="text-teal-500 text-[17px]"></iconify-icon>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-sm font-semibold text-slate-800">{{ $transaksi->siswa->name ?? 'Kas Masuk' }}</p>
+                                                        <p class="text-xs text-slate-400 mt-0.5">{{ $transaksi->tagihan ? 'Tagihan Wajib' : 'Lainnya' }}</p>
+                                                    </div>
+                                                @else
+                                                    <div class="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center">
+                                                        <iconify-icon icon="solar:card-send-bold" class="text-rose-500 text-[17px]"></iconify-icon>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-sm font-semibold text-slate-800">{{ \Illuminate\Support\Str::limit($transaksi->keterangan, 20) }}</p>
+                                                        <p class="text-xs text-slate-400 mt-0.5">Pengeluaran Kelas</p>
+                                                    </div>
+                                                @endif
                                             </div>
-                                            <div>
-                                                <p class="text-sm font-semibold text-slate-800">Kas Mingguan</p>
-                                                <p class="text-xs text-slate-400 mt-0.5">Bendahara Kelas</p>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            @if($transaksi->jenis == 'masuk')
+                                                <span class="px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-semibold">Kas Masuk</span>
+                                            @else
+                                                <span class="px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-semibold">Kas Keluar</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <p class="text-sm text-slate-700">{{ \Carbon\Carbon::parse($transaksi->tanggal_sort)->translatedFormat('d M Y') }}</p>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            @if($transaksi->jenis == 'masuk')
+                                                <p class="text-sm font-bold text-teal-600">+ Rp {{ number_format($transaksi->jml_bayar, 0, ',', '.') }}</p>
+                                            @else
+                                                <p class="text-sm font-bold text-rose-500">- Rp {{ number_format($transaksi->nominal, 0, ',', '.') }}</p>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            @if($transaksi->jenis == 'masuk' && $transaksi->status == 'lunas')
+                                                <span class="px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-semibold">Berhasil</span>
+                                            @elseif($transaksi->jenis == 'masuk' && $transaksi->status == 'pending')
+                                                <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold">Diproses</span>
+                                            @else
+                                                <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">Tercatat</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-10 text-center">
+                                            <div class="flex flex-col items-center justify-center text-slate-400">
+                                                <iconify-icon icon="solar:inbox-line-duotone" class="text-5xl mb-3 opacity-50"></iconify-icon>
+                                                <p class="text-sm font-medium">Belum ada riwayat transaksi tercatat.</p>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-semibold">Kas Masuk</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <p class="text-sm text-slate-700">25 Mei 2026</p>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <p class="text-sm font-bold text-teal-600">+ Rp 500.000</p>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-semibold">Berhasil</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center justify-center gap-2">
-                                            <button class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition text-sm">
-                                                <iconify-icon icon="solar:eye-bold"></iconify-icon>
-                                            </button>
-                                            <button class="w-8 h-8 rounded-xl bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition text-sm">
-                                                <iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr class="table-row border-b border-slate-50">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center">
-                                                <iconify-icon icon="solar:card-send-bold" class="text-rose-500 text-[17px]"></iconify-icon>
-                                            </div>
-                                            <div>
-                                                <p class="text-sm font-semibold text-slate-800">Pembelian ATK</p>
-                                                <p class="text-xs text-slate-400 mt-0.5">Pengeluaran Kelas</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-semibold">Kas Keluar</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <p class="text-sm text-slate-700">24 Mei 2026</p>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <p class="text-sm font-bold text-rose-500">- Rp 120.000</p>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold">Diproses</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center justify-center gap-2">
-                                            <button class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition text-sm">
-                                                <iconify-icon icon="solar:eye-bold"></iconify-icon>
-                                            </button>
-                                            <button class="w-8 h-8 rounded-xl bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition text-sm">
-                                                <iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr class="table-row">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center">
-                                                <iconify-icon icon="solar:users-group-rounded-bold" class="text-teal-500 text-[17px]"></iconify-icon>
-                                            </div>
-                                            <div>
-                                                <p class="text-sm font-semibold text-slate-800">Iuran Perpisahan</p>
-                                                <p class="text-xs text-slate-400 mt-0.5">Siswa Kelas</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-semibold">Kas Masuk</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <p class="text-sm text-slate-700">23 Mei 2026</p>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <p class="text-sm font-bold text-teal-600">+ Rp 300.000</p>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-semibold">Berhasil</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center justify-center gap-2">
-                                            <button class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition text-sm">
-                                                <iconify-icon icon="solar:eye-bold"></iconify-icon>
-                                            </button>
-                                            <button class="w-8 h-8 rounded-xl bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition text-sm">
-                                                <iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>

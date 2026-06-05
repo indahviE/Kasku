@@ -38,31 +38,82 @@ class KasController extends Controller
     public function storeKasMasuk(Request $request)
     {
         $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'tagihan_id' => 'nullable|exists:tagihan,id',
             'jml_bayar' => 'required|numeric',
+            'tanggal_bayar' => 'required|date',
+            'metode' => 'required|in:tunai,transfer',
+            'bukti_bayar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
-        Pembayaran::create($request->all());
+        $namaFile = '-';
+        if ($request->hasFile('bukti_bayar')) {
+            $pathBukti = $request->file('bukti_bayar')->store('bukti_pembayaran', 'public');
+            $namaFile = basename($pathBukti);
+        }
 
-        return redirect()->route('kas_masuk')->with('success', 'Kas masuk berhasil ditambahkan.');
+        Pembayaran::create([
+            'user_id' => $request->user_id,
+            'tagihan_id' => $request->tagihan_id,
+            'jml_bayar' => $request->jml_bayar,
+            'tanggal_bayar' => $request->tanggal_bayar,
+            'metode' => $request->metode,
+            'status' => 'lunas',
+            'dicatat_oleh' => auth()->id(),
+            'bukti_bayar' => $namaFile,
+        ]);
+
+        return redirect()->route('bendahara.kas_masuk')->with('success', 'Kas masuk berhasil ditambahkan.');
     }
 
     public function updateKasMasuk(Request $request, $id)
     {
         $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'tagihan_id' => 'nullable|exists:tagihan,id',
             'jml_bayar' => 'required|numeric',
+            'tanggal_bayar' => 'required|date',
+            'metode' => 'required|in:tunai,transfer',
+            'bukti_bayar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
-        Pembayaran::findOrFail($id)->update($request->all());
+        $pembayaran = Pembayaran::findOrFail($id);
+        
+        $namaFile = $pembayaran->bukti_bayar;
+        if ($request->hasFile('bukti_bayar')) {
+            $pathBukti = $request->file('bukti_bayar')->store('bukti_pembayaran', 'public');
+            $namaFile = basename($pathBukti);
+        }
 
-        return redirect()->route('kas_masuk')->with('success', 'Kas masuk berhasil diupdate.');
+        $pembayaran->update([
+            'user_id' => $request->user_id,
+            'tagihan_id' => $request->tagihan_id,
+            'jml_bayar' => $request->jml_bayar,
+            'tanggal_bayar' => $request->tanggal_bayar,
+            'metode' => $request->metode,
+            'bukti_bayar' => $namaFile,
+        ]);
+
+        return redirect()->route('bendahara.kas_masuk')->with('success', 'Kas masuk berhasil diupdate.');
     }
 
-    public function deleteKasMasuk(Request $request)
+    public function verifikasiKasMasuk(Request $request, $id)
     {
-        $id = $request->input('id');
+        $pembayaran = Pembayaran::findOrFail($id);
+        $pembayaran->update([
+            'status' => $request->status, // 'lunas' or 'ditolak'
+            'dicatat_oleh' => auth()->id(), // Bendahara yang verifikasi
+        ]);
+
+        $message = $request->status == 'lunas' ? 'Pembayaran berhasil diverifikasi (Lunas).' : 'Pembayaran ditolak.';
+        return redirect()->back()->with('success', $message);
+    }
+
+    public function deleteKasMasuk($id)
+    {
         Pembayaran::findOrFail($id)->delete();
 
-        return redirect()->route('kas_masuk')->with('success', 'Kas masuk berhasil dihapus.');
+        return redirect()->route('bendahara.kas_masuk')->with('success', 'Kas masuk berhasil dihapus.');
     }
 
 
@@ -90,29 +141,42 @@ class KasController extends Controller
     {
         $request->validate([
             'nominal' => 'required|numeric',
+            'tanggal' => 'required|date',
+            'keterangan' => 'required|string|max:255',
         ]);
 
-        Pengeluaran::create($request->all());
+        Pengeluaran::create([
+            'nominal' => $request->nominal,
+            'tanggal' => $request->tanggal,
+            'keterangan' => $request->keterangan,
+            'dicatat_oleh' => auth()->id(),
+            'kelas_id' => auth()->user()->kelas_id ?? \App\Models\Kelas::first()->id,
+        ]);
 
-        return redirect()->route('kas_keluar')->with('success', 'Kas keluar berhasil ditambahkan.');
+        return redirect()->route('bendahara.kas_keluar')->with('success', 'Kas keluar berhasil ditambahkan.');
     }
 
     public function updateKasKeluar(Request $request, $id)
     {
         $request->validate([
             'nominal' => 'required|numeric',
+            'tanggal' => 'required|date',
+            'keterangan' => 'required|string|max:255',
         ]);
 
-        Pengeluaran::findOrFail($id)->update($request->all());
+        Pengeluaran::findOrFail($id)->update([
+            'nominal' => $request->nominal,
+            'tanggal' => $request->tanggal,
+            'keterangan' => $request->keterangan,
+        ]);
 
-        return redirect()->route('kas_keluar')->with('success', 'Kas keluar berhasil diupdate.');
+        return redirect()->route('bendahara.kas_keluar')->with('success', 'Kas keluar berhasil diupdate.');
     }
 
-    public function deleteKasKeluar(Request $request)
+    public function deleteKasKeluar($id)
     {
-        $id = $request->input('id');
         Pengeluaran::findOrFail($id)->delete();
 
-        return redirect()->route('kas_keluar')->with('success', 'Kas keluar berhasil dihapus.');
+        return redirect()->route('bendahara.kas_keluar')->with('success', 'Kas keluar berhasil dihapus.');
     }
 }

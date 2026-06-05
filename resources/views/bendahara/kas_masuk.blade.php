@@ -37,8 +37,8 @@
             gap: 10px;
         }
 
-        .sidebar-item:hover {
-            background: rgba(255,255,255,.02);
+        .sidebar-item:not(.sidebar-active):hover {
+            background: rgba(255, 255, 255, .02);
             transform: translateX(4px);
             color: #94a3b8;
         }
@@ -193,9 +193,12 @@
                         <a href="{{ route('bendahara.pengaturan') }}" class="flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-slate-50 transition">
                             <iconify-icon icon="solar:settings-linear"></iconify-icon> Pengaturan
                         </a>
-                        <button class="w-full flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-50 transition">
-                            <iconify-icon icon="solar:logout-2-linear"></iconify-icon> Logout
-                        </button>
+                        <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
+                            @csrf
+                            <button type="submit" class="w-full flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-50 transition">
+                                <iconify-icon icon="solar:logout-2-linear"></iconify-icon> Logout
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -208,7 +211,7 @@
                     <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kas Masuk</h2>
                     <p class="text-sm text-slate-500 mt-0.5">Kelola dan pantau semua aliran dana masuk iuran kelas.</p>
                 </div>
-                <button class="h-11 px-5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-md shadow-teal-500/20 active:scale-[0.98] transition">
+                <button onclick="openCreateModal()" class="h-11 px-5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-md shadow-teal-500/20 active:scale-[0.98] transition">
                     <iconify-icon icon="solar:plus-bold" class="text-base"></iconify-icon>
                     Tambah Kas Masuk
                 </button>
@@ -220,9 +223,11 @@
                         <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Total Masuk (Bulan Ini)</p>
                         <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
-                    <p class="text-[22px] font-bold text-slate-900">Rp 4.250<span class="text-slate-400">.000</span></p>
+                    <p class="text-[22px] font-bold text-slate-900">Rp {{ number_format($totalMasukBulanIni, 0, ',', '.') }}</p>
                     <div class="flex items-center gap-2 mt-3">
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-green">↑ 12.1%</span>
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $persenMasuk >= 0 ? 'badge-green' : 'bg-rose-50 text-rose-600' }}">
+                            {{ $persenMasuk >= 0 ? '↑' : '↓' }} {{ number_format(abs($persenMasuk), 1, ',', '.') }}%
+                        </span>
                         <span class="text-[11px] text-slate-400">vs bulan lalu</span>
                     </div>
                 </div>
@@ -232,10 +237,9 @@
                         <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Iuran Wajib</p>
                         <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
-                    <p class="text-[22px] font-bold text-slate-900">Rp 3.800<span class="text-slate-400">.000</span></p>
+                    <p class="text-[22px] font-bold text-slate-900">Rp {{ number_format($iuranWajib, 0, ',', '.') }}</p>
                     <div class="flex items-center gap-2 mt-3">
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-green">↑ 8.3%</span>
-                        <span class="text-[11px] text-slate-400">vs bulan lalu</span>
+                        <span class="text-[11px] text-slate-400">Total terakumulasi</span>
                     </div>
                 </div>
 
@@ -244,10 +248,9 @@
                         <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Denda / Lainnya</p>
                         <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
-                    <p class="text-[22px] font-bold text-slate-900">Rp 450<span class="text-slate-400">.000</span></p>
+                    <p class="text-[22px] font-bold text-slate-900">Rp {{ number_format($dendaLainnya, 0, ',', '.') }}</p>
                     <div class="flex items-center gap-2 mt-3">
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-green">↑ 4.2%</span>
-                        <span class="text-[11px] text-slate-400">vs bulan lalu</span>
+                        <span class="text-[11px] text-slate-400">Total terakumulasi</span>
                     </div>
                 </div>
 
@@ -256,10 +259,9 @@
                         <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Frekuensi Log</p>
                         <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
-                    <p class="text-[22px] font-bold text-slate-900">42 <span class="text-slate-400">Transaksi</span></p>
+                    <p class="text-[22px] font-bold text-slate-900">{{ $pembayaran->count() }} <span class="text-slate-400">Transaksi</span></p>
                     <div class="flex items-center gap-2 mt-3">
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-green">↑ 14.5%</span>
-                        <span class="text-[11px] text-slate-400">vs bulan lalu</span>
+                        <span class="text-[11px] text-slate-400">Total log tercatat</span>
                     </div>
                 </div>
             </div>
@@ -277,9 +279,9 @@
                         <option>Sumbangan / Sukarela</option>
                     </select>
                 </div>
-                <button class="h-11 px-4 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold rounded-xl text-sm transition flex items-center gap-2">
+                <a href="{{ route('bendahara.kas_masuk.cetak') }}" target="_blank" class="h-11 px-4 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold rounded-xl text-sm transition flex items-center gap-2">
                     <iconify-icon icon="solar:printer-linear" class="text-lg"></iconify-icon> Cetak Laporan
-                </button>
+                </a>
             </div>
 
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
@@ -291,33 +293,61 @@
                                 <th class="px-6 py-4">Kategori Kas</th>
                                 <th class="px-6 py-4">Tanggal Masuk</th>
                                 <th class="px-6 py-4 text-right">Jumlah Nominal</th>
+                                <th class="px-6 py-4 text-center">Status</th>
                                 <th class="px-6 py-4 text-center">Aksi / CRUD</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-xs text-slate-600 font-medium">
+                            @forelse($pembayaran as $item)
                             <tr class="hover:bg-slate-50/50 transition">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold text-sm shadow-sm">AS</div>
+                                        <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold text-sm shadow-sm">{{ strtoupper(substr($item->siswa->name ?? 'U', 0, 2)) }}</div>
                                         <div>
-                                            <span class="font-bold text-slate-800 block text-[13px]">Andi Saputra</span>
-                                            <span class="text-[10px] text-slate-400 font-medium">NISN. 002938192</span>
+                                            <span class="font-bold text-slate-800 block text-[13px]">{{ $item->siswa->name ?? 'User Tidak Dikenal' }}</span>
+                                            <span class="text-[10px] text-slate-400 font-medium">{{ $item->siswa->email ?? '-' }}</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="px-2.5 py-1 rounded-lg bg-teal-50 text-teal-600 text-[10px] font-bold border border-teal-100">Iuran Wajib Mingguan</span>
+                                    <span class="px-2.5 py-1 rounded-lg bg-teal-50 text-teal-600 text-[10px] font-bold border border-teal-100">{{ $item->tagihan ? $item->tagihan->nama_tagihan : 'Kas Umum' }}</span>
                                 </td>
-                                <td class="px-6 py-4 text-slate-500">28 Mei 2026, 14:20 PM</td>
-                                <td class="px-6 py-4 text-right font-extrabold text-emerald-500 text-sm">+ Rp 50.000</td>
+                                <td class="px-6 py-4 text-slate-500">{{ \Carbon\Carbon::parse($item->tanggal_bayar)->format('d M Y') }}</td>
+                                <td class="px-6 py-4 text-right font-extrabold text-emerald-500 text-sm">+ Rp {{ number_format($item->jml_bayar, 0, ',', '.') }}</td>
+                                <td class="px-6 py-4 text-center">
+                                    @if($item->status == 'lunas')
+                                        <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[10px] font-bold border border-emerald-100">Diterima</span>
+                                    @elseif($item->status == 'pending')
+                                        <span class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-600 text-[10px] font-bold border border-amber-100">Menunggu</span>
+                                    @elseif($item->status == 'ditolak')
+                                        <span class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 text-[10px] font-bold border border-rose-100">Ditolak</span>
+                                    @else
+                                        <span class="px-2.5 py-1 rounded-lg bg-slate-50 text-slate-600 text-[10px] font-bold border border-slate-100">Belum</span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center justify-center gap-1.5">
-                                        <button title="Detail" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-500 flex items-center justify-center transition"><iconify-icon icon="solar:eye-linear" class="text-base"></iconify-icon></button>
-                                        <button title="Ubah" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 flex items-center justify-center transition"><iconify-icon icon="solar:pen-linear" class="text-base"></iconify-icon></button>
-                                        <button title="Hapus" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition"><iconify-icon icon="solar:trash-bin-trash-linear" class="text-base"></iconify-icon></button>
+                                        @if($item->status == 'pending')
+                                            <button onclick="verifikasiKas({{ $item->id }}, '{{ asset('storage/bukti_pembayaran/' . $item->bukti_bayar) }}')" title="Verifikasi" class="w-8 h-8 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-600 flex items-center justify-center transition"><iconify-icon icon="solar:check-circle-linear" class="text-base"></iconify-icon></button>
+                                        @endif
+                                        <button onclick="openEditModal({{ $item }})" title="Ubah" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 flex items-center justify-center transition"><iconify-icon icon="solar:pen-linear" class="text-base"></iconify-icon></button>
+                                        <button onclick="deleteKas({{ $item->id }})" title="Hapus" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition"><iconify-icon icon="solar:trash-bin-trash-linear" class="text-base"></iconify-icon></button>
                                     </div>
+                                    <form id="delete-form-{{ $item->id }}" action="{{ route('bendahara.kas_masuk.delete', $item->id) }}" method="POST" style="display: none;">
+                                        @csrf
+                                        @method('DELETE')
+                                    </form>
+                                    <form id="verifikasi-form-{{ $item->id }}" action="{{ route('bendahara.kas_masuk.verifikasi', $item->id) }}" method="POST" style="display: none;">
+                                        @csrf
+                                        <input type="hidden" name="status" id="verifikasi-status-{{ $item->id }}">
+                                    </form>
                                 </td>
                             </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="text-center py-6 text-slate-500">Belum ada data kas masuk</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -336,11 +366,243 @@
     </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function toggleDropdown() { document.getElementById('dropdownMenu').classList.toggle('show'); }
     window.addEventListener('click', function(e) {
         if (!e.target.closest('.relative')) { document.getElementById('dropdownMenu').classList.remove('show'); }
     });
+
+    function openCreateModal() {
+        const createModal = document.getElementById('createModal');
+        const createModalContent = document.getElementById('createModalContent');
+        createModal.classList.remove('hidden');
+        setTimeout(() => {
+            createModalContent.classList.remove('scale-95', 'opacity-0');
+            createModalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeCreateModal() {
+        const createModal = document.getElementById('createModal');
+        const createModalContent = document.getElementById('createModalContent');
+        createModalContent.classList.remove('scale-100', 'opacity-100');
+        createModalContent.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            createModal.classList.add('hidden');
+        }, 300);
+    }
+
+    function openEditModal(data) {
+        const editModal = document.getElementById('editModal');
+        const editModalContent = document.getElementById('editModalContent');
+        const editForm = document.getElementById('editForm');
+
+        document.getElementById('edit_user_id').value = data.user_id;
+        document.getElementById('edit_tagihan_id').value = data.tagihan_id || '';
+        document.getElementById('edit_jml_bayar').value = parseFloat(data.jml_bayar);
+        document.getElementById('edit_tanggal_bayar').value = data.tanggal_bayar;
+        editForm.action = `/bendahara/kasMasuk/update/${data.id}`;
+
+        editModal.classList.remove('hidden');
+        setTimeout(() => {
+            editModalContent.classList.remove('scale-95', 'opacity-0');
+            editModalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeEditModal() {
+        const editModal = document.getElementById('editModal');
+        const editModalContent = document.getElementById('editModalContent');
+
+        editModalContent.classList.remove('scale-100', 'opacity-100');
+        editModalContent.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            editModal.classList.add('hidden');
+        }, 300);
+    }
+
+    // SweetAlert Delete
+    function deleteKas(id) {
+        Swal.fire({
+            title: 'Hapus Kas Masuk?',
+            text: "Data kas yang dihapus tidak dapat dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            customClass: {
+                popup: 'rounded-2xl',
+                confirmButton: 'rounded-xl text-sm font-bold',
+                cancelButton: 'rounded-xl text-sm font-bold'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + id).submit();
+            }
+        })
+    }
+
+    function verifikasiKas(id, imageUrl) {
+        Swal.fire({
+            title: 'Verifikasi Pembayaran',
+            text: 'Silakan cek bukti transfer berikut.',
+            imageUrl: imageUrl,
+            imageWidth: 400,
+            imageAlt: 'Bukti Pembayaran',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Terima (Lunas)',
+            denyButtonText: 'Tolak Pembayaran',
+            cancelButtonText: 'Tutup',
+            confirmButtonColor: '#10b981',
+            denyButtonColor: '#ef4444',
+            cancelButtonColor: '#94a3b8',
+            customClass: {
+                popup: 'rounded-2xl',
+                confirmButton: 'rounded-xl text-sm font-bold',
+                denyButton: 'rounded-xl text-sm font-bold',
+                cancelButton: 'rounded-xl text-sm font-bold',
+                image: 'rounded-xl border border-slate-200'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('verifikasi-status-' + id).value = 'lunas';
+                document.getElementById('verifikasi-form-' + id).submit();
+            } else if (result.isDenied) {
+                document.getElementById('verifikasi-status-' + id).value = 'ditolak';
+                document.getElementById('verifikasi-form-' + id).submit();
+            }
+        });
+    }
+
+    // SweetAlert Notifications
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: '{{ session('success') }}',
+            showConfirmButton: false,
+            timer: 2000,
+            customClass: { popup: 'rounded-2xl' }
+        });
+    @endif
+
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: '{{ session('error') }}',
+            showConfirmButton: false,
+            timer: 2000,
+            customClass: { popup: 'rounded-2xl' }
+        });
+    @endif
+
+    @if($errors->any())
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal Memproses Data!',
+            html: '{!! implode("<br>", $errors->all()) !!}',
+            showConfirmButton: true,
+            confirmButtonColor: '#ef4444',
+            customClass: { popup: 'rounded-2xl', confirmButton: 'rounded-xl text-sm font-bold' }
+        });
+    @endif
 </script>
+
+<!-- Modal Tambah -->
+<div id="createModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="createModalContent">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-slate-800">Tambah Kas Masuk</h3>
+            <button type="button" onclick="closeCreateModal()" class="text-slate-400 hover:text-red-500 transition"><iconify-icon icon="solar:close-circle-bold" class="text-2xl"></iconify-icon></button>
+        </div>
+        <form action="{{ route('bendahara.kas_masuk.store') }}" method="POST">
+            @csrf
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Pilih Siswa</label>
+                    <select name="user_id" required class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-teal-500 outline-none transition">
+                        <option value="">Pilih Siswa...</option>
+                        @foreach($siswaList as $siswa)
+                            <option value="{{ $siswa->id }}">{{ $siswa->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kategori Kas (Opsional)</label>
+                    <select name="tagihan_id" class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-teal-500 outline-none transition">
+                        <option value="">Pilih Tagihan / Umum...</option>
+                        @foreach($tagihanList as $tagihan)
+                            <option value="{{ $tagihan->id }}">{{ $tagihan->nama_tagihan }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Jumlah Bayar (Rp)</label>
+                    <input type="number" name="jml_bayar" required class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-teal-500 outline-none transition" placeholder="Contoh: 50000">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tanggal Bayar</label>
+                    <input type="date" name="tanggal_bayar" required class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-teal-500 outline-none transition" value="{{ date('Y-m-d') }}">
+                </div>
+                <input type="hidden" name="metode" value="tunai">
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" onclick="closeCreateModal()" class="px-5 py-2.5 rounded-xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition text-sm">Batal</button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl font-bold text-white bg-teal-500 hover:bg-teal-600 shadow-md shadow-teal-500/20 transition text-sm">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Edit -->
+<div id="editModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="editModalContent">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-slate-800">Ubah Kas Masuk</h3>
+            <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-red-500 transition"><iconify-icon icon="solar:close-circle-bold" class="text-2xl"></iconify-icon></button>
+        </div>
+        <form id="editForm" method="POST">
+            @csrf
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Pilih Siswa</label>
+                    <select name="user_id" id="edit_user_id" required class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-teal-500 outline-none transition">
+                        <option value="">Pilih Siswa...</option>
+                        @foreach($siswaList as $siswa)
+                            <option value="{{ $siswa->id }}">{{ $siswa->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kategori Kas (Opsional)</label>
+                    <select name="tagihan_id" id="edit_tagihan_id" class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-teal-500 outline-none transition">
+                        <option value="">Pilih Tagihan / Umum...</option>
+                        @foreach($tagihanList as $tagihan)
+                            <option value="{{ $tagihan->id }}">{{ $tagihan->nama_tagihan }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Jumlah Bayar (Rp)</label>
+                    <input type="number" name="jml_bayar" id="edit_jml_bayar" required class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-teal-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tanggal Bayar</label>
+                    <input type="date" name="tanggal_bayar" id="edit_tanggal_bayar" required class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-teal-500 outline-none transition">
+                </div>
+                <input type="hidden" name="metode" value="tunai">
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 rounded-xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition text-sm">Batal</button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl font-bold text-white bg-teal-500 hover:bg-teal-600 shadow-md shadow-teal-500/20 transition text-sm">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>

@@ -89,8 +89,14 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
     Route::post('/kasMasuk/update/{id}', [KasController::class, 'updateKasMasuk'])
         ->name('bendahara.kas_masuk.update');
 
-    Route::post('/kasMasuk/delete', [KasController::class, 'deleteKasMasuk'])
+    Route::delete('/kasMasuk/delete/{id}', [KasController::class, 'deleteKasMasuk'])
         ->name('bendahara.kas_masuk.delete');
+
+    Route::post('/kasMasuk/verifikasi/{id}', [KasController::class, 'verifikasiKasMasuk'])
+        ->name('bendahara.kas_masuk.verifikasi');
+
+    Route::get('/kasMasuk/cetak', [BendaharaController::class, 'cetakKasMasuk'])
+        ->name('bendahara.kas_masuk.cetak');
 
 
     //kas pengeluaran
@@ -103,13 +109,13 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
     Route::get('/kasKeluar/edit', [KasController::class, 'editKasKeluar'])
         ->name('bendahara.kas_keluar.edit');
 
-    Route::post('/kasKeluar/store', [KasController::class, 'storeKasMasuk'])
+    Route::post('/kasKeluar/store', [KasController::class, 'storeKasKeluar'])
         ->name('bendahara.kas_keluar.store');
 
     Route::post('/kasKeluar/update/{id}', [KasController::class, 'updateKasKeluar'])
         ->name('bendahara.kas_keluar.update');
 
-    Route::post('/kasKeluar/delete', [KasController::class, 'deleteKasKeluar'])
+    Route::delete('/kasKeluar/delete/{id}', [KasController::class, 'deleteKasKeluar'])
         ->name('bendahara.kas_keluar.delete');
 
 
@@ -135,8 +141,14 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
 
 
     // laporan
-Route::get('/laporan', [BendaharaController::class, 'laporan'])
-    ->name('bendahara.laporan');
+    Route::get('/laporan', [BendaharaController::class, 'laporan'])
+        ->name('bendahara.laporan');
+
+    Route::get('/laporan/export-pdf', [BendaharaController::class, 'exportPdf'])
+        ->name('bendahara.laporan.export_pdf');
+
+    Route::get('/transaksi/export-excel', [BendaharaController::class, 'exportExcel'])
+        ->name('bendahara.transaksi.export_excel');
 
 // profile
 Route::get('/profile', [ProfileController::class, 'edit'])
@@ -152,7 +164,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
     Route::get('/index', [SiswaController::class, 'index'])
         ->name('siswa.index');
-
+    
     Route::patch('/notifikasi/read/{id}', [SiswaController::class, 'readNotification'])
         ->name('siswa.notifikasi.read');
 
@@ -189,9 +201,5 @@ Route::middleware(['auth', 'role:wali_kelas'])->prefix('wali')->group(function (
     Route::get('/rekap-pembayaran', [WalkelController::class, 'rekapPembayaran'])->name('wali.rekap-pembayaran');
     Route::get('/tunggakan', [WalkelController::class, 'tunggakan'])->name('wali.tunggakan');
     Route::get('/pengeluaran', [WalkelController::class, 'pengeluaran'])->name('wali.pengeluaran');
-    Route::get('/transaksi-kas', [WalkelController::class, 'transaksiKas'])->name('wali.transaksi-kas');
-    Route::get('/rekap-pembayaran', [WalkelController::class, 'rekapPembayaran'])->name('wali.rekap-pembayaran');
-    Route::get('/tunggakan', [WalkelController::class, 'tunggakan'])->name('wali.tunggakan');
-    Route::get('/transaksi-kas/cetak-pdf', [WalkelController::class, 'cetakTransaksiPdf'])->name('wali.cetak-transaksi-pdf');
 });
 require __DIR__ . '/auth.php';
