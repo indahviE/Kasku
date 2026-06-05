@@ -192,5 +192,6 @@ Route::middleware(['auth', 'role:wali_kelas'])->prefix('wali')->group(function (
     Route::get('/transaksi-kas', [WalkelController::class, 'transaksiKas'])->name('wali.transaksi-kas');
     Route::get('/rekap-pembayaran', [WalkelController::class, 'rekapPembayaran'])->name('wali.rekap-pembayaran');
     Route::get('/tunggakan', [WalkelController::class, 'tunggakan'])->name('wali.tunggakan');
+    Route::get('/transaksi-kas/cetak-pdf', [WalkelController::class, 'cetakTransaksiPdf'])->name('wali.cetak-transaksi-pdf');
 });
 require __DIR__ . '/auth.php';
