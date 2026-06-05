@@ -40,10 +40,10 @@
             gap:10px;
         }
 
-        .sidebar-item:hover{
-            background:rgba(255,255,255,.02);
-            transform:translateX(4px);
-            color:#94a3b8;
+        .sidebar-item:not(.sidebar-active):hover {
+            background: rgba(255, 255, 255, .02);
+            transform: translateX(4px);
+            color: #94a3b8;
         }
 
         .sidebar-active{
@@ -196,9 +196,12 @@
                         <a href="{{ route('bendahara.pengaturan') }}" class="flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-slate-50 transition">
                             <iconify-icon icon="solar:settings-linear"></iconify-icon> Pengaturan
                         </a>
-                        <button class="w-full flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-50 transition">
-                            <iconify-icon icon="solar:logout-2-linear"></iconify-icon> Logout
-                        </button>
+                        <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
+                            @csrf
+                            <button type="submit" class="w-full flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-50 transition">
+                                <iconify-icon icon="solar:logout-2-linear"></iconify-icon> Logout
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -224,9 +227,11 @@
                         <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Total Dana Masuk</p>
                         <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
-                    <p class="text-[22px] font-bold text-slate-900">Rp 12.450<span class="text-slate-400">.000</span></p>
+                    <p class="text-[22px] font-bold text-slate-900">Rp {{ number_format($totalMasukBulanIni, 0, ',', '.') }}</p>
                     <div class="flex items-center gap-2 mt-3">
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-green">↑ 12.1%</span>
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $persenMasuk >= 0 ? 'badge-green' : 'bg-rose-50 text-rose-600' }}">
+                            {{ $persenMasuk >= 0 ? '↑' : '↓' }} {{ number_format(abs($persenMasuk), 1, ',', '.') }}%
+                        </span>
                         <span class="text-[11px] text-slate-400">vs bulan lalu</span>
                     </div>
                 </div>
@@ -236,9 +241,11 @@
                         <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Total Dana Keluar</p>
                         <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
-                    <p class="text-[22px] font-bold text-slate-900">Rp 4.120<span class="text-slate-400">.000</span></p>
+                    <p class="text-[22px] font-bold text-slate-900">Rp {{ number_format($totalKeluarBulanIni, 0, ',', '.') }}</p>
                     <div class="flex items-center gap-2 mt-3">
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-red">↑ 2.4%</span>
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $persenKeluar > 0 ? 'bg-rose-50 text-rose-600' : 'badge-green' }}">
+                            {{ $persenKeluar > 0 ? '↑' : '↓' }} {{ number_format(abs($persenKeluar), 1, ',', '.') }}%
+                        </span>
                         <span class="text-[11px] text-slate-400">vs bulan lalu</span>
                     </div>
                 </div>
@@ -248,10 +255,9 @@
                         <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Total Log Jurnal</p>
                         <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
-                    <p class="text-[22px] font-bold text-slate-900">158 <span class="text-slate-400">Log</span></p>
+                    <p class="text-[22px] font-bold text-slate-900">{{ $jumlahTransaksi }} <span class="text-slate-400">Data</span></p>
                     <div class="flex items-center gap-2 mt-3">
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-green">↑ 6.3%</span>
-                        <span class="text-[11px] text-slate-400">Aktif</span>
+                        <span class="text-[11px] text-slate-400">Total riwayat mutasi</span>
                     </div>
                 </div>
 
@@ -260,9 +266,9 @@
                         <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Verifikasi Tertunda</p>
                         <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
-                    <p class="text-[22px] font-bold text-amber-600">3 <span class="text-amber-500/60">Log</span></p>
+                    <p class="text-[22px] font-bold text-amber-600">{{ $verifikasiTertunda }} <span class="text-amber-500/60">Log</span></p>
                     <div class="flex items-center gap-2 mt-3">
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-red">Perlu Cek</span>
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $verifikasiTertunda > 0 ? 'badge-red' : 'badge-green' }}">{{ $verifikasiTertunda > 0 ? 'Perlu Cek' : 'Aman' }}</span>
                         <span class="text-[11px] text-slate-400">Belum disetujui</span>
                     </div>
                 </div>
@@ -275,9 +281,9 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <input type="date" class="h-11 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 outline-none focus:bg-white transition cursor-pointer">
-                    <button class="h-11 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition flex items-center gap-2">
+                    <a href="{{ route('bendahara.transaksi.export_excel') }}" class="h-11 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition flex items-center gap-2">
                         <iconify-icon icon="solar:export-linear" class="text-lg"></iconify-icon> Export Excel
-                    </button>
+                    </a>
                 </div>
             </div>
 
@@ -290,56 +296,102 @@
                                 <th class="px-6 py-4">Kategori Jurnal</th>
                                 <th class="px-6 py-4">Tanggal & Waktu</th>
                                 <th class="px-6 py-4 text-right">Jumlah Mutasi</th>
+                                <th class="px-6 py-4 text-center">Status</th>
                                 <th class="px-6 py-4 text-center">Aksi / CRUD</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-xs text-slate-600 font-medium">
+                            @php
+                                $semuaTransaksi = collect();
+                                
+                                foreach($pembayaran as $p) {
+                                    $semuaTransaksi->push((object)[
+                                        'id' => $p->id,
+                                        'tanggal' => $p->tanggal_bayar,
+                                        'deskripsi' => ($p->siswa->name ?? 'User') . ' membayar kas',
+                                        'operator' => 'Sistem',
+                                        'kategori' => 'Kas Masuk',
+                                        'jenis' => 'Masuk',
+                                        'nominal' => $p->jml_bayar,
+                                        'status' => $p->status,
+                                        'bukti_bayar' => $p->bukti_bayar,
+                                    ]);
+                                }
+
+                                foreach($pengeluaran as $p) {
+                                    $semuaTransaksi->push((object)[
+                                        'id' => $p->id,
+                                        'tanggal' => $p->tanggal,
+                                        'deskripsi' => $p->keterangan,
+                                        'operator' => 'Bendahara',
+                                        'kategori' => 'Kas Keluar',
+                                        'jenis' => 'Keluar',
+                                        'nominal' => $p->nominal,
+                                        'status' => 'lunas',
+                                        'bukti_bayar' => null,
+                                    ]);
+                                }
+
+                                $semuaTransaksi = $semuaTransaksi->sortByDesc('tanggal');
+                            @endphp
+
+                            @forelse($semuaTransaksi as $trx)
                             <tr class="hover:bg-slate-50/50 transition">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-lg shadow-sm"><iconify-icon icon="solar:long-arrow-down-left-bold"></iconify-icon></div>
+                                        @if($trx->jenis == 'Masuk')
+                                            <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-lg shadow-sm"><iconify-icon icon="solar:long-arrow-down-left-bold"></iconify-icon></div>
+                                        @else
+                                            <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg shadow-sm"><iconify-icon icon="solar:long-arrow-up-right-bold"></iconify-icon></div>
+                                        @endif
                                         <div>
-                                            <span class="font-bold text-slate-800 block text-[13px]">Andi Saputra membayar kas wajib</span>
-                                            <span class="text-[10px] text-slate-400 font-medium">Operator: Melina Detiana</span>
+                                            <span class="font-bold text-slate-800 block text-[13px]">{{ $trx->deskripsi }}</span>
+                                            <span class="text-[10px] text-slate-400 font-medium">Operator: {{ $trx->operator }}</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="px-2.5 py-1 rounded-lg bg-teal-50 text-teal-600 text-[10px] font-bold border border-teal-100">Kas Masuk</span>
+                                    @if($trx->jenis == 'Masuk')
+                                        <span class="px-2.5 py-1 rounded-lg bg-teal-50 text-teal-600 text-[10px] font-bold border border-teal-100">{{ $trx->kategori }}</span>
+                                    @else
+                                        <span class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 text-[10px] font-bold border border-rose-100">{{ $trx->kategori }}</span>
+                                    @endif
                                 </td>
-                                <td class="px-6 py-4 text-slate-500">28 Mei 2026, 14:20 PM</td>
-                                <td class="px-6 py-4 text-right font-extrabold text-emerald-500 text-sm">+ Rp 50.000</td>
+                                <td class="px-6 py-4 text-slate-500">{{ \Carbon\Carbon::parse($trx->tanggal)->format('d M Y, H:i') }}</td>
+                                <td class="px-6 py-4 text-right font-extrabold {{ $trx->jenis == 'Masuk' ? 'text-emerald-500' : 'text-rose-500' }} text-sm">
+                                    {{ $trx->jenis == 'Masuk' ? '+' : '-' }} Rp {{ number_format($trx->nominal, 0, ',', '.') }}
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    @if($trx->status == 'lunas')
+                                        <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[10px] font-bold border border-emerald-100">Lunas</span>
+                                    @elseif($trx->status == 'pending')
+                                        <span class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-600 text-[10px] font-bold border border-amber-100">Menunggu</span>
+                                    @elseif($trx->status == 'ditolak')
+                                        <span class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 text-[10px] font-bold border border-rose-100">Ditolak</span>
+                                    @else
+                                        <span class="px-2.5 py-1 rounded-lg bg-slate-50 text-slate-600 text-[10px] font-bold border border-slate-100">Belum</span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center justify-center gap-1.5">
-                                        <button title="Detail" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-500 flex items-center justify-center transition"><iconify-icon icon="solar:eye-linear" class="text-base"></iconify-icon></button>
-                                        <button title="Ubah" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 flex items-center justify-center transition"><iconify-icon icon="solar:pen-linear" class="text-base"></iconify-icon></button>
-                                        <button title="Hapus" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition"><iconify-icon icon="solar:trash-bin-trash-linear" class="text-base"></iconify-icon></button>
+                                        @if($trx->jenis == 'Masuk' && $trx->bukti_bayar)
+                                            <button onclick="lihatBukti('{{ asset('storage/bukti_pembayaran/' . $trx->bukti_bayar) }}')" title="Lihat Bukti" class="w-8 h-8 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-600 flex items-center justify-center transition"><iconify-icon icon="solar:gallery-bold" class="text-base"></iconify-icon></button>
+                                        @else
+                                            <button title="Detail" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-500 flex items-center justify-center transition"><iconify-icon icon="solar:eye-linear" class="text-base"></iconify-icon></button>
+                                        @endif
+                                        @if($trx->jenis == 'Masuk')
+                                            <a href="{{ route('bendahara.kas_masuk') }}" title="Ubah di Kas Masuk" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 flex items-center justify-center transition"><iconify-icon icon="solar:pen-linear" class="text-base"></iconify-icon></a>
+                                        @else
+                                            <a href="{{ route('bendahara.kas_keluar') }}" title="Ubah di Kas Keluar" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 flex items-center justify-center transition"><iconify-icon icon="solar:pen-linear" class="text-base"></iconify-icon></a>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
-                            <tr class="hover:bg-slate-50/50 transition">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg shadow-sm"><iconify-icon icon="solar:long-arrow-up-right-bold"></iconify-icon></div>
-                                        <div>
-                                            <span class="font-bold text-slate-800 block text-[13px]">Fotocopy Modul Fisika</span>
-                                            <span class="text-[10px] text-slate-400 font-medium">Operator: Melina Detiana</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 text-[10px] font-bold border border-rose-100">Kas Keluar</span>
-                                </td>
-                                <td class="px-6 py-4 text-slate-500">26 Mei 2026, 09:15 AM</td>
-                                <td class="px-6 py-4 text-right font-extrabold text-rose-500 text-sm">- Rp 120.000</td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center justify-center gap-1.5">
-                                        <button title="Detail" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-500 flex items-center justify-center transition"><iconify-icon icon="solar:eye-linear" class="text-base"></iconify-icon></button>
-                                        <button title="Ubah" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 flex items-center justify-center transition"><iconify-icon icon="solar:pen-linear" class="text-base"></iconify-icon></button>
-                                        <button title="Hapus" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition"><iconify-icon icon="solar:trash-bin-trash-linear" class="text-base"></iconify-icon></button>
-                                    </div>
-                                </td>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="text-center py-6 text-slate-500">Belum ada data transaksi</td>
                             </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -358,11 +410,28 @@
     </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function toggleDropdown() { document.getElementById('dropdownMenu').classList.toggle('show'); }
     window.addEventListener('click', function(e) {
         if (!e.target.closest('.relative')) { document.getElementById('dropdownMenu').classList.remove('show'); }
     });
+
+    function lihatBukti(imageUrl) {
+        Swal.fire({
+            title: 'Bukti Pembayaran Siswa',
+            imageUrl: imageUrl,
+            imageWidth: 400,
+            imageAlt: 'Bukti Pembayaran',
+            confirmButtonText: 'Tutup',
+            confirmButtonColor: '#0f172a',
+            customClass: {
+                popup: 'rounded-2xl',
+                confirmButton: 'rounded-xl text-sm font-bold',
+                image: 'rounded-xl border border-slate-200'
+            }
+        });
+    }
 </script>
 </body>
 </html>

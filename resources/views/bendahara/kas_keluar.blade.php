@@ -37,8 +37,8 @@
             gap: 10px;
         }
 
-        .sidebar-item:hover {
-            background: rgba(255,255,255,.02);
+        .sidebar-item:not(.sidebar-active):hover {
+            background: rgba(255, 255, 255, .02);
             transform: translateX(4px);
             color: #94a3b8;
         }
@@ -193,9 +193,12 @@
                         <a href="{{ route('bendahara.pengaturan') }}" class="flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-slate-50 transition">
                             <iconify-icon icon="solar:settings-linear"></iconify-icon> Pengaturan
                         </a>
-                        <button class="w-full flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-50 transition">
-                            <iconify-icon icon="solar:logout-2-linear"></iconify-icon> Logout
-                        </button>
+                        <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
+                            @csrf
+                            <button type="submit" class="w-full flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-50 transition">
+                                <iconify-icon icon="solar:logout-2-linear"></iconify-icon> Logout
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -208,7 +211,7 @@
                     <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kas Keluar</h2>
                     <p class="text-sm text-slate-500 mt-0.5">Catat pengeluaran operasional dan anggaran kebutuhan kelas.</p>
                 </div>
-                <button class="h-11 px-5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-md shadow-rose-500/20 active:scale-[0.98] transition">
+                <button onclick="openCreateModal()" class="h-11 px-5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-md shadow-rose-500/20 active:scale-[0.98] transition">
                     <iconify-icon icon="solar:minus-circle-bold" class="text-base"></iconify-icon>
                     Catat Kas Keluar
                 </button>
@@ -220,22 +223,25 @@
                         <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Total Keluar (Bulan Ini)</p>
                         <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
-                    <p class="text-[22px] font-bold text-slate-900">Rp 1.850<span class="text-slate-400">.000</span></p>
+                    <p class="text-[22px] font-bold text-slate-900">Rp {{ number_format($totalKeluarBulanIni, 0, ',', '.') }}</p>
                     <div class="flex items-center gap-2 mt-3">
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-red">↑ 2.4%</span>
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $persenKeluar > 0 ? 'bg-rose-50 text-rose-600' : 'badge-green' }}">
+                            {{ $persenKeluar > 0 ? '↑' : '↓' }} {{ number_format(abs($persenKeluar), 1, ',', '.') }}%
+                        </span>
                         <span class="text-[11px] text-slate-400">vs bulan lalu</span>
                     </div>
                 </div>
 
                 <div class="stat-card">
                     <div class="flex items-start justify-between mb-4">
-                        <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Sektor Terbesar (ATK)</p>
+                        <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">
+                            Sektor Terbesar {{ $sektorTerbesar ? '(' . \Illuminate\Support\Str::limit($sektorTerbesar->keterangan, 10) . ')' : '' }}
+                        </p>
                         <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
-                    <p class="text-[22px] font-bold text-slate-900">Rp 750<span class="text-slate-400">.000</span></p>
+                    <p class="text-[22px] font-bold text-slate-900">Rp {{ number_format($sektorTerbesar->total ?? 0, 0, ',', '.') }}</p>
                     <div class="flex items-center gap-2 mt-3">
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-red">↑ 5.1%</span>
-                        <span class="text-[11px] text-slate-400">vs bulan lalu</span>
+                        <span class="text-[11px] text-slate-400">Total terakumulasi</span>
                     </div>
                 </div>
 
@@ -244,10 +250,10 @@
                         <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Kas Aktual Tersisa</p>
                         <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
-                    <p class="text-[22px] font-bold text-teal-600">Rp 2.400<span class="text-teal-400/60">.000</span></p>
+                    <p class="text-[22px] font-bold {{ $kasSisa >= 0 ? 'text-teal-600' : 'text-rose-600' }}">Rp {{ number_format($kasSisa, 0, ',', '.') }}</p>
                     <div class="flex items-center gap-2 mt-3">
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-green">↑ 12.1%</span>
-                        <span class="text-[11px] text-slate-400">Aman</span>
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $kasSisa >= 0 ? 'badge-green' : 'bg-rose-50 text-rose-600' }}">{{ $kasSisa >= 0 ? 'Aman' : 'Defisit' }}</span>
+                        <span class="text-[11px] text-slate-400">Status kas</span>
                     </div>
                 </div>
 
@@ -256,10 +262,9 @@
                         <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Jumlah Alokasi</p>
                         <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
-                    <p class="text-[22px] font-bold text-slate-900">5 <span class="text-slate-400">Sektor</span></p>
+                    <p class="text-[22px] font-bold text-slate-900">{{ $jumlahSektor }} <span class="text-slate-400">Sektor</span></p>
                     <div class="flex items-center gap-2 mt-3">
-                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold badge-green">Stabil</span>
-                        <span class="text-[11px] text-slate-400">Pengeluaran rutin</span>
+                        <span class="text-[11px] text-slate-400">Pengeluaran tercatat</span>
                     </div>
                 </div>
             </div>
@@ -292,29 +297,38 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-xs text-slate-600 font-medium">
+                            @forelse($pengeluaran as $item)
                             <tr class="hover:bg-slate-50/50 transition">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg shadow-sm"><iconify-icon icon="solar:notebook-bold"></iconify-icon></div>
                                         <div>
-                                            <span class="font-bold text-slate-800 block text-[13px]">Fotocopy Modul Fisika</span>
-                                            <span class="text-[10px] text-slate-400 font-medium">Nota Terlampir (JPG)</span>
+                                            <span class="font-bold text-slate-800 block text-[13px]">{{ $item->keterangan }}</span>
+                                            <span class="text-[10px] text-slate-400 font-medium">Pengeluaran</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 text-[10px] font-bold border border-rose-100">ATK Kelas</span>
+                                    <span class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 text-[10px] font-bold border border-rose-100">Umum</span>
                                 </td>
-                                <td class="px-6 py-4 text-slate-500">26 Mei 2026, 09:15 AM</td>
-                                <td class="px-6 py-4 text-right font-extrabold text-rose-500 text-sm">- Rp 120.000</td>
+                                <td class="px-6 py-4 text-slate-500">{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}</td>
+                                <td class="px-6 py-4 text-right font-extrabold text-rose-500 text-sm">- Rp {{ number_format($item->nominal, 0, ',', '.') }}</td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center justify-center gap-1.5">
-                                        <button title="Lihat Nota" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-500 flex items-center justify-center transition"><iconify-icon icon="solar:eye-linear" class="text-base"></iconify-icon></button>
-                                        <button title="Ubah" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 flex items-center justify-center transition"><iconify-icon icon="solar:pen-linear" class="text-base"></iconify-icon></button>
-                                        <button title="Hapus" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition"><iconify-icon icon="solar:trash-bin-trash-linear" class="text-base"></iconify-icon></button>
+                                        <button onclick="openEditModal({{ $item }})" title="Ubah" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 flex items-center justify-center transition"><iconify-icon icon="solar:pen-linear" class="text-base"></iconify-icon></button>
+                                        <button onclick="deleteKas({{ $item->id }})" title="Hapus" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition"><iconify-icon icon="solar:trash-bin-trash-linear" class="text-base"></iconify-icon></button>
                                     </div>
+                                    <form id="delete-form-{{ $item->id }}" action="{{ route('bendahara.kas_keluar.delete', $item->id) }}" method="POST" style="display: none;">
+                                        @csrf
+                                        @method('DELETE')
+                                    </form>
                                 </td>
                             </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="text-center py-6 text-slate-500">Belum ada data kas keluar</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -333,11 +347,179 @@
     </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function toggleDropdown() { document.getElementById('dropdownMenu').classList.toggle('show'); }
     window.addEventListener('click', function(e) {
         if (!e.target.closest('.relative')) { document.getElementById('dropdownMenu').classList.remove('show'); }
     });
+
+    function openCreateModal() {
+        const createModal = document.getElementById('createModal');
+        const createModalContent = document.getElementById('createModalContent');
+        createModal.classList.remove('hidden');
+        setTimeout(() => {
+            createModalContent.classList.remove('scale-95', 'opacity-0');
+            createModalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeCreateModal() {
+        const createModal = document.getElementById('createModal');
+        const createModalContent = document.getElementById('createModalContent');
+        createModalContent.classList.remove('scale-100', 'opacity-100');
+        createModalContent.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            createModal.classList.add('hidden');
+        }, 300);
+    }
+
+    function openEditModal(data) {
+        const editModal = document.getElementById('editModal');
+        const editModalContent = document.getElementById('editModalContent');
+        const editForm = document.getElementById('editForm');
+
+        document.getElementById('edit_keterangan').value = data.keterangan;
+        document.getElementById('edit_nominal').value = parseFloat(data.nominal);
+        document.getElementById('edit_tanggal').value = data.tanggal;
+        editForm.action = `/bendahara/kasKeluar/update/${data.id}`;
+
+        editModal.classList.remove('hidden');
+        setTimeout(() => {
+            editModalContent.classList.remove('scale-95', 'opacity-0');
+            editModalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeEditModal() {
+        const editModal = document.getElementById('editModal');
+        const editModalContent = document.getElementById('editModalContent');
+
+        editModalContent.classList.remove('scale-100', 'opacity-100');
+        editModalContent.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            editModal.classList.add('hidden');
+        }, 300);
+    }
+
+    // SweetAlert Delete
+    function deleteKas(id) {
+        Swal.fire({
+            title: 'Hapus Kas Keluar?',
+            text: "Data kas yang dihapus tidak dapat dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            customClass: {
+                popup: 'rounded-2xl',
+                confirmButton: 'rounded-xl text-sm font-bold',
+                cancelButton: 'rounded-xl text-sm font-bold'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + id).submit();
+            }
+        })
+    }
+
+    // SweetAlert Notifications
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: '{{ session('success') }}',
+            showConfirmButton: false,
+            timer: 2000,
+            customClass: { popup: 'rounded-2xl' }
+        });
+    @endif
+
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: '{{ session('error') }}',
+            showConfirmButton: false,
+            timer: 2000,
+            customClass: { popup: 'rounded-2xl' }
+        });
+    @endif
+
+    @if($errors->any())
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal Memproses Data!',
+            html: '{!! implode("<br>", $errors->all()) !!}',
+            showConfirmButton: true,
+            confirmButtonColor: '#ef4444',
+            customClass: { popup: 'rounded-2xl', confirmButton: 'rounded-xl text-sm font-bold' }
+        });
+    @endif
 </script>
+
+<!-- Modal Tambah -->
+<div id="createModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="createModalContent">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-slate-800">Catat Kas Keluar</h3>
+            <button type="button" onclick="closeCreateModal()" class="text-slate-400 hover:text-red-500 transition"><iconify-icon icon="solar:close-circle-bold" class="text-2xl"></iconify-icon></button>
+        </div>
+        <form action="{{ route('bendahara.kas_keluar.store') }}" method="POST">
+            @csrf
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Keterangan / Keperluan</label>
+                    <input type="text" name="keterangan" required class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-rose-500 outline-none transition" placeholder="Contoh: Beli spidol kelas">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nominal (Rp)</label>
+                    <input type="number" name="nominal" required class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-rose-500 outline-none transition" placeholder="Contoh: 15000">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tanggal Keluar</label>
+                    <input type="date" name="tanggal" required class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-rose-500 outline-none transition" value="{{ date('Y-m-d') }}">
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" onclick="closeCreateModal()" class="px-5 py-2.5 rounded-xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition text-sm">Batal</button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl font-bold text-white bg-rose-500 hover:bg-rose-600 shadow-md shadow-rose-500/20 transition text-sm">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Edit -->
+<div id="editModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="editModalContent">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-slate-800">Ubah Kas Keluar</h3>
+            <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-red-500 transition"><iconify-icon icon="solar:close-circle-bold" class="text-2xl"></iconify-icon></button>
+        </div>
+        <form id="editForm" method="POST">
+            @csrf
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Keterangan / Keperluan</label>
+                    <input type="text" name="keterangan" id="edit_keterangan" required class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-rose-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nominal (Rp)</label>
+                    <input type="number" name="nominal" id="edit_nominal" required class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-rose-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tanggal Keluar</label>
+                    <input type="date" name="tanggal" id="edit_tanggal" required class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-rose-500 outline-none transition">
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 rounded-xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition text-sm">Batal</button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl font-bold text-white bg-rose-500 hover:bg-rose-600 shadow-md shadow-rose-500/20 transition text-sm">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>
