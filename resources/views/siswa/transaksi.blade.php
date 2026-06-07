@@ -13,9 +13,8 @@
 
 <div class="max-w-6xl mx-auto px-4 py-6">
 
-    {{-- HEADER WITH BACK BUTTON AND PROFILE DROPDOWN --}}
     <div class="flex items-center justify-between mb-6">
-        <a href="{{ route('siswa.tunggakan') }}" class="w-12 h-12 rounded-2xl border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition">
+        <a href="{{ route('siswa.index') }}" class="w-12 h-12 rounded-2xl border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
@@ -82,24 +81,8 @@
                 </h1>
 
                 <p class="text-gray-500 mt-5 leading-relaxed text-sm md:text-base max-w-md">
-                    Silahkan lakukan pembayaran melalui scan QRIS di samping, lalu unggah bukti pembayaran Anda untuk divalidasi oleh bendahara.
+                    Silahkan lakukan pembayaran melalui scan QRIS di samping, lalu unggah bukti pembayaran Anda untuk divalidasi.
                 </p>
-
-                {{-- INFORMASI DETIL TAGIHAN OTOMATIS --}}
-                @if($tagihanTerpilih)
-                    <div class="mt-6 p-5 bg-white border border-gray-200 rounded-2xl max-w-md shadow-sm">
-                        <p class="text-xs uppercase tracking-wider text-gray-400 font-bold">Detail Tagihan Terpilih:</p>
-                        <h4 class="font-bold text-gray-900 text-lg mt-1">{{ $tagihanTerpilih->nama_tagihan }}</h4>
-                        <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-100 text-sm">
-                            <span class="text-gray-500">Periode:</span>
-                            <span class="font-semibold text-gray-800">{{ \Carbon\Carbon::parse($tagihanTerpilih->periode)->translatedFormat('F Y') }}</span>
-                        </div>
-                        <div class="flex justify-between items-center mt-1 text-sm">
-                            <span class="text-gray-500">Batas Waktu:</span>
-                            <span class="font-semibold text-red-600">{{ \Carbon\Carbon::parse($tagihanTerpilih->batas_bayar)->translatedFormat('d M Y') }}</span>
-                        </div>
-                    </div>
-                @endif
             </div>
 
             {{-- RIGHT --}}
@@ -126,7 +109,7 @@
                     {{-- TAGIHAN ID --}}
                     <input type="hidden"
                            name="tagihan_id"
-                           value="{{ $tagihanTerpilih ? $tagihanTerpilih->id : request('tagihan_id') }}">
+                           value="{{ request('tagihan_id') }}">
 
                     {{-- FIXED METODE (HIDDEN) SEBAGAI QRIS/TRANSFER --}}
                     <input type="hidden" name="metode" value="transfer">
@@ -134,7 +117,7 @@
                     {{-- QRIS --}}
                     <div class="mb-6">
                         <div class="rounded-3xl border border-gray-200 bg-gray-50 p-4 text-center">
-                            <img src="{{ asset('images/QRIS FATHAN.png') }}"
+                            <img src="{{ asset('images/qris.png') }}"
                                  alt="QRIS"
                                  class="w-44 md:w-56 mx-auto object-contain">
                             <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 mt-4">
@@ -151,10 +134,10 @@
                         <input
                             type="number"
                             name="jml_bayar"
-                            value="{{ old('jml_bayar', $tagihanTerpilih ? $tagihanTerpilih->nominal : '') }}"
-                            @if($tagihanTerpilih) readonly @endif
+                            value="{{ old('jml_bayar', request('nominal')) }}"
+                            @if(request('nominal')) readonly @endif
                             placeholder="Masukkan nominal pembayaran"
-                            class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-black @if($tagihanTerpilih) text-gray-500 cursor-not-allowed font-semibold @endif"
+                            class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-black"
                         >
                     </div>
 
@@ -236,6 +219,7 @@
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('bukti_bayar');
 
+    // Mencegah perilaku default browser (seperti membuka gambar otomatis di tab baru)
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropzone.addEventListener(eventName, preventDefaults, false);
         document.body.addEventListener(eventName, preventDefaults, false);
@@ -246,6 +230,7 @@
         e.stopPropagation();
     }
 
+    // Efek visual saat file diseret di atas Dropzone
     ['dragenter', 'dragover'].forEach(eventName => {
         dropzone.addEventListener(eventName, () => {
             dropzone.classList.add('border-black', 'bg-gray-100');
@@ -258,16 +243,19 @@
         }, false);
     });
 
+    // Menangani file saat dilepas (Dropped)
     dropzone.addEventListener('drop', (e) => {
         const dt = e.dataTransfer;
         const files = dt.files;
 
         if (files.length > 0) {
+            // Masukkan file hasil drag ke dalam input file HTML agar form bisa mengirimkannya
             fileInput.files = files;
             handleFileSelect(files);
         }
     });
 
+    // Memproses file untuk memunculkan gambar (Preview)
     function handleFileSelect(files) {
         const placeholder = document.getElementById('upload-placeholder');
         const previewContainer = document.getElementById('preview-container');
@@ -277,6 +265,7 @@
         if (files && files[0]) {
             const file = files[0];
 
+            // Validasi sederhana memastikan yang dimasukkan adalah gambar
             if (!file.type.startsWith('image/')) {
                 alert('Silakan masukkan file format gambar saja!');
                 return;

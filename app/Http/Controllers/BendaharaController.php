@@ -216,6 +216,39 @@ class BendaharaController extends Controller
             ->with('success', 'Tagihan berhasil dibuat');
     }
 
+    // edit tagihan
+    public function editTagihan($id)
+    {
+        $tagihan = Tagihan::findOrFail($id);
+        return view('bendahara.edit_tagihan', compact('tagihan'));
+    }
+
+    // update tagihan
+    public function updateTagihan(Request $request, $id)
+    {
+        $request->validate([
+            'nama_tagihan' => 'required',
+            'periode'      => 'required|date',
+            'nominal'      => 'required|numeric',
+            'batas_bayar'  => 'required|date',
+            'deskripsi'    => 'nullable'
+        ]);
+
+        $tagihan = Tagihan::findOrFail($id);
+        
+        $tagihan->update([
+            'nama_tagihan' => $request->nama_tagihan,
+            'periode'      => $request->periode,
+            'nominal'      => $request->nominal,
+            'batas_bayar'  => $request->batas_bayar,
+            'deskripsi'    => $request->deskripsi,
+        ]);
+
+        return redirect()
+            ->route('bendahara.tagihan')
+            ->with('success', 'Tagihan berhasil diupdate');
+    }
+
     // hapus tagihan
     public function destroyTagihan($id)
     {

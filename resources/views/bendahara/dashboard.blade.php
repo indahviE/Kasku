@@ -103,7 +103,6 @@
 
     <div class="flex h-screen overflow-hidden">
 
-        <!-- SIDEBAR -->
         <aside class="sidebar w-[250px] fixed h-screen text-white flex flex-col justify-between">
             <div>
                 <div class="px-6 py-6 flex items-center gap-4 border-b border-white/5">
@@ -164,10 +163,8 @@
             </div>
         </aside>
 
-        <!-- MAIN CONTENT -->
         <main class="ml-[250px] flex-1 overflow-y-auto h-screen">
 
-            <!-- HEADER -->
             <div class="h-[70px] bg-white border-b border-slate-200 px-8 flex items-center justify-between shadow-sm">
                 <div>
                     <p class="text-[12px] text-slate-400 font-medium">
@@ -179,25 +176,23 @@
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <!-- NOTIFIKASI -->
                     <button class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition relative">
                         <iconify-icon icon="solar:bell-bold" class="text-[18px] text-slate-700"></iconify-icon>
                         <div class="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 pulse-dot"></div>
                     </button>
 
-                    <!-- PROFILE DROPDOWN -->
                     <div class="relative">
                         <button onclick="toggleDropdown()" class="flex items-center gap-3">
                             <div class="text-right">
                                 <h1 class="text-[13px] font-bold text-slate-800">
-                                    {{ Auth::user()->name ?? 'User' }}
+                                    Nafisah Adelia Putri
                                 </h1>
                                 <p class="text-[11px] text-slate-400">
-                                    {{ Auth::user()->role ?? 'Bendahara' }}
+                                    Bendahara
                                 </p>
                             </div>
                             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white font-bold">
-                                {{ substr(Auth::user()->name ?? 'U', 0, 1) }}
+                                M
                             </div>
                         </button>
 
@@ -219,13 +214,10 @@
                 </div>
             </div>
 
-            <!-- CONTENT -->
             <div class="p-8 space-y-6">
                 
-                <!-- STAT CARDS -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                     
-                    <!-- Sisa Saldo Kas -->
                     <div class="rounded-2xl p-5 text-white flex flex-col justify-between shadow-sm bg-gradient-to-br from-cyan-400 to-emerald-400">
                         <div>
                             <span class="text-[11px] font-medium opacity-90 block">Sisa Saldo Kas</span>
@@ -237,7 +229,6 @@
                         </div>
                     </div>
 
-                    <!-- Total Kas Masuk -->
                     <div class="rounded-2xl p-5 text-white flex flex-col justify-between shadow-sm bg-gradient-to-br from-blue-400 to-indigo-400">
                         <div>
                             <span class="text-[11px] font-medium opacity-90 block">Total Kas Masuk</span>
@@ -249,7 +240,6 @@
                         </div>
                     </div>
 
-                    <!-- Total Kas Keluar -->
                     <div class="rounded-2xl p-5 text-white flex flex-col justify-between shadow-sm bg-gradient-to-br from-pink-400 to-rose-400">
                         <div>
                             <span class="text-[11px] font-medium opacity-90 block">Total Kas Keluar</span>
@@ -261,7 +251,6 @@
                         </div>
                     </div>
 
-                    <!-- Kas Sosial -->
                     <div class="rounded-2xl p-5 text-white flex flex-col justify-between shadow-sm bg-gradient-to-br from-purple-400 to-fuchsia-400">
                         <div>
                             <span class="text-[11px] font-medium opacity-90 block">Tabungan / Kas Sosial</span>
@@ -275,10 +264,8 @@
 
                 </div>
 
-                <!-- CHART & ALLOCATION -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    <!-- Total Arus Kas Chart -->
                     <div class="lg:col-span-2 card p-6 flex flex-col justify-between">
                         <div class="flex items-center justify-between mb-4">
                             <div>
@@ -296,7 +283,6 @@
                         </div>
                     </div>
 
-                    <!-- Alokasi Kas Keluar -->
                     <div class="card p-6 flex flex-col">
                         <div class="flex items-center justify-between mb-2">
                             <h3 class="text-sm font-bold text-slate-800">Alokasi Kas Keluar</h3>
@@ -327,10 +313,8 @@
 
                 </div>
 
-                <!-- TRANSACTION & GOALS -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    <!-- Riwayat Transaksi Terbaru -->
                     <div class="lg:col-span-2 card p-6">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-sm font-bold text-slate-800">Riwayat Transaksi Terbaru</h3>
@@ -384,7 +368,6 @@
                         </div>
                     </div>
 
-                    <!-- Target Kas Kelas -->
                     <div class="card p-6 flex flex-col">
                         <div class="flex items-center justify-between mb-2">
                             <h3 class="text-sm font-bold text-slate-800">Target Kas Kelas</h3>
@@ -429,7 +412,6 @@
     </div>
 
     <script>
-        // CHART CONFIGURATION
         const ctx = document.getElementById('cashChart').getContext('2d');
 
         const gradientFill = ctx.createLinearGradient(0, 0, 0, 300);
@@ -478,12 +460,10 @@
             }
         });
 
-        // DROPDOWN TOGGLE
         function toggleDropdown() {
             document.getElementById('dropdownMenu').classList.toggle('show');
         }
 
-        // CLOSE DROPDOWN WHEN CLICKING OUTSIDE
         window.addEventListener('click', function(e) {
             const dropdown = document.getElementById('dropdownMenu');
             if (!e.target.closest('.relative')) {

@@ -265,7 +265,7 @@
                     <iconify-icon icon="solar:check-circle-bold" class="text-[22px]"></iconify-icon>
 
                     <span class="text-sm font-medium">
-                        Tagihan berhasil dibuat
+                        {{ session('success') }}
                     </span>
 
                 </div>
@@ -350,85 +350,50 @@
 
                             <tbody class="bg-white">
 
+                                @forelse($tagihan as $item)
                                 <tr class="table-row border-b border-slate-100">
 
                                     <td class="py-5 px-6">
-
                                         <h1 class="text-sm font-semibold text-slate-800">
-                                            Kas 1 Minggu
+                                            {{ $item->nama_tagihan }}
                                         </h1>
-
                                     </td>
 
                                     <td class="py-5 px-6 text-sm text-slate-600">
-                                        Mei 2026
+                                        {{ \Carbon\Carbon::parse($item->periode)->translatedFormat('F Y') }}
                                     </td>
 
                                     <td class="py-5 px-6 text-sm font-bold text-emerald-600">
-                                        Rp 50.000
+                                        Rp {{ number_format($item->nominal, 0, ',', '.') }}
                                     </td>
 
                                     <td class="py-5 px-6 text-sm text-slate-600">
-                                        30 Mei 2026
+                                        {{ \Carbon\Carbon::parse($item->batas_bayar)->translatedFormat('d F Y') }}
                                     </td>
 
                                     <td class="py-5 px-6">
-
                                         <div class="flex items-center justify-center gap-2">
-
-                                            <button class="w-9 h-9 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center hover:scale-105 transition">
+                                            <a href="{{ route('bendahara.tagihan.edit', $item->id) }}" class="w-9 h-9 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center hover:scale-105 transition">
                                                 <iconify-icon icon="solar:pen-bold"></iconify-icon>
-                                            </button>
-
-                                            <button class="w-9 h-9 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center hover:scale-105 transition">
-                                                <iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon>
-                                            </button>
-
+                                            </a>
+                                            <form action="{{ route('bendahara.tagihan.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus tagihan ini?');" class="m-0 p-0 inline-block">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="w-9 h-9 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center hover:scale-105 transition">
+                                                    <iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon>
+                                                </button>
+                                            </form>
                                         </div>
-
                                     </td>
 
                                 </tr>
-
-                                <tr class="table-row">
-
-                                    <td class="py-5 px-6">
-
-                                        <h1 class="text-sm font-semibold text-slate-800">
-                                            Iuran Perpisahan
-                                        </h1>
-
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="py-10 text-center text-slate-500">
+                                        Belum ada data tagihan kelas.
                                     </td>
-
-                                    <td class="py-5 px-6 text-sm text-slate-600">
-                                        Juni 2026
-                                    </td>
-
-                                    <td class="py-5 px-6 text-sm font-bold text-emerald-600">
-                                        Rp 150.000
-                                    </td>
-
-                                    <td class="py-5 px-6 text-sm text-slate-600">
-                                        15 Juni 2026
-                                    </td>
-
-                                    <td class="py-5 px-6">
-
-                                        <div class="flex items-center justify-center gap-2">
-
-                                            <button class="w-9 h-9 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center hover:scale-105 transition">
-                                                <iconify-icon icon="solar:pen-bold"></iconify-icon>
-                                            </button>
-
-                                            <button class="w-9 h-9 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center hover:scale-105 transition">
-                                                <iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon>
-                                            </button>
-
-                                        </div>
-
-                                    </td>
-
                                 </tr>
+                                @endforelse
 
                             </tbody>
 
