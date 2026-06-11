@@ -205,7 +205,7 @@
         </div>
 
         <div class="p-7 space-y-6 flex-1">
-            
+
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kas Keluar</h2>

@@ -22,13 +22,13 @@
         }
 
         .sidebar {
-            background: #0a0f1d; 
+            background: #0a0f1d;
             overflow: hidden;
         }
 
         .sidebar-item {
             transition: all .25s ease;
-            color: #64748b; 
+            color: #64748b;
             font-size: 14px;
             padding: 12px 16px;
             border-radius: 12px;
@@ -205,7 +205,7 @@
         </div>
 
         <div class="p-7 space-y-6 flex-1">
-            
+
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kas Masuk</h2>
@@ -293,8 +293,9 @@
                                 <th class="px-6 py-4">Kategori Kas</th>
                                 <th class="px-6 py-4">Tanggal Masuk</th>
                                 <th class="px-6 py-4 text-right">Jumlah Nominal</th>
+                                <th class="px-6 py-4 text-center">Bukti Pembayaran</th>
                                 <th class="px-6 py-4 text-center">Status</th>
-                                <th class="px-6 py-4 text-center">Aksi / CRUD</th>
+                                <th class="px-6 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-xs text-slate-600 font-medium">
@@ -313,7 +314,18 @@
                                     <span class="px-2.5 py-1 rounded-lg bg-teal-50 text-teal-600 text-[10px] font-bold border border-teal-100">{{ $item->tagihan ? $item->tagihan->nama_tagihan : 'Kas Umum' }}</span>
                                 </td>
                                 <td class="px-6 py-4 text-slate-500">{{ \Carbon\Carbon::parse($item->tanggal_bayar)->format('d M Y') }}</td>
-                                <td class="px-6 py-4 text-right font-extrabold text-emerald-500 text-sm">+ Rp {{ number_format($item->jml_bayar, 0, ',', '.') }}</td>
+                                <td class="px-6 py-4 text-rizght font-extrabold text-emerald-500 text-sm">+ Rp {{ number_format($item->jml_bayar, 0, ',', '.') }}</td>
+                                    <td class="px-6 py-4 text-center">
+                                    @if($item->bukti_bayar)
+                                        <button onclick="lihatBukti('{{ asset('storage/bukti_pembayaran/' . $item->bukti_bayar) }}')"
+                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 text-[10px] font-bold border border-blue-100 transition">
+                                            <iconify-icon icon="solar:eye-linear" class="text-base"></iconify-icon>
+                                            Lihat
+                                        </button>
+                                    @else
+                                        <span class="text-slate-400 text-[10px]">-</span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4 text-center">
                                     @if($item->status == 'lunas')
                                         <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[10px] font-bold border border-emerald-100">Diterima</span>
@@ -352,15 +364,39 @@
                     </table>
                 </div>
 
-                <div class="p-4 border-t border-slate-200 flex items-center justify-between bg-slate-50/50">
-                    <p class="text-xs text-slate-400 font-medium">Menampilkan <span class="font-semibold text-slate-700">1 dari 24</span> data kas masuk</p>
-                    <div class="flex items-center gap-1">
-                        <button class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-100 text-xs font-semibold transition">‹</button>
-                        <button class="px-3 py-1.5 bg-teal-500 text-white rounded-lg text-xs font-bold shadow-sm shadow-teal-500/10">1</button>
-                        <button class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-100 text-xs font-semibold transition">›</button>
-                    </div>
-                </div>
-            </div>
+{{-- PAGINATION --}}
+@if($pembayaran->hasPages())
+<div class="p-4 border-t border-slate-200 flex items-center justify-between bg-slate-50/50">
+    <p class="text-xs text-slate-400 font-medium">
+        Menampilkan <span class="font-semibold text-slate-700">{{ $pembayaran->firstItem() }} - {{ $pembayaran->lastItem() }}</span>
+        dari <span class="font-semibold text-slate-700">{{ $pembayaran->total() }}</span> data kas masuk
+    </p>
+    <div class="flex items-center gap-1">
+        {{-- Tombol Previous --}}
+        @if($pembayaran->onFirstPage())
+            <button disabled class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-300 text-xs font-semibold opacity-50">‹</button>
+        @else
+            <a href="{{ $pembayaran->previousPageUrl() }}" class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-100 text-xs font-semibold transition">‹</a>
+        @endif
+
+        {{-- Nomor Halaman --}}
+        @for($i = 1; $i <= $pembayaran->lastPage(); $i++)
+            @if($i == $pembayaran->currentPage())
+                <button class="px-3 py-1.5 bg-teal-500 text-white rounded-lg text-xs font-bold shadow-sm shadow-teal-500/10">{{ $i }}</button>
+            @else
+                <a href="{{ $pembayaran->url($i) }}" class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-100 text-xs font-semibold transition">{{ $i }}</a>
+            @endif
+        @endfor
+
+        {{-- Tombol Next --}}
+        @if($pembayaran->hasMorePages())
+            <a href="{{ $pembayaran->nextPageUrl() }}" class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-100 text-xs font-semibold transition">›</a>
+        @else
+            <button disabled class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-300 text-xs font-semibold opacity-50">›</button>
+        @endif
+    </div>
+</div>
+@endif
 
         </div>
     </main>
@@ -477,6 +513,23 @@
             }
         });
     }
+    // Lihat bukti pembayaran
+function lihatBukti(imageUrl) {
+    Swal.fire({
+        title: 'Bukti Pembayaran',
+        imageUrl: imageUrl,
+        imageWidth: 400,
+        imageAlt: 'Bukti Pembayaran Siswa',
+        showConfirmButton: true,
+        confirmButtonText: 'Tutup',
+        confirmButtonColor: '#0E7C7B',
+        customClass: {
+            popup: 'rounded-2xl',
+            confirmButton: 'rounded-xl text-sm font-bold',
+            image: 'rounded-xl border border-slate-200'
+        }
+    });
+}
 
     // SweetAlert Notifications
     @if(session('success'))

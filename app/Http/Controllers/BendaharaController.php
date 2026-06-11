@@ -65,7 +65,7 @@ public function dashboard()
             Pembayaran::count() +
             Pengeluaran::count();
 
-        $pembayaran = Pembayaran::with(['siswa', 'tagihan'])->latest()->get();
+        $pembayaran = Pembayaran::with(['siswa', 'tagihan'])->latest()->paginate(5);
         $siswaList = \App\Models\User::where('role', 'siswa')->get();
         $tagihanList = \App\Models\Tagihan::latest()->get();
 

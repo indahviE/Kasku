@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\Pembayaran;
 use App\Models\Pengeluaran;
 use App\Models\Tagihan;
-use Illuminate\Support\Facades\Storage;
 
 class KasController extends Controller
 {
@@ -23,38 +22,29 @@ class KasController extends Controller
     // =========================
     // KAS MASUK - STORE
     // =========================
-public function storeKasMasuk(Request $request)
-{
-    $request->validate([
-        'user_id'       => 'required|exists:users,id',
-        'tagihan_id'    => 'nullable|exists:tagihan,id',
-        'jml_bayar'     => 'required|numeric|min:1',
-        'tanggal_bayar' => 'required|date',
-        'metode'        => 'required|in:tunai,transfer',
-        'bukti_bayar'   => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
-    ]);
+    public function storeKasMasuk(Request $request)
+    {
+        $request->validate([
+            'user_id'       => 'required|exists:users,id',
+            'tagihan_id'    => 'nullable|exists:tagihan,id',
+            'jml_bayar'     => 'required|numeric|min:1',
+            'tanggal_bayar' => 'required|date',
+            'metode'        => 'required|in:tunai,transfer'
+        ]);
 
-    $namaFile = null;
-    if ($request->hasFile('bukti_bayar')) {
-        $pathBukti = $request->file('bukti_bayar')
-            ->store('bukti_pembayaran', 'public');
-        $namaFile = basename($pathBukti);
+        Pembayaran::create([
+            'user_id'       => $request->user_id,
+            'tagihan_id'    => $request->tagihan_id,
+            'jml_bayar'     => $request->jml_bayar,
+            'tanggal_bayar' => $request->tanggal_bayar,
+            'metode'        => $request->metode,
+            'status'        => 'pending', // default pending, tunggu verifikasi bendahara
+        ]);
+
+        return redirect()
+            ->route('bendahara.kas_masuk')
+            ->with('success', 'Kas masuk berhasil dicatat. Menunggu verifikasi bendahara.');
     }
-
-    Pembayaran::create([
-        'user_id'       => $request->user_id,
-        'tagihan_id'    => $request->tagihan_id,
-        'jml_bayar'     => $request->jml_bayar,
-        'tanggal_bayar' => $request->tanggal_bayar,
-        'metode'        => $request->metode,
-        'status'        => 'lunas', // ✅ LANGSUNG LUNAS
-        'bukti_bayar'   => $namaFile,
-    ]);
-
-    return redirect()
-        ->route('bendahara.kas_masuk')
-        ->with('success', 'Kas masuk berhasil dicatat & diverifikasi.');
-}
 
     // =========================
     // KAS MASUK - EDIT
@@ -70,45 +60,30 @@ public function storeKasMasuk(Request $request)
     // =========================
     // KAS MASUK - UPDATE
     // =========================
-public function updateKasMasuk(Request $request, $id)
-{
-    $request->validate([
-        'user_id'       => 'required|exists:users,id',
-        'tagihan_id'    => 'nullable|exists:tagihan,id',
-        'jml_bayar'     => 'required|numeric|min:1',
-        'tanggal_bayar' => 'required|date',
-        'metode'        => 'required|in:tunai,transfer',
-        'bukti_bayar'   => 'nullable|image|mimes:jpg,jpeg,png|max:2048' // ✅ OPTIONAL
-    ]);
+    public function updateKasMasuk(Request $request, $id)
+    {
+        $request->validate([
+            'user_id'       => 'required|exists:users,id',
+            'tagihan_id'    => 'nullable|exists:tagihan,id',
+            'jml_bayar'     => 'required|numeric|min:1',
+            'tanggal_bayar' => 'required|date',
+            'metode'        => 'required|in:tunai,transfer'
+        ]);
 
-    $pembayaran = Pembayaran::findOrFail($id);
+        $pembayaran = Pembayaran::findOrFail($id);
 
-    $namaFile = $pembayaran->bukti_bayar; // Keep old file
+        $pembayaran->update([
+            'user_id'       => $request->user_id,
+            'tagihan_id'    => $request->tagihan_id,
+            'jml_bayar'     => $request->jml_bayar,
+            'tanggal_bayar' => $request->tanggal_bayar,
+            'metode'        => $request->metode,
+        ]);
 
-if ($request->hasFile('bukti_bayar')) {
-    // Hapus file lama (optional)
-    if ($pembayaran->bukti_bayar) {
-        @unlink(public_path('storage/bukti_pembayaran/' . $pembayaran->bukti_bayar));
+        return redirect()
+            ->route('bendahara.kas_masuk')
+            ->with('success', 'Kas masuk berhasil diperbarui.');
     }
-
-    $pathBukti = $request->file('bukti_bayar')
-        ->store('bukti_pembayaran', 'public');
-    $namaFile = basename($pathBukti);
-}
-
-    $pembayaran->update([
-        'user_id'       => $request->user_id,
-        'tagihan_id'    => $request->tagihan_id,
-        'jml_bayar'     => $request->jml_bayar,
-        'tanggal_bayar' => $request->tanggal_bayar,
-        'metode'        => $request->metode,
-        'bukti_bayar'   => $namaFile, // ✅ Bisa null
-    ]);
-
-    return redirect()
-        ->route('bendahara.kas_masuk')
-        ->with('success', 'Kas masuk berhasil diperbarui.');
-}
 
     // =========================
     // KAS MASUK - DELETE
@@ -158,24 +133,26 @@ if ($request->hasFile('bukti_bayar')) {
     // =========================
     // KAS KELUAR - STORE
     // =========================
-    public function storeKasKeluar(Request $request)
-    {
-        $request->validate([
-            'keterangan' => 'required|string',
-            'nominal'    => 'required|numeric|min:1',
-            'tanggal'    => 'required|date'
-        ]);
+public function storeKasKeluar(Request $request)
+{
+    $request->validate([
+        'keterangan' => 'required|string',
+        'nominal'    => 'required|numeric|min:1',
+        'tanggal'    => 'required|date'
+    ]);
 
-        Pengeluaran::create([
-            'keterangan' => $request->keterangan,
-            'nominal'    => $request->nominal,
-            'tanggal'    => $request->tanggal
-        ]);
+    Pengeluaran::create([
+        'kelas_id'    => auth()->user()->kelas_id, // ✅ Ambil dari bendahara
+        'keterangan'  => $request->keterangan,
+        'nominal'     => $request->nominal,
+        'tanggal'     => $request->tanggal,
+        'dicatat_oleh' => auth()->id()
+    ]);
 
-        return redirect()
-            ->route('bendahara.kas_keluar')
-            ->with('success', 'Kas keluar berhasil dicatat.');
-    }
+    return redirect()
+        ->route('bendahara.kas_keluar')
+        ->with('success', 'Kas keluar berhasil dicatat.');
+}
 
     // =========================
     // KAS KELUAR - EDIT
