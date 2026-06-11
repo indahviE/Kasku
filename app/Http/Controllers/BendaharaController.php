@@ -189,32 +189,45 @@ class BendaharaController extends Controller
 
     // simpan tagihan
     public function storeTagihan(Request $request)
-    {
-        $request->validate([
-            'nama_tagihan' => 'required',
-            'periode'      => 'required|date',
-            'nominal'      => 'required|numeric',
-            'batas_bayar'  => 'required|date',
-            'deskripsi'    => 'nullable'
+{
+    $request->validate([
+        'nama_tagihan' => 'required',
+        'periode'      => 'required|date',
+        'nominal'      => 'required|numeric',
+        'batas_bayar'  => 'required|date',
+        'deskripsi'    => 'nullable'
+    ]);
+
+    // 1. Simpan induk data tagihan terlebih dahulu
+    $tagihan = Tagihan::create([
+        'user_id'      => auth()->id(), // Bendahara yang membuat
+        'created_by'   => auth()->id(),
+        'nama_tagihan' => $request->nama_tagihan,
+        'periode'      => $request->periode,
+        'nominal'      => $request->nominal,
+        'batas_bayar'  => $request->batas_bayar,
+        'deskripsi'    => $request->deskripsi,
+    ]);
+
+    // 2. Ambil semua data user yang memiliki role 'siswa'
+    $daftarSiswa = \App\Models\User::where('role', 'siswa')->get();
+
+    // 3. SEBARKAN KE SELURUH SISWA (Masukkan data ke tabel tunggakan)
+    foreach ($daftarSiswa as $siswa) {
+        // Asumsi nama model jembatan Anda adalah 'Tunggakan' atau disesuaikan dengan Query Builder:
+        \DB::table('tunggakan')->insert([
+            'tagihan_id' => $tagihan->id,       // Mengambil ID dari tagihan yang baru dibuat di atas
+            'user_id'    => $siswa->id,         // ID Siswa yang mendapatkan tagihan
+            'status'     => 'belum_bayar',      // Status default sesuai struktur enum database Anda
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
-
-        Tagihan::create([
-
-            // wajib karena database minta ini
-            'user_id'      => auth()->id(),
-            'created_by'   => auth()->id(),
-
-            'nama_tagihan' => $request->nama_tagihan,
-            'periode'      => $request->periode,
-            'nominal'      => $request->nominal,
-            'batas_bayar'  => $request->batas_bayar,
-            'deskripsi'    => $request->deskripsi,
-        ]);
-
-        return redirect()
-            ->route('bendahara.tagihan')
-            ->with('success', 'Tagihan berhasil dibuat');
     }
+
+    return redirect()
+        ->route('bendahara.tagihan')
+        ->with('success', 'Tagihan berhasil dibuat dan disebarkan ke seluruh siswa.');
+}
 
     // edit tagihan
     public function editTagihan($id)
@@ -365,4 +378,6 @@ class BendaharaController extends Controller
     {
         return view('bendahara.pengaturan');
     }
+
+    
 }
