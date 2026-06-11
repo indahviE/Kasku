@@ -221,13 +221,13 @@ class SiswaController extends Controller
     public function detailTagihan($id)
     {
         $tunggakanItem = \App\Models\Tunggakan::with('tagihan')
-            ->where('user_id', auth()->id())
+            ->where('user_id', Auth::user()->id)
             ->findOrFail($id);
 
         $tagihan = $tunggakanItem->tagihan;
 
         $pembayaran = Pembayaran::where('tagihan_id', $tagihan->id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', Auth::user()->id)
             ->first();
 
         $lunas = $tunggakanItem->status === 'lunas';

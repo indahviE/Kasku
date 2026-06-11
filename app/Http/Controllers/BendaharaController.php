@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Pembayaran;
 use App\Models\Pengeluaran;
 use App\Models\Tagihan;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BendaharaController extends Controller
 {
@@ -111,7 +113,7 @@ public function dashboard()
     {
         $totalKeluar = Pengeluaran::sum('nominal') ?? 0;
 
-        $pengeluaran = Pengeluaran::latest()->get();
+        $pengeluaran = Pengeluaran::where('kelas_id', Auth::user()->kelas_id)->latest()->get();
 
         $totalKeluarBulanIni = Pengeluaran::whereMonth('tanggal', now()->month)
                                           ->whereYear('tanggal', now()->year)
@@ -129,7 +131,7 @@ public function dashboard()
 
         $totalMasuk = Pembayaran::sum('jml_bayar') ?? 0;
         $kasSisa = $totalMasuk - $totalKeluar;
-        $jumlahSektor = Pengeluaran::distinct('keterangan')->count('keterangan');
+        $jumlahSektor = Pengeluaran::where('kelas_id', Auth::user()->kelas_id)->distinct('keterangan')->count('keterangan');
 
         return view('bendahara.kas_keluar', compact(
             'pengeluaran',
@@ -204,8 +206,8 @@ public function dashboard()
 
     // 1. Simpan induk data tagihan terlebih dahulu
     $tagihan = Tagihan::create([
-        'user_id'      => auth()->id(), // Bendahara yang membuat
-        'created_by'   => auth()->id(),
+        'user_id'      => Auth::user()->id, // Bendahara yang membuat
+        'created_by'   => Auth::user()->id,
         'nama_tagihan' => $request->nama_tagihan,
         'periode'      => $request->periode,
         'nominal'      => $request->nominal,
@@ -219,7 +221,7 @@ public function dashboard()
     // 3. SEBARKAN KE SELURUH SISWA (Masukkan data ke tabel tunggakan)
     foreach ($daftarSiswa as $siswa) {
         // Asumsi nama model jembatan Anda adalah 'Tunggakan' atau disesuaikan dengan Query Builder:
-        \DB::table('tunggakan')->insert([
+        DB::table('tunggakan')->insert([
             'tagihan_id' => $tagihan->id,       // Mengambil ID dari tagihan yang baru dibuat di atas
             'user_id'    => $siswa->id,         // ID Siswa yang mendapatkan tagihan
             'status'     => 'belum_bayar',      // Status default sesuai struktur enum database Anda
