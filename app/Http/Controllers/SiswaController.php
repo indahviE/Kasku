@@ -347,6 +347,45 @@ class SiswaController extends Controller
         return back();
     }
 
+    public function search(Request $request)
+{
+    $keyword = $request->q;
+
+    $tagihan = Tagihan::where('user_id', auth()->id())
+    ->where(function ($query) use ($keyword) {
+
+        $query->where('nama_tagihan', 'like', "%{$keyword}%")
+              ->orWhere('periode', 'like', "%{$keyword}%");
+
+    })
+    ->get();
+
+    $pembayaran = Pembayaran::with('tagihan')
+        ->where('user_id', auth()->id())
+        ->where(function ($query) use ($keyword) {
+
+            $query->where('metode', 'like', "%{$keyword}%")
+                  ->orWhere('status', 'like', "%{$keyword}%")
+                  ->orWhereHas('tagihan', function ($q) use ($keyword) {
+
+                        $q->where(
+                            'nama_tagihan',
+                            'like',
+                            "%{$keyword}%"
+                        );
+
+                  });
+
+        })
+        ->latest()
+        ->get();
+
+    return response()->json([
+        'tagihan' => $tagihan,
+        'pembayaran' => $pembayaran,
+    ]);
+}
+
     public function allNotifications()
     {
         $user = Auth::user();

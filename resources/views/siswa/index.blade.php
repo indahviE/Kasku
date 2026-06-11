@@ -509,65 +509,45 @@
     });
 
     //LIVE SEARCH
+function initSearch(inputId, resultId)
+{
+    const searchInput = document.getElementById(inputId);
+    const results = document.getElementById(resultId);
 
+    if(!searchInput || !results) return;
 
+    searchInput.addEventListener('keyup', function(){
 
+        let keyword = this.value.trim();
 
-const searchInput = document.getElementById('searchInput');
-const results = document.getElementById('searchResults');
+        if(keyword.length < 2)
+        {
+            results.classList.add('hidden');
+            results.innerHTML = '';
+            return;
+        }
 
-
-searchInput.addEventListener('keydown', function(e){
-
-    if(e.key === 'Enter'){
-        e.preventDefault();
-    }
-
-});
-
-searchInput.addEventListener('keyup', function(){
-
-    let keyword = this.value.trim();
-
-    if(keyword.length < 2){
-
-        results.classList.add('hidden');
-        results.innerHTML = '';
-        return;
-
-    }
-
-    fetch(`/siswa/search?q=${keyword}`)
-
+        fetch(`/siswa/search?q=${keyword}`)
         .then(response => response.json())
-
         .then(data => {
 
             let html = '';
 
-            // ======================
-            // TAGIHAN
-            // ======================
-
-            if(data.tagihan.length){
-
-                html += `
-                    <div class="px-4 pt-4 pb-2 text-xs font-bold uppercase text-gray-400">
-                        Tagihan
-                    </div>
-                `;
+            if(data.tagihan.length)
+            {
+                html += '<div class="px-4 py-2 text-xs font-bold text-gray-400 uppercase">Tagihan</div>';
 
                 data.tagihan.forEach(item => {
 
                     html += `
                         <a href="/siswa/detail-tunggakan/${item.id}"
-                           class="block px-4 py-3 hover:bg-gray-50 transition border-t border-gray-100">
+                           class="block px-4 py-3 hover:bg-gray-50 border-t border-gray-100">
 
-                            <div class="font-semibold text-gray-900">
+                            <div class="font-semibold">
                                 ${item.nama_tagihan}
                             </div>
 
-                            <div class="text-sm text-gray-500 mt-1">
+                            <div class="text-sm text-gray-500">
                                 Rp ${new Intl.NumberFormat('id-ID').format(item.nominal)}
                             </div>
 
@@ -575,138 +555,24 @@ searchInput.addEventListener('keyup', function(){
                     `;
 
                 });
-
             }
-
-            // ======================
-            // PEMBAYARAN
-            // ======================
-
-            if(data.pembayaran.length){
-
-                html += `
-                    <div class="px-4 pt-4 pb-2 text-xs font-bold uppercase text-gray-400">
-                        Riwayat Pembayaran
-                    </div>
-                `;
-
-                data.pembayaran.forEach(item => {
-
-                    html += `
-                        <a href="/siswa/riwayat"
-                           class="block px-4 py-3 hover:bg-gray-50 transition border-t border-gray-100">
-
-                            <div class="font-semibold text-gray-900">
-                                ${item.metode}
-                            </div>
-
-                            <div class="text-sm text-gray-500 mt-1">
-                                Status: ${item.status}
-                            </div>
-
-                        </a>
-                    `;
-
-                });
-
-            }
-
-            // ======================
-            // DATA KAS
-            // ======================
-
-            if(data.kas.length){
-
-                html += `
-                    <div class="px-4 pt-4 pb-2 text-xs font-bold uppercase text-gray-400">
-                        Data Kas
-                    </div>
-                `;
-
-                data.kas.forEach(item => {
-
-                    html += `
-                        <a href="/siswa/laporan-kas"
-                           class="block px-4 py-3 hover:bg-gray-50 transition border-t border-gray-100">
-
-                            <div class="font-semibold text-gray-900">
-                                ${item.keterangan}
-                            </div>
-
-                            <div class="text-sm text-gray-500 mt-1">
-                                Rp ${new Intl.NumberFormat('id-ID').format(item.nominal)}
-                            </div>
-
-                        </a>
-                    `;
-
-                });
-
-            }
-
-            // ======================
-            // KOSONG
-            // ======================
-
-            if(
-                data.tagihan.length === 0 &&
-                data.pembayaran.length === 0 &&
-                data.kas.length === 0
-            ){
-
-                html = `
-                    <div class="p-6 text-center">
-
-                        <p class="text-sm text-gray-500">
-                            Data tidak ditemukan
-                        </p>
-
-                    </div>
-                `;
-
-            }
-
-            console.log(data);
-            console.log(results);
 
             results.innerHTML = html;
             results.classList.remove('hidden');
 
-        })
-
-        .catch(error => {
-
-            console.error(error);
-
         });
 
-});
+    });
+}
 
-// Tutup dropdown saat klik luar
+initSearch(
+    'searchInputDesktop',
+    'searchResultsDesktop'
+);
 
-document.addEventListener('click', function(e){
-
-    if(
-        !searchInput.contains(e.target) &&
-        !results.contains(e.target)
-    ){
-
-        results.classList.add('hidden');
-
-    }
-
-});
-
-// Buka lagi saat fokus ke input
-
-searchInput.addEventListener('focus', function(){
-
-    if(results.innerHTML.trim() !== ''){
-
-        results.classList.remove('hidden');
-
-    }
-
-});
+initSearch(
+    'searchInputMobile',
+    'searchResultsMobile'
+);
 
 </script>
