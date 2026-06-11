@@ -33,9 +33,7 @@ class SiswaController extends Controller
             ->take(5)
             ->get();
 
-        $totalTagihanSiswa = Tagihan::whereHas('tunggakan', function($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->sum('nominal');
+        $totalTagihanSiswa = Tagihan::where('user_id', $user->id)->sum('nominal');
 
         $totalSudahBayar = Pembayaran::where('user_id', $user->id)
             ->where('status', 'lunas')
@@ -191,26 +189,16 @@ class SiswaController extends Controller
 
     public function tunggakan()
     {
-        $tunggakan = \DB::table('tunggakan')
-            ->join('tagihan', 'tunggakan.tagihan_id', '=', 'tagihan.id')
-            ->leftJoin('pembayaran', function($join) {
-                $join->on('tagihan.id', '=', 'pembayaran.tagihan_id')
-                     ->where('pembayaran.user_id', '=', Auth::id())
-                     ->whereIn('pembayaran.status', ['nunggak', 'lunas']);
+        $user = Auth::user();
+
+        $tunggakan = Tagihan::where('user_id', $user->id)
+            ->whereDoesntHave('pembayaran', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
             })
-            ->where('tunggakan.user_id', Auth::id())
-            ->where('tunggakan.status', 'belum_bayar')
-            ->whereNull('pembayaran.id') 
-            ->select(
-                'tunggakan.id as tunggakan_id',
-                'tunggakan.status',
-                'tagihan.id as tagihan_id',
-                'tagihan.nama_tagihan',
-                'tagihan.nominal',
-                'tagihan.periode',
-                'tagihan.batas_bayar'
-            )
-            ->orderBy('tagihan.batas_bayar', 'asc')
+            ->with(['pembayaran' => function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            }])
+            ->orderBy('periode', 'desc')
             ->get();
 
         return view('siswa.tunggakan', compact('tunggakan'));
@@ -260,16 +248,17 @@ class SiswaController extends Controller
         ));
     }
 
-    public function pembayaran(Request $request)
+    public function pembayaran()
     {
         $user = Auth::user();
 
-        $tagihanBelumBayar = Tagihan::whereHas('tunggakan', function($query) use ($user) {
-                $query->where('user_id', $user->id)->where('status', 'belum_bayar');
-            })
-            ->whereDoesntHave('pembayaran', function($query) use ($user) {
-                $query->where('user_id', $user->id)->whereIn('status', ['nunggak', 'lunas']);
-            })
+        $sudahDibayar = Pembayaran::where('user_id', $user->id)
+            ->whereNotNull('tagihan_id')
+            ->pluck('tagihan_id')
+            ->toArray();
+
+        $tagihanBelumBayar = Tagihan::where('user_id', $user->id)
+            ->whereNotIn('id', $sudahDibayar)
             ->orderBy('periode', 'asc')
             ->get();
 
@@ -277,12 +266,10 @@ class SiswaController extends Controller
             ->latest()
             ->get();
 
-        $tagihanTerpilih = null;
-        if ($request->has('tagihan_id')) {
-            $tagihanTerpilih = Tagihan::find($request->query('tagihan_id'));
-        }
-
-        return view('siswa.transaksi', compact('tagihanBelumBayar', 'data_pembayaran', 'tagihanTerpilih'));
+        return view('siswa.transaksi', compact(
+            'tagihanBelumBayar',
+            'data_pembayaran'
+        ));
     }
 
     public function simpanPembayaran(Request $request)
@@ -313,7 +300,7 @@ class SiswaController extends Controller
             'jml_bayar'     => $request->jml_bayar,
             'tanggal_bayar' => now()->format('Y-m-d'),
             'metode'        => $request->metode,
-            'status'        => 'nunggak',
+            'status'        => 'pending',
             'bukti_bayar'   => $namaFile,
         ]);
 

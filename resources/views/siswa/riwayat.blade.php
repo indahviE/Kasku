@@ -117,9 +117,9 @@
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Lunas
                                     </span>
-                                @elseif($item->status == 'nunggak')
+                                @elseif($item->status == 'pending')
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pending
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Menunggu
                                     </span>
                                 @else
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-red-50 text-red-700 border border-red-100">

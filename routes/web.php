@@ -130,8 +130,11 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
     Route::get('/tagihan/create', [BendaharaController::class, 'createTagihan'])
         ->name('bendahara.tagihan.create');
 
-    Route::get('/tagihan/edit', [BendaharaController::class, 'editTagihan'])
+    Route::get('/tagihan/edit/{id}', [BendaharaController::class, 'editTagihan'])
         ->name('bendahara.tagihan.edit');
+
+    Route::post('/tagihan/update/{id}', [BendaharaController::class, 'updateTagihan'])
+        ->name('bendahara.tagihan.update');
 
     Route::post('/tagihan/store', [BendaharaController::class, 'storeTagihan'])
         ->name('bendahara.tagihan.store');
