@@ -29,13 +29,13 @@
         }
 
         .sidebar {
-            background: #0a0f1d; 
+            background: #0a0f1d;
             overflow: hidden;
         }
 
         .sidebar-item {
             transition: .25s ease;
-            color: #64748b; 
+            color: #64748b;
             font-size: 14px;
             padding: 12px 16px;
             border-radius: 12px;
@@ -51,8 +51,8 @@
         }
 
         .sidebar-active {
-            background: rgba(255, 255, 255, 0.05); 
-            color: #ffffff; 
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
             font-weight: 500;
             position: relative;
         }
@@ -64,7 +64,7 @@
             top: 25%;
             height: 50%;
             width: 4px;
-            background-color: #2dd4bf; 
+            background-color: #2dd4bf;
             border-radius: 0 4px 4px 0;
         }
 
@@ -122,32 +122,32 @@
 
                 <div class="px-4 mt-6">
                     <nav class="space-y-1">
-                        <a href="{{ route('bendahara.dashboard') }}" class="sidebar-item sidebar-active">
+                        <a href="{{ route('bendahara.dashboard') }}" class="sidebar-item {{ request()->routeIs('bendahara.dashboard') ? 'sidebar-active' : '' }}">
                             <iconify-icon icon="solar:home-2-bold" class="text-[18px]"></iconify-icon>
                             <span>Dashboard</span>
                         </a>
 
-                        <a href="{{ route('bendahara.kas_masuk') }}" class="sidebar-item">
+                        <a href="{{ route('bendahara.kas_masuk') }}" class="sidebar-item {{ request()->routeIs('bendahara.kas_masuk') ? 'sidebar-active' : '' }}">
                             <iconify-icon icon="solar:wallet-money-bold" class="text-[18px]"></iconify-icon>
                             <span>Kas Masuk</span>
                         </a>
 
-                        <a href="{{ route('bendahara.kas_keluar') }}" class="sidebar-item">
+                        <a href="{{ route('bendahara.kas_keluar') }}" class="sidebar-item {{ request()->routeIs('bendahara.kas_keluar') ? 'sidebar-active' : '' }}">
                             <iconify-icon icon="solar:card-send-bold" class="text-[18px]"></iconify-icon>
                             <span>Kas Keluar</span>
                         </a>
 
-                        <a href="{{ route('bendahara.transaksi') }}" class="sidebar-item">
+                        <a href="{{ route('bendahara.transaksi') }}" class="sidebar-item {{ request()->routeIs('bendahara.transaksi') ? 'sidebar-active' : '' }}">
                             <iconify-icon icon="solar:clipboard-list-bold" class="text-[18px]"></iconify-icon>
                             <span>Transaksi</span>
                         </a>
 
-                        <a href="{{ route('bendahara.tagihan') }}" class="sidebar-item">
+                        <a href="{{ route('bendahara.tagihan') }}" class="sidebar-item {{ request()->routeIs('bendahara.tagihan') ? 'sidebar-active' : '' }}">
                             <iconify-icon icon="solar:bill-list-bold" class="text-[18px]"></iconify-icon>
                             <span>Tagihan</span>
                         </a>
 
-                        <a href="{{ route('bendahara.laporan') }}" class="sidebar-item">
+                        <a href="{{ route('bendahara.laporan') }}" class="sidebar-item {{ request()->routeIs('bendahara.laporan') ? 'sidebar-active' : '' }}">
                             <iconify-icon icon="solar:chart-bold" class="text-[18px]"></iconify-icon>
                             <span>Laporan</span>
                         </a>
@@ -156,7 +156,7 @@
             </div>
 
             <div class="p-4 border-t border-white/5">
-                <a href="{{ route('bendahara.pengaturan') }}" class="sidebar-item">
+                <a href="{{ route('bendahara.pengaturan') }}" class="sidebar-item {{ request()->routeIs('bendahara.pengaturan') ? 'sidebar-active' : '' }}">
                     <iconify-icon icon="solar:settings-bold" class="text-[18px]"></iconify-icon>
                     <span>Pengaturan</span>
                 </a>
@@ -185,14 +185,14 @@
                         <button onclick="toggleDropdown()" class="flex items-center gap-3">
                             <div class="text-right">
                                 <h1 class="text-[13px] font-bold text-slate-800">
-                                    Nafisah Adelia Putri
+                                    {{ auth()->user()->name ?? 'Bendahara' }}
                                 </h1>
                                 <p class="text-[11px] text-slate-400">
                                     Bendahara
                                 </p>
                             </div>
                             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white font-bold">
-                                M
+                                {{ strtoupper(substr(auth()->user()->name ?? 'B', 0, 1)) }}
                             </div>
                         </button>
 
@@ -215,9 +215,9 @@
             </div>
 
             <div class="p-8 space-y-6">
-                
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                    
+
                     <div class="rounded-2xl p-5 text-white flex flex-col justify-between shadow-sm bg-gradient-to-br from-cyan-400 to-emerald-400">
                         <div>
                             <span class="text-[11px] font-medium opacity-90 block">Sisa Saldo Kas</span>
@@ -264,145 +264,52 @@
 
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    <div class="lg:col-span-2 card p-6 flex flex-col justify-between">
-                        <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1">
-                                    Total Arus Kas <iconify-icon icon="solar:alt-arrow-down-linear" class="text-xs text-slate-400"></iconify-icon>
-                                </h3>
-                            </div>
-                            <button class="text-xs bg-slate-50 border border-slate-200 text-slate-600 px-2.5 py-1 rounded-lg font-medium flex items-center gap-1">
-                                7 Hari Terakhir <iconify-icon icon="solar:alt-arrow-down-linear"></iconify-icon>
-                            </button>
-                        </div>
-
-                        <div class="h-60 relative">
-                            <canvas id="cashChart"></canvas>
-                        </div>
+                <div class="card p-6">
+                    <div class="mb-4">
+                        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1">
+                            Total Arus Kas <iconify-icon icon="solar:alt-arrow-down-linear" class="text-xs text-slate-400"></iconify-icon>
+                        </h3>
                     </div>
 
-                    <div class="card p-6 flex flex-col">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-sm font-bold text-slate-800">Alokasi Kas Keluar</h3>
-                            <button class="text-xs text-slate-400 flex items-center gap-1">Bulan Ini <iconify-icon icon="solar:alt-arrow-down-linear"></iconify-icon></button>
-                        </div>
-
-                        <div class="flex items-center justify-center flex-1 gap-6">
-                            
-                            <div class="w-36 h-36 relative flex items-center justify-center flex-shrink-0">
-                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                                    <path class="text-slate-100" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                    <path class="text-cyan-400" stroke-dasharray="51, 100" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                </svg>
-                                <div class="absolute text-center">
-                                    <span class="text-[11px] text-slate-400 block font-medium leading-none mb-0.5">Terpakai</span>
-                                    <span class="text-xl font-extrabold text-slate-800 leading-none">51%</span>
-                                </div>
-                            </div>
-
-                            <div class="flex-1 space-y-2.5 text-[11px] font-semibold text-slate-500">
-                                <div class="flex justify-between items-center"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> Fotocopy & ATK</span> <span class="text-slate-700">51%</span></div>
-                                <div class="flex justify-between items-center"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-pink-400"></span> Kas Sosial</span> <span class="text-slate-700">23%</span></div>
-                                <div class="flex justify-between items-center"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Konsumsi Rapat</span> <span class="text-slate-700">16%</span></div>
-                                <div class="flex justify-between items-center"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-400"></span> Event Kelas</span> <span class="text-slate-700">10%</span></div>
-                            </div>
-                        </div>
+                    <div class="h-80 relative">
+                        <canvas id="cashChart"></canvas>
                     </div>
-
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    <div class="lg:col-span-2 card p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-sm font-bold text-slate-800">Riwayat Transaksi Terbaru</h3>
-                            <div class="flex gap-4 text-xs font-bold text-indigo-600">
-                                <button class="border-b-2 border-indigo-600 pb-0.5">Terbaru</button>
-                                <button class="text-slate-400">Tertunda</button>
-                                <button class="text-slate-400">Semua</button>
-                            </div>
-                        </div>
-
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                                        <th class="pb-2">Deskripsi / Nama</th>
-                                        <th class="pb-2">Kategori</th>
-                                        <th class="pb-2">Tanggal</th>
-                                        <th class="pb-2 text-right">Jumlah</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-50 text-xs text-slate-600">
-                                    <tr>
-                                        <td class="py-3 font-bold text-slate-800 flex items-center gap-2">
-                                            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><iconify-icon icon="solar:user-rounded-bold"></iconify-icon></div>
-                                            Andi Saputra
-                                        </td>
-                                        <td class="py-3">Kas Mingguan</td>
-                                        <td class="py-3 text-slate-400">28 Mei 2026</td>
-                                        <td class="py-3 text-right font-bold text-emerald-500">+ Rp 50.000</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-3 font-bold text-slate-800 flex items-center gap-2">
-                                            <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center"><iconify-icon icon="solar:notebook-bold"></iconify-icon></div>
-                                            Fotocopy Modul Fisika
-                                        </td>
-                                        <td class="py-3">ATK Kelas</td>
-                                        <td class="py-3 text-slate-400">26 Mei 2026</td>
-                                        <td class="py-3 text-right font-bold text-rose-500">- Rp 120.000</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-3 font-bold text-slate-800 flex items-center gap-2">
-                                            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><iconify-icon icon="solar:user-rounded-bold"></iconify-icon></div>
-                                            Siti Aminah
-                                        </td>
-                                        <td class="py-3">Kas Mingguan</td>
-                                        <td class="py-3 text-slate-400">25 Mei 2026</td>
-                                        <td class="py-3 text-right font-bold text-emerald-500">+ Rp 50.000</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                <div class="card p-6">
+                    <div class="mb-4">
+                        <h3 class="text-sm font-bold text-slate-800">Riwayat Transaksi Terbaru</h3>
                     </div>
 
-                    <div class="card p-6 flex flex-col">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-sm font-bold text-slate-800">Target Kas Kelas</h3>
-                            <button class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-[10px] font-bold px-2.5 py-1 rounded-lg transition">+ Target</button>
-                        </div>
-
-                        <div class="flex-1 flex flex-col justify-center space-y-4 py-2">
-                            <div class="space-y-1">
-                                <div class="flex justify-between items-center text-xs font-medium">
-                                    <span class="text-slate-700 font-bold flex items-center gap-1.5">
-                                        <iconify-icon icon="solar:palette-bold" class="text-blue-500"></iconify-icon> Dekorasi Kelas Baru
-                                    </span>
-                                    <span class="text-slate-400 text-[10px]">65%</span>
-                                </div>
-                                <p class="text-[10px] text-slate-400">Rp 650.000 dari Rp 1.000.000</p>
-                                <div class="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                                    <div class="h-full w-[65%] rounded-full bg-blue-500"></div>
-                                </div>
-                            </div>
-
-                            <div class="space-y-1">
-                                <div class="flex justify-between items-center text-xs font-medium">
-                                    <span class="text-slate-700 font-bold flex items-center gap-1.5">
-                                        <iconify-icon icon="solar:cup-first-bold" class="text-emerald-500"></iconify-icon> Dana Lomba & Event
-                                    </span>
-                                    <span class="text-slate-400 text-[10px]">40%</span>
-                                </div>
-                                <p class="text-[10px] text-slate-400">Rp 800.000 dari Rp 2.000.000</p>
-                                <div class="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                                    <div class="h-full w-[40%] rounded-full bg-emerald-500"></div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                                    <th class="pb-2">Deskripsi / Nama</th>
+                                    <th class="pb-2">Kategori</th>
+                                    <th class="pb-2">Tanggal</th>
+                                    <th class="pb-2 text-right">Jumlah</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50 text-xs text-slate-600">
+                                @forelse($pembayaran->take(5) as $item)
+                                <tr>
+                                    <td class="py-3 font-bold text-slate-800 flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><iconify-icon icon="solar:user-rounded-bold"></iconify-icon></div>
+                                        {{ $item->siswa->name ?? 'User' }}
+                                    </td>
+                                    <td class="py-3">{{ $item->tagihan->nama_tagihan ?? 'Kas Umum' }}</td>
+                                    <td class="py-3 text-slate-400">{{ \Carbon\Carbon::parse($item->tanggal_bayar)->format('d M Y') }}</td>
+                                    <td class="py-3 text-right font-bold text-emerald-500">+ Rp {{ number_format($item->jml_bayar, 0, ',', '.') }}</td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="4" class="py-6 text-center text-slate-400">Belum ada transaksi</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
-
                 </div>
 
             </div>
@@ -411,66 +318,140 @@
 
     </div>
 
-    <script>
-        const ctx = document.getElementById('cashChart').getContext('2d');
+<script>
+    const ctx = document.getElementById('cashChart').getContext('2d');
 
-        const gradientFill = ctx.createLinearGradient(0, 0, 0, 300);
-        gradientFill.addColorStop(0, 'rgba(56, 189, 248, 0.25)'); 
-        gradientFill.addColorStop(1, 'rgba(56, 189, 248, 0.00)');
+    const gradientFillMasuk = ctx.createLinearGradient(0, 0, 0, 300);
+    gradientFillMasuk.addColorStop(0, 'rgba(34, 197, 94, 0.25)');
+    gradientFillMasuk.addColorStop(1, 'rgba(34, 197, 94, 0.00)');
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['22 Mei', '23 Mei', '24 Mei', '25 Mei', '26 Mei', '27 Mei', '28 Mei'],
-                datasets: [{
-                    label: 'Kas Kelas Masuk',
-                    data: [150000, 320000, 240000, 680000, 410000, 520000, 890000],
-                    borderColor: '#0284c7', 
-                    backgroundColor: gradientFill,
+    const gradientFillKeluar = ctx.createLinearGradient(0, 0, 0, 300);
+    gradientFillKeluar.addColorStop(0, 'rgba(239, 68, 68, 0.25)');
+    gradientFillKeluar.addColorStop(1, 'rgba(239, 68, 68, 0.00)');
+
+    const pembayaranData = @json($pembayaran->sortBy('tanggal_bayar')->values());
+    const pengeluaranData = @json(\App\Models\Pengeluaran::orderBy('tanggal')->get());
+
+    // Buat 7 hari terakhir
+    const last7Days = [];
+    const dailyMasuk = {};
+    const dailyKeluar = {};
+
+    for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const dateKey = `${year}-${month}-${day}`;
+
+        const label = date.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
+        last7Days.push(label);
+        dailyMasuk[dateKey] = 0;
+        dailyKeluar[dateKey] = 0;
+    }
+
+    // Sum pembayaran
+    pembayaranData.forEach(item => {
+        const dateKey = item.tanggal_bayar.substring(0, 10);
+        if (dailyMasuk.hasOwnProperty(dateKey)) {
+            dailyMasuk[dateKey] += parseFloat(item.jml_bayar);
+        }
+    });
+
+    // Sum pengeluaran
+    pengeluaranData.forEach(item => {
+        const dateKey = item.tanggal.substring(0, 10);
+        if (dailyKeluar.hasOwnProperty(dateKey)) {
+            dailyKeluar[dateKey] += parseFloat(item.nominal);
+        }
+    });
+
+    // Ambil values dalam urutan 7 hari
+    const masukanValues = [];
+    const keluaranValues = [];
+    for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const dateKey = `${year}-${month}-${day}`;
+
+        masukanValues.push(dailyMasuk[dateKey] || 0);
+        keluaranValues.push(dailyKeluar[dateKey] || 0);
+    }
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: last7Days,
+            datasets: [
+                {
+                    label: 'Kas Masuk',
+                    data: masukanValues,
+                    borderColor: '#22c55e',
+                    backgroundColor: gradientFillMasuk,
                     fill: true,
-                    tension: 0.4, 
+                    tension: 0.4,
                     pointRadius: 0,
                     pointHoverRadius: 6,
-                    pointBackgroundColor: '#0284c7',
+                    pointBackgroundColor: '#22c55e',
                     borderWidth: 2.5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
                 },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#94a3b8', font: { size: 10 } }
-                    },
-                    y: {
-                        grid: { color: '#f1f5f9', drawBorder: false },
-                        ticks: {
-                            color: '#94a3b8',
-                            font: { size: 10 },
-                            callback: function(value) {
-                                return 'Rp ' + (value / 1000) + 'k';
-                            }
+                {
+                    label: 'Kas Keluar',
+                    data: keluaranValues,
+                    borderColor: '#ef4444',
+                    backgroundColor: gradientFillKeluar,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#ef4444',
+                    borderWidth: 2.5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#94a3b8', font: { size: 10 } }
+                },
+                y: {
+                    grid: { color: '#f1f5f9', drawBorder: false },
+                    ticks: {
+                        color: '#94a3b8',
+                        font: { size: 10 },
+                        callback: function(value) {
+                            return 'Rp ' + (value / 1000) + 'k';
                         }
                     }
                 }
             }
-        });
-
-        function toggleDropdown() {
-            document.getElementById('dropdownMenu').classList.toggle('show');
         }
+    });
 
-        window.addEventListener('click', function(e) {
-            const dropdown = document.getElementById('dropdownMenu');
-            if (!e.target.closest('.relative')) {
-                dropdown.classList.remove('show');
-            }
-        });
-    </script>
+    function toggleDropdown() {
+        document.getElementById('dropdownMenu').classList.toggle('show');
+    }
+
+    window.addEventListener('click', function(e) {
+        const dropdown = document.getElementById('dropdownMenu');
+        if (!e.target.closest('.relative')) {
+            dropdown.classList.remove('show');
+        }
+    });
+</script>
 
 </body>
 

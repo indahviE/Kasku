@@ -12,38 +12,42 @@ class BendaharaController extends Controller
     // =========================
     // DASHBOARD
     // =========================
-    public function dashboard()
-    {
-        $totalMasuk = Pembayaran::sum('jml_bayar') ?? 0;
-        $totalKeluar = Pengeluaran::sum('nominal') ?? 0;
+public function dashboard()
+{
+    $totalMasuk = Pembayaran::sum('jml_bayar') ?? 0;
+    $totalKeluar = Pengeluaran::sum('nominal') ?? 0;
 
-        $saldoAwal = 1000000;
-        $saldoKas = $totalMasuk - $totalKeluar;
-        $saldoAkhir = $saldoAwal + $saldoKas;
+    $saldoAwal = 1000000;
+    $saldoKas = $totalMasuk - $totalKeluar;
+    $saldoAkhir = $saldoAwal + $saldoKas;
 
-        $jumlahTransaksi =
-            Pembayaran::count() +
-            Pengeluaran::count();
+    $jumlahTransaksi =
+        Pembayaran::count() +
+        Pengeluaran::count();
 
-        $kasSosial = Pembayaran::whereHas('tagihan', function($q) {
-            $q->where('nama_tagihan', 'like', '%sosial%')
-              ->orWhere('nama_tagihan', 'like', '%tabungan%');
-        })->sum('jml_bayar') ?? 0;
-        
-        $targetKasSosial = 10000000; // Contoh target 10 juta
-        $persenKasSosial = $targetKasSosial > 0 ? min(100, ($kasSosial / $targetKasSosial) * 100) : 0;
+    $kasSosial = Pembayaran::whereHas('tagihan', function($q) {
+        $q->where('nama_tagihan', 'like', '%sosial%')
+          ->orWhere('nama_tagihan', 'like', '%tabungan%');
+    })->sum('jml_bayar') ?? 0;
 
-        return view('bendahara.dashboard', compact(
-            'totalMasuk',
-            'totalKeluar',
-            'saldoKas',
-            'saldoAwal',
-            'saldoAkhir',
-            'jumlahTransaksi',
-            'kasSosial',
-            'persenKasSosial'
-        ));
-    }
+    $targetKasSosial = 10000000;
+    $persenKasSosial = $targetKasSosial > 0 ? min(100, ($kasSosial / $targetKasSosial) * 100) : 0;
+
+    // ✅ TAMBAH INI:
+    $pembayaran = Pembayaran::with(['siswa', 'tagihan'])->latest()->get();
+
+    return view('bendahara.dashboard', compact(
+        'totalMasuk',
+        'totalKeluar',
+        'saldoKas',
+        'saldoAwal',
+        'saldoAkhir',
+        'jumlahTransaksi',
+        'kasSosial',
+        'persenKasSosial',
+        'pembayaran'  // ✅ TAMBAH INI
+    ));
+}
 
     // =========================
     // KAS MASUK
@@ -71,7 +75,7 @@ class BendaharaController extends Controller
         $totalMasukBulanLalu = Pembayaran::whereMonth('tanggal_bayar', now()->subMonth()->month)
                                          ->whereYear('tanggal_bayar', now()->subMonth()->year)
                                          ->sum('jml_bayar') ?? 0;
-        
+
         $persenMasuk = $totalMasukBulanLalu > 0 ? (($totalMasukBulanIni - $totalMasukBulanLalu) / $totalMasukBulanLalu) * 100 : 100;
 
         $iuranWajib = Pembayaran::whereNotNull('tagihan_id')->sum('jml_bayar') ?? 0;
@@ -115,14 +119,14 @@ class BendaharaController extends Controller
         $totalKeluarBulanLalu = Pengeluaran::whereMonth('tanggal', now()->subMonth()->month)
                                            ->whereYear('tanggal', now()->subMonth()->year)
                                            ->sum('nominal') ?? 0;
-        
+
         $persenKeluar = $totalKeluarBulanLalu > 0 ? (($totalKeluarBulanIni - $totalKeluarBulanLalu) / $totalKeluarBulanLalu) * 100 : 100;
 
         $sektorTerbesar = Pengeluaran::selectRaw('keterangan, sum(nominal) as total')
                                      ->groupBy('keterangan')
                                      ->orderByDesc('total')
                                      ->first();
-        
+
         $totalMasuk = Pembayaran::sum('jml_bayar') ?? 0;
         $kasSisa = $totalMasuk - $totalKeluar;
         $jumlahSektor = Pengeluaran::distinct('keterangan')->count('keterangan');
@@ -235,7 +239,7 @@ class BendaharaController extends Controller
         ]);
 
         $tagihan = Tagihan::findOrFail($id);
-        
+
         $tagihan->update([
             'nama_tagihan' => $request->nama_tagihan,
             'periode'      => $request->periode,
@@ -279,7 +283,7 @@ class BendaharaController extends Controller
         $persenKeluar = $totalKeluarBulanLalu > 0 ? (($totalKeluarBulanIni - $totalKeluarBulanLalu) / $totalKeluarBulanLalu) * 100 : 100;
 
         $totalTagihan = Tagihan::sum('nominal') ?? 0;
-        
+
         $pembayaran = Pembayaran::with('siswa')->where('status', 'lunas')->get()->map(function($item) {
             $item->jenis = 'masuk';
             $item->tanggal_sort = $item->tanggal_bayar;
