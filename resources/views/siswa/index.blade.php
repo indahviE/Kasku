@@ -214,11 +214,39 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M16 10.5a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z" />
                     </svg>
                 </span>
-                <input
-                    type="text"
-                    placeholder="Search"
-                    class="w-full bg-gray-100 border border-gray-200 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-black"
-                >
+<div class="flex-1">
+
+    <div class="relative">
+
+        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="w-5 h-5"
+                 fill="none"
+                 viewBox="0 0 24 24"
+                 stroke="currentColor">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M21 21l-4.35-4.35M16 10.5a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z" />
+            </svg>
+        </span>
+
+        <input
+            id="searchInputDesktop"
+            type="text"
+            name="q"
+            autocomplete="off"
+            value="{{ request('q') }}"
+            placeholder="Cari tagihan, pembayaran, kas..."
+            class="w-full bg-gray-100 border border-gray-200 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-black">
+
+    </div>
+     <div id="searchResultsDesktop"
+         class="hidden absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-3xl overflow-hidden z-50">
+
+    </div>
+
+</div>
             </div>
 
             <button class="w-14 h-14 rounded-2xl bg-black flex items-center justify-center text-white hover:scale-105 transition">
@@ -380,27 +408,69 @@
 </div>
 
 <div class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 md:hidden z-40">
-    <div class="flex items-center gap-3">
-        <div class="flex-1 relative">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M16 10.5a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z" />
+
+    <div class="relative">
+
+        <div class="flex items-center gap-3">
+
+            <div class="flex-1 relative">
+
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="w-5 h-5"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor">
+
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M21 21l-4.35-4.35M16 10.5a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z"/>
+
+                    </svg>
+
+                </span>
+
+                <input
+                    id="searchInputMobile"
+                    type="text"
+                    autocomplete="off"
+                    placeholder="Cari tagihan, pembayaran, kas..."
+                    class="w-full bg-gray-100 border border-gray-200 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-black">
+
+            </div>
+
+            <button class="w-14 h-14 rounded-2xl bg-black flex items-center justify-center text-white">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="w-6 h-6"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 4v16m8-8H4" />
+
                 </svg>
-            </span>
-            <input
-                type="text"
-                placeholder="Search"
-                class="w-full bg-gray-100 border border-gray-200 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-black"
-            >
+
+            </button>
+
         </div>
 
-        <button class="w-14 h-14 rounded-2xl bg-black flex items-center justify-center text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-        </button>
+        <!-- SEARCH RESULT -->
+        <div id="searchResultsMobile"
+             class="hidden absolute bottom-full left-0 right-0 mb-3 bg-white border border-gray-200 rounded-3xl max-h-80 overflow-y-auto z-[9999]">
+
+        </div>
+
     </div>
+
 </div>
+
+
 
 </body>
 
@@ -437,4 +507,206 @@
             notificationMenu.classList.add('hidden');
         }
     });
+
+    //LIVE SEARCH
+
+
+
+
+const searchInput = document.getElementById('searchInput');
+const results = document.getElementById('searchResults');
+
+
+searchInput.addEventListener('keydown', function(e){
+
+    if(e.key === 'Enter'){
+        e.preventDefault();
+    }
+
+});
+
+searchInput.addEventListener('keyup', function(){
+
+    let keyword = this.value.trim();
+
+    if(keyword.length < 2){
+
+        results.classList.add('hidden');
+        results.innerHTML = '';
+        return;
+
+    }
+
+    fetch(`/siswa/search?q=${keyword}`)
+
+        .then(response => response.json())
+
+        .then(data => {
+
+            let html = '';
+
+            // ======================
+            // TAGIHAN
+            // ======================
+
+            if(data.tagihan.length){
+
+                html += `
+                    <div class="px-4 pt-4 pb-2 text-xs font-bold uppercase text-gray-400">
+                        Tagihan
+                    </div>
+                `;
+
+                data.tagihan.forEach(item => {
+
+                    html += `
+                        <a href="/siswa/detail-tunggakan/${item.id}"
+                           class="block px-4 py-3 hover:bg-gray-50 transition border-t border-gray-100">
+
+                            <div class="font-semibold text-gray-900">
+                                ${item.nama_tagihan}
+                            </div>
+
+                            <div class="text-sm text-gray-500 mt-1">
+                                Rp ${new Intl.NumberFormat('id-ID').format(item.nominal)}
+                            </div>
+
+                        </a>
+                    `;
+
+                });
+
+            }
+
+            // ======================
+            // PEMBAYARAN
+            // ======================
+
+            if(data.pembayaran.length){
+
+                html += `
+                    <div class="px-4 pt-4 pb-2 text-xs font-bold uppercase text-gray-400">
+                        Riwayat Pembayaran
+                    </div>
+                `;
+
+                data.pembayaran.forEach(item => {
+
+                    html += `
+                        <a href="/siswa/riwayat"
+                           class="block px-4 py-3 hover:bg-gray-50 transition border-t border-gray-100">
+
+                            <div class="font-semibold text-gray-900">
+                                ${item.metode}
+                            </div>
+
+                            <div class="text-sm text-gray-500 mt-1">
+                                Status: ${item.status}
+                            </div>
+
+                        </a>
+                    `;
+
+                });
+
+            }
+
+            // ======================
+            // DATA KAS
+            // ======================
+
+            if(data.kas.length){
+
+                html += `
+                    <div class="px-4 pt-4 pb-2 text-xs font-bold uppercase text-gray-400">
+                        Data Kas
+                    </div>
+                `;
+
+                data.kas.forEach(item => {
+
+                    html += `
+                        <a href="/siswa/laporan-kas"
+                           class="block px-4 py-3 hover:bg-gray-50 transition border-t border-gray-100">
+
+                            <div class="font-semibold text-gray-900">
+                                ${item.keterangan}
+                            </div>
+
+                            <div class="text-sm text-gray-500 mt-1">
+                                Rp ${new Intl.NumberFormat('id-ID').format(item.nominal)}
+                            </div>
+
+                        </a>
+                    `;
+
+                });
+
+            }
+
+            // ======================
+            // KOSONG
+            // ======================
+
+            if(
+                data.tagihan.length === 0 &&
+                data.pembayaran.length === 0 &&
+                data.kas.length === 0
+            ){
+
+                html = `
+                    <div class="p-6 text-center">
+
+                        <p class="text-sm text-gray-500">
+                            Data tidak ditemukan
+                        </p>
+
+                    </div>
+                `;
+
+            }
+
+            console.log(data);
+            console.log(results);
+
+            results.innerHTML = html;
+            results.classList.remove('hidden');
+
+        })
+
+        .catch(error => {
+
+            console.error(error);
+
+        });
+
+});
+
+// Tutup dropdown saat klik luar
+
+document.addEventListener('click', function(e){
+
+    if(
+        !searchInput.contains(e.target) &&
+        !results.contains(e.target)
+    ){
+
+        results.classList.add('hidden');
+
+    }
+
+});
+
+// Buka lagi saat fokus ke input
+
+searchInput.addEventListener('focus', function(){
+
+    if(results.innerHTML.trim() !== ''){
+
+        results.classList.remove('hidden');
+
+    }
+
+});
+
 </script>
