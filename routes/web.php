@@ -167,7 +167,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
     Route::get('/index', [SiswaController::class, 'index'])
         ->name('siswa.index');
-    
+
     Route::patch('/notifikasi/read/{id}', [SiswaController::class, 'readNotification'])
         ->name('siswa.notifikasi.read');
 
@@ -204,5 +204,9 @@ Route::middleware(['auth', 'role:wali_kelas'])->prefix('wali')->group(function (
     Route::get('/rekap-pembayaran', [WalkelController::class, 'rekapPembayaran'])->name('wali.rekap-pembayaran');
     Route::get('/tunggakan', [WalkelController::class, 'tunggakan'])->name('wali.tunggakan');
     Route::get('/pengeluaran', [WalkelController::class, 'pengeluaran'])->name('wali.pengeluaran');
+    Route::get('/transaksi-kas', [WalkelController::class, 'transaksiKas'])->name('wali.transaksi-kas');
+    Route::get('/rekap-pembayaran', [WalkelController::class, 'rekapPembayaran'])->name('wali.rekap-pembayaran');
+    Route::get('/tunggakan', [WalkelController::class, 'tunggakan'])->name('wali.tunggakan');
+    Route::get('/transaksi-kas/cetak-pdf', [WalkelController::class, 'cetakTransaksiPdf'])->name('wali.cetak-transaksi-pdf');
 });
 require __DIR__ . '/auth.php';
