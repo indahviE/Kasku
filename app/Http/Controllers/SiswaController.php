@@ -102,6 +102,24 @@ class SiswaController extends Controller
             }
         }
 
+        if (\App\Models\Tunggakan::where('user_id', $user->id)->where('status', 'belum_bayar')->whereDate('created_at', $today)->exists()) {
+            $cekNotifTunggakanBaru = Notifications::where('user_id', $user->id)
+                ->where('title', 'Ada Tunggakan Baru')
+                ->whereDate('created_at', $today)
+                ->exists();
+
+            if (!$cekNotifTunggakanBaru) {
+                Notifications::create([
+                    'user_id'     => $user->id,
+                    'title'       => 'Ada Tunggakan Baru',
+                    'message'     => 'Kamu memiliki daftar tunggakan kas baru yang harus segera dilunasi. Silakan cek menu Tunggakan.',
+                    'target_type' => 'personal',
+                    'is_read'     => false,
+                    'created_at'  => $today
+                ]);
+            }
+        }
+
         if (Pembayaran::where('user_id', $user->id)->where('status', 'nunggak')->whereDate('created_at', $today)->exists()) {
             $cekNotifTungguVerif = Notifications::where('user_id', $user->id)
                 ->where('title', 'Menunggu Verifikasi')
@@ -191,14 +209,10 @@ class SiswaController extends Controller
     {
         $user = Auth::user();
 
-        $tunggakan = Tagihan::where('user_id', $user->id)
-            ->whereDoesntHave('pembayaran', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
-            ->with(['pembayaran' => function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            }])
-            ->orderBy('periode', 'desc')
+        $tunggakan = \App\Models\Tunggakan::with('tagihan')
+            ->where('user_id', $user->id)
+            ->where('status', '!=', 'lunas') // Menampilkan yang belum lunas
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return view('siswa.tunggakan', compact('tunggakan'));
@@ -206,13 +220,17 @@ class SiswaController extends Controller
 
     public function detailTagihan($id)
     {
-        $tagihan = Tagihan::findOrFail($id);
+        $tunggakanItem = \App\Models\Tunggakan::with('tagihan')
+            ->where('user_id', auth()->id())
+            ->findOrFail($id);
+
+        $tagihan = $tunggakanItem->tagihan;
 
         $pembayaran = Pembayaran::where('tagihan_id', $tagihan->id)
             ->where('user_id', auth()->id())
             ->first();
 
-        $lunas = $pembayaran ? true : false;
+        $lunas = $tunggakanItem->status === 'lunas';
 
         return view('siswa.detail-tunggakan', compact(
             'tagihan',
