@@ -30,18 +30,19 @@ class UserSeeder extends Seeder
         }
 
         $bendaharas = [
-            ['name' => 'NAFISAH ADELIA PUTRI', 'email' => 'nafisah@example.com', 'nis' => '12430136', 'password' => 'bendahara123'],
-            ['name' => 'FATHAN APRIAN', 'email' => 'fathan.aprian@example.com', 'nis' => '12430125', 'password' => 'bendahara123'],
-        ];
+        ['name' => 'NAFISAH ADELIA PUTRI', 'email' => 'nafisah@example.com', 'nis' => '12430136', 'password' => 'bendahara123', 'kelas_id' => 2],
+        ['name' => 'FATHAN APRIAN', 'email' => 'fathan.aprian@example.com', 'nis' => '12430125', 'password' => 'bendahara123', 'kelas_id' => 2],
+    ];
 
-        foreach ($bendaharas as $bendahara) {
-            User::create([
-                'name'     => $bendahara['name'],
-                'email'    => $bendahara['email'],
-                'password' => Hash::make($bendahara['password']),
-                'role'     => 'bendahara',
-            ]);
-        }
+    foreach ($bendaharas as $bendahara) {
+        User::create([
+            'name'     => $bendahara['name'],
+            'email'    => $bendahara['email'],
+            'password' => Hash::make($bendahara['password']),
+            'role'     => 'bendahara',
+            'kelas_id' => $bendahara['kelas_id'],  // ← TAMBAH INI
+        ]);
+    }
 
 
         $allStudents = [

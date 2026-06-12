@@ -22,6 +22,10 @@ class Pembayaran extends Model
         'bukti_bayar',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
     public function tagihan()
     {
         return $this->belongsTo(Tagihan::class, 'tagihan_id');
