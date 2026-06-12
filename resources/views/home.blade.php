@@ -420,7 +420,7 @@
 <body class="overflow-x-hidden">
 
     <!-- ===== NAVBAR PLACEHOLDER ===== -->
-    <!-- <x-navbar></x-navbar> -->
+    <x-navbar></x-navbar>
 
     <!-- ===== HERO (TIDAK DIUBAH) ===== -->
     <section class="relative">

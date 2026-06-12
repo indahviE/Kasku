@@ -20,17 +20,12 @@
                 </a>
             </li>
             <li>
-                <a href="#fitur" class="hover:text-black transition">
-                    Features
-                </a>
-            </li>
-            <li>
-                <a href="#tentang" class="hover:text-black transition">
+                <a href="/about" class="hover:text-black transition">
                     About
                 </a>
             </li>
             <li>
-                <a href="#kontak" class="hover:text-black transition">
+                <a href="/contact" class="hover:text-black transition">
                     Contact
                 </a>
             </li>
