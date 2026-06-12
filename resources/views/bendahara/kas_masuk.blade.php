@@ -266,23 +266,35 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+            <form action="{{ route('bendahara.kas_masuk') }}" method="GET" class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm w-full">
                 <div class="flex items-center gap-3 flex-1 min-w-[280px]">
                     <div class="relative flex-1 max-w-md">
-                        <span class="absolute inset-y-0 left-4 flex items-center text-slate-400"><iconify-icon icon="solar:magnifer-linear" class="text-lg"></iconify-icon></span>
-                        <input type="text" placeholder="Cari nama siswa, nomor induk atau kategori..." class="w-full h-11 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-teal-500 outline-none transition font-medium text-slate-700">
+                        <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
+                            <iconify-icon icon="solar:magnifer-linear" class="text-lg"></iconify-icon>
+                        </span>
+                        <input type="text" name="search" id="searchInput" value="{{ request('search') }}" placeholder="Cari nama siswa atau email..." class="w-full h-11 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-teal-500 outline-none transition font-medium text-slate-700">
                     </div>
-                    <select class="h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 outline-none focus:bg-white transition cursor-pointer">
-                        <option>Semua Kategori</option>
-                        <option>Iuran Wajib Mingguan</option>
-                        <option>Denda Lambat</option>
-                        <option>Sumbangan / Sukarela</option>
+                    
+                    <select name="kategori" onchange="this.form.submit()" class="h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 outline-none focus:bg-white transition cursor-pointer">
+                        <option value="">Semua Kategori</option>
+                        <option value="umum" {{ request('kategori') == 'umum' ? 'selected' : '' }}>Kas Umum</option>
+                        @foreach($tagihanList as $tagihan)
+                            <option value="{{ $tagihan->id }}" {{ request('kategori') == $tagihan->id ? 'selected' : '' }}>{{ $tagihan->nama_tagihan }}</option>
+                        @endforeach
                     </select>
                 </div>
-                <a href="{{ route('bendahara.kas_masuk.cetak') }}" target="_blank" class="h-11 px-4 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold rounded-xl text-sm transition flex items-center gap-2">
-                    <iconify-icon icon="solar:printer-linear" class="text-lg"></iconify-icon> Cetak Laporan
-                </a>
-            </div>
+                
+                <div class="flex items-center gap-2">
+                    @if(request('search') || request('kategori'))
+                        <a href="{{ route('bendahara.kas_masuk') }}" class="h-11 px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-sm transition flex items-center justify-center">
+                            Reset
+                        </a>
+                    @endif
+                    <a href="{{ route('bendahara.kas_masuk.cetak', request()->query()) }}" target="_blank" class="h-11 px-4 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold rounded-xl text-sm transition flex items-center gap-2">
+                        <iconify-icon icon="solar:printer-linear" class="text-lg"></iconify-icon> Cetak Laporan
+                    </a>
+                </div>
+            </form>
 
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                 <div class="overflow-x-auto">
@@ -659,3 +671,23 @@ function lihatBukti(imageUrl) {
 </div>
 </body>
 </html>
+<script>
+    const searchInput = document.getElementById('searchInput');
+    let typingTimer;
+    const doneTypingInterval = 800; // waktu tunggu dalam milidetik
+
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function() {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(doneTyping, doneTypingInterval);
+        });
+
+        searchInput.addEventListener('keydown', function() {
+            clearTimeout(typingTimer);
+        });
+    }
+
+    function doneTyping() {
+        searchInput.closest('form').submit();
+    }
+</script>

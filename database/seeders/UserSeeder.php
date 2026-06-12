@@ -10,6 +10,7 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        // 1. SEEDER ADMIN
         $admins = [
             [
                 'name' => 'Afika Awwaliyah Rozaaq S.Pd.',
@@ -26,12 +27,14 @@ class UserSeeder extends Seeder
                 'email'    => $admin['email'],
                 'password' => Hash::make($admin['password']),
                 'role'     => $admin['role'],
+                'kelas_id' => null, // Admin tidak butuh kelas_id
             ]);
         }
 
+        // 2. SEEDER BENDAHARA (Ditambahkan kelas_id)
         $bendaharas = [
-            ['name' => 'NAFISAH ADELIA PUTRI', 'email' => 'nafisah@example.com', 'nis' => '12430136', 'password' => 'bendahara123'],
-            ['name' => 'FATHAN APRIAN', 'email' => 'fathan.aprian@example.com', 'nis' => '12430125', 'password' => 'bendahara123'],
+            ['name' => 'NAFISAH ADELIA PUTRI', 'email' => 'nafisah@example.com', 'nis' => '12430136', 'password' => 'bendahara123', 'kelas_id' => 2],
+            ['name' => 'FATHAN APRIAN', 'email' => 'fathan.aprian@example.com', 'nis' => '12430125', 'password' => 'bendahara123', 'kelas_id' => 2],
         ];
 
         foreach ($bendaharas as $bendahara) {
@@ -40,10 +43,11 @@ class UserSeeder extends Seeder
                 'email'    => $bendahara['email'],
                 'password' => Hash::make($bendahara['password']),
                 'role'     => 'bendahara',
+                'kelas_id' => $bendahara['kelas_id'], // ✅ Sekarang bendahara punya kelas!
             ]);
         }
 
-
+        // 3. SEEDER SISWA (Ditambahkan kelas_id)
         $allStudents = [
             ['nis' => '12430117', 'name' => 'ABDUL MUGHNI NUGRAHA'],
             ['nis' => '12430118', 'name' => 'AHMAD FATHAN ARROYYAN'],
@@ -91,16 +95,21 @@ class UserSeeder extends Seeder
                     'email'    => strtolower(str_replace(' ', '.', explode(' ', $student['name'])[0])) . $student['nis'] . '@siswa.com',
                     'password' => Hash::make($student['nis']),
                     'role'     => 'siswa',
+                    'kelas_id' => 2, // ✅ Siswa biasa juga langsung dimasukkan ke kelas 2
                 ]);
             }
         }
+
+        // 4. SEEDER WALI KELAS
         $waliKelasData = [
-            ['name' => 'Riyan Triana',
-            'email' => 'riyan@example.com',
-            'password' => 'walikelas123',
-            'nip' => 198501012010011001,
-            'no_hp' => '081234567890',
-            'kelas_id' => 2],
+            [
+                'name' => 'Riyan Triana',
+                'email' => 'riyan@example.com',
+                'password' => 'walikelas123',
+                'nip' => 198501012010011001,
+                'no_hp' => '081234567890',
+                'kelas_id' => 2
+            ],
         ];
 
         foreach ($waliKelasData as $wali) {
@@ -109,6 +118,7 @@ class UserSeeder extends Seeder
                 'email'    => $wali['email'],
                 'password' => Hash::make($wali['password']),
                 'role'     => 'wali_kelas',
+                'kelas_id' => $wali['kelas_id'], // Tambahkan kelas_id ke user wali kelas jika diperlukan
             ]);
 
             \App\Models\WaliKelas::create([

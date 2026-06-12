@@ -277,7 +277,9 @@
             <div class="bg-white rounded-2xl border border-slate-200 p-4 flex items-center justify-between gap-4 shadow-sm">
                 <div class="relative flex-1 max-w-md">
                     <span class="absolute inset-y-0 left-4 flex items-center text-slate-400"><iconify-icon icon="solar:magnifer-linear" class="text-lg"></iconify-icon></span>
-                    <input type="text" placeholder="Cari ID transaksi, nama, kategori mutasi..." class="w-full h-11 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-slate-800 outline-none transition font-medium text-slate-700">
+                    
+                    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari ID transaksi, nama, kategori mutasi..." class="w-full h-11 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-slate-800 outline-none transition font-medium text-slate-700">
+                
                 </div>
                 <div class="flex items-center gap-2">
                     <input type="date" class="h-11 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 outline-none focus:bg-white transition cursor-pointer">
@@ -300,7 +302,8 @@
                                 <th class="px-6 py-4 text-center">Aksi / CRUD</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100 text-xs text-slate-600 font-medium">
+                        
+                        <tbody id="tableBody" class="divide-y divide-slate-100 text-xs text-slate-600 font-medium">
                             @php
                                 $semuaTransaksi = collect();
                                 
@@ -388,8 +391,8 @@
                                 </td>
                             </tr>
                             @empty
-                            <tr>
-                                <td colspan="5" class="text-center py-6 text-slate-500">Belum ada data transaksi</td>
+                            <tr id="emptyRow">
+                                <td colspan="6" class="text-center py-6 text-slate-500">Belum ada data transaksi</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -431,6 +434,29 @@
                 image: 'rounded-xl border border-slate-200'
             }
         });
+    }
+
+    // PERBAIKAN: Fungsi Real-time Filter Table Multi-kolom
+    function filterTable() {
+        const input = document.getElementById("searchInput");
+        const filter = input.value.toLowerCase();
+        const tbody = document.getElementById("tableBody");
+        const rows = tbody.getElementsByTagName("tr");
+
+        for (let i = 0; i < rows.length; i++) {
+            // Lewati filter jika baris tersebut info data kosong
+            if (rows[i].id === 'emptyRow') continue;
+
+            // Mengambil semua string teks di dalam satu baris data 
+            const rowText = rows[i].textContent || rows[i].innerText;
+            
+            // Evaluasi string kecocokan data
+            if (rowText.toLowerCase().indexOf(filter) > -1) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
     }
 </script>
 </body>

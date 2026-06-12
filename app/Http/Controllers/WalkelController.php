@@ -15,13 +15,25 @@ use Illuminate\Pagination\Paginator;
 
 class WalkelController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $wali = WaliKelas::where('user_id', Auth::id())->firstOrFail();
 
-        $siswa = Siswa::with('user')
-            ->where('kelas_id', $wali->kelas_id)
-            ->paginate(5);
+        // Mengambil data pencarian jika ada
+        $search = $request->get('search', '');
+
+        // query dasar mengambil siswa di kelas wali kelas tersebut
+        $siswaQuery = Siswa::with('user')->where('kelas_id', $wali->kelas_id);
+
+        // LOGIKA FILTER PENCARIAN (Berdasarkan nama siswa)
+        if (!empty($search)) {
+            $siswaQuery->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'LIKE', '%' . $search . '%');
+            });
+        }
+
+        // Ambil data siswa dengan pagination dan pastikan link halaman mempertahankan query string pencarian
+        $siswa = $siswaQuery->paginate(5)->withQueryString();
 
         $userIds = $siswa->pluck('user_id');
 
