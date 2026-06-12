@@ -115,6 +115,51 @@
         .table-row { transition: .15s ease; }
         .table-row:hover { background: #f8fafc; }
 
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 22px;
+            border: 1px solid #e2e8f0;
+            transition: .2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,.06);
+        }
+
+        .stat-card .arrow-btn {
+            width: 32px; height: 32px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            display: flex; align-items: center; justify-content: center;
+            color: #64748b;
+            transition: .2s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .stat-card .arrow-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .badge-green { background: #dcfce7; color: #16a34a; }
+        .badge-red   { background: #fee2e2; color: #dc2626; }
+
+        .dropdown-menu {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all .25s ease;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
         .btn { height: 44px; padding: 0 18px; border-radius: 12px; font-size: 13px; font-weight: 600; transition: .2s ease; display: flex; align-items: center; gap: 8px; cursor: pointer; border: none; }
         .btn:hover { transform: translateY(-1px); }
 
@@ -228,9 +273,10 @@
                     <button class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition">
                         <iconify-icon icon="solar:bell-bold" class="text-[18px] text-slate-700"></iconify-icon>
                     </button>
-                    <div class="flex items-center gap-3">
+                    <div class="relative">
+                    <button onclick="toggleDropdown()" class="flex items-center gap-3">
                         <div class="text-right">
-                            <h1 class="text-[13px] font-bold text-slate-800">
+                                <h1 class="text-[13px] font-bold text-slate-800">
                                     {{ auth()->user()->name ?? 'Bendahara' }}
                                 </h1>
                                 <p class="text-[11px] text-slate-400">
@@ -240,6 +286,21 @@
                             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white font-bold">
                                 {{ strtoupper(substr(auth()->user()->name ?? 'B', 0, 1)) }}
                             </div>
+                        </button>
+                                                <div id="dropdownMenu" class="dropdown-menu absolute right-0 top-14 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+                        <a href="{{ route('bendahara.profile') }}" class="flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-slate-50 transition">
+                            <iconify-icon icon="solar:user-linear"></iconify-icon> Profile
+                        </a>
+                        <a href="{{ route('bendahara.pengaturan') }}" class="flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-slate-50 transition">
+                            <iconify-icon icon="solar:settings-linear"></iconify-icon> Pengaturan
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
+                            @csrf
+                            <button type="submit" class="w-full flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-50 transition">
+                                <iconify-icon icon="solar:logout-2-linear"></iconify-icon> Logout
+                            </button>
+                        </form>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -555,6 +616,10 @@
     </div>
 
     <script>
+        function toggleDropdown() { document.getElementById('dropdownMenu').classList.toggle('show'); }
+    window.addEventListener('click', function(e) {
+        if (!e.target.closest('.relative')) { document.getElementById('dropdownMenu').classList.remove('show'); }
+    });
         // BAR CHART
         const ctx = document.getElementById('arusKasChart').getContext('2d');
         new Chart(ctx, {

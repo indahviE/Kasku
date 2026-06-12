@@ -91,6 +91,51 @@
         .success-alert {
             animation: fadeIn .3s ease;
         }
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 22px;
+            border: 1px solid #e2e8f0;
+            transition: .2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,.06);
+        }
+
+        .stat-card .arrow-btn {
+            width: 32px; height: 32px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            display: flex; align-items: center; justify-content: center;
+            color: #64748b;
+            transition: .2s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .stat-card .arrow-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .badge-green { background: #dcfce7; color: #16a34a; }
+        .badge-red   { background: #fee2e2; color: #dc2626; }
+
+        .dropdown-menu {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all .25s ease;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
 
         @keyframes fadeIn {
             from {
@@ -212,28 +257,20 @@
         <main class="ml-[250px] flex-1 overflow-y-auto">
 
             <!-- NAVBAR -->
-            <div class="h-[72px] bg-white border-b border-slate-200 px-8 flex items-center justify-between sticky top-0 z-20">
+<div class="h-[72px] bg-white border-b border-slate-200 px-8 flex items-center justify-between shadow-sm sticky top-0 z-20 flex-shrink-0">
+            <div>
+                <p class="text-[12px] text-slate-400 font-medium">Pages / Transaksi</p>
+                <h1 class="text-[20px] font-bold text-slate-800 mt-1">Jurnal Arus Kas</h1>
+            </div>
 
-                <div>
+            <div class="flex items-center gap-4">
+                <button class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition relative">
+                    <iconify-icon icon="solar:bell-bold" class="text-[18px] text-slate-700"></iconify-icon>
+                    <div class="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></div>
+                </button>
 
-                    <p class="text-[12px] text-slate-400 font-medium">
-                        Pages / Tagihan
-                    </p>
-
-                    <h1 class="text-[21px] font-bold text-slate-800 mt-1">
-                        Data Tagihan
-                    </h1>
-
-                </div>
-
-                <div class="flex items-center gap-4">
-
-                    <button class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition">
-                        <iconify-icon icon="solar:bell-bold" class="text-[18px] text-slate-700"></iconify-icon>
-                    </button>
-
-                    <div class="flex items-center gap-3">
-
+                <div class="relative">
+                    <button onclick="toggleDropdown()" class="flex items-center gap-3">
                         <div class="text-right">
                                 <h1 class="text-[13px] font-bold text-slate-800">
                                     {{ auth()->user()->name ?? 'Bendahara' }}
@@ -247,11 +284,23 @@
                             </div>
                         </button>
 
+                    <div id="dropdownMenu" class="dropdown-menu absolute right-0 top-14 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+                        <a href="{{ route('bendahara.profile') }}" class="flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-slate-50 transition">
+                            <iconify-icon icon="solar:user-linear"></iconify-icon> Profile
+                        </a>
+                        <a href="{{ route('bendahara.pengaturan') }}" class="flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-slate-50 transition">
+                            <iconify-icon icon="solar:settings-linear"></iconify-icon> Pengaturan
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
+                            @csrf
+                            <button type="submit" class="w-full flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-50 transition">
+                                <iconify-icon icon="solar:logout-2-linear"></iconify-icon> Logout
+                            </button>
+                        </form>
                     </div>
-
                 </div>
-
             </div>
+        </div>
 
             <!-- CONTENT -->
             <div class="p-7 space-y-6">
@@ -405,7 +454,12 @@
         </main>
 
     </div>
-
+<script>
+        function toggleDropdown() { document.getElementById('dropdownMenu').classList.toggle('show'); }
+    window.addEventListener('click', function(e) {
+        if (!e.target.closest('.relative')) { document.getElementById('dropdownMenu').classList.remove('show'); }
+    });
+</script>
 </body>
 
 </html>

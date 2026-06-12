@@ -297,7 +297,8 @@ class BendaharaController extends Controller
 
         $tagihan = Tagihan::whereIn('user_id', $userIds)
             ->latest()
-            ->paginate(5);
+            ->get()
+            ->unique('nama_tagihan');
 
         return view('bendahara.tagihan', compact('tagihan'));
     }

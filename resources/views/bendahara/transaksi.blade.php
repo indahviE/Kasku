@@ -64,7 +64,7 @@
             border-radius:0 4px 4px 0;
         }
 
-        /* CARD STYLE */
+        /* CARD STYLE DARI LAPORAN */
         .stat-card {
             background: white;
             border-radius: 20px;
@@ -119,8 +119,8 @@
     <aside class="sidebar w-[250px] fixed h-screen text-white flex flex-col justify-between z-10">
         <div>
             <div class="px-6 py-6 flex items-center gap-4 border-b border-white/5">
-                <div class="w-12 h-12 rounded-2xl bg-teal-500 flex items-center justify-center text-white text-lg font-bold shadow-lg">
-                    K
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-400 to-cyan-600 flex items-center justify-center text-white text-2xl shadow-lg shadow-teal-500/20">
+                    <iconify-icon icon="solar:wallet-bold"></iconify-icon>
                 </div>
                 <div>
                     <h1 class="text-[18px] font-bold tracking-wide text-white leading-none">KASKU</h1>
@@ -183,11 +183,17 @@
                 <div class="relative">
                     <button onclick="toggleDropdown()" class="flex items-center gap-3">
                         <div class="text-right">
-                            <h1 class="text-[13px] font-bold text-slate-800">{{ auth()->user()->name }}</h1>
-                            <p class="text-[11px] text-slate-400">Bendahara</p>
-                        </div>
-                        <div class="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white font-extrabold text-base">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
-                    </button>
+                                <h1 class="text-[13px] font-bold text-slate-800">
+                                    {{ auth()->user()->name ?? 'Bendahara' }}
+                                </h1>
+                                <p class="text-[11px] text-slate-400">
+                                    Bendahara
+                                </p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white font-bold">
+                                {{ strtoupper(substr(auth()->user()->name ?? 'B', 0, 1)) }}
+                            </div>
+                        </button>
 
                     <div id="dropdownMenu" class="dropdown-menu absolute right-0 top-14 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
                         <a href="{{ route('bendahara.profile') }}" class="flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-slate-50 transition">
@@ -221,75 +227,55 @@
                 </div>
             </div>
 
-            <!-- STAT CARDS - IMPROVED MONTHLY VIEW -->
             <div class="grid grid-cols-4 gap-4">
                 <div class="stat-card">
                     <div class="flex items-start justify-between mb-4">
-                        <div>
-                            <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Pemasukan</p>
-                            <p class="text-[10px] text-emerald-600 font-semibold mt-1">Bulan ini</p>
-                        </div>
-                        <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                            <iconify-icon icon="solar:wallet-money-bold" class="text-emerald-600 text-base"></iconify-icon>
-                        </div>
+                        <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Total Dana Masuk</p>
+                        <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
                     <p class="text-[22px] font-bold text-slate-900">Rp {{ number_format($totalMasukBulanIni, 0, ',', '.') }}</p>
                     <div class="flex items-center gap-2 mt-3">
                         <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $persenMasuk >= 0 ? 'badge-green' : 'bg-rose-50 text-rose-600' }}">
                             {{ $persenMasuk >= 0 ? '↑' : '↓' }} {{ number_format(abs($persenMasuk), 1, ',', '.') }}%
                         </span>
-                        <span class="text-[11px] text-slate-400">dibanding bulan lalu</span>
+                        <span class="text-[11px] text-slate-400">vs bulan lalu</span>
                     </div>
                 </div>
 
                 <div class="stat-card">
                     <div class="flex items-start justify-between mb-4">
-                        <div>
-                            <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Pengeluaran</p>
-                            <p class="text-[10px] text-rose-600 font-semibold mt-1">Bulan ini</p>
-                        </div>
-                        <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
-                            <iconify-icon icon="solar:card-send-bold" class="text-rose-600 text-base"></iconify-icon>
-                        </div>
+                        <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Total Dana Keluar</p>
+                        <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
                     <p class="text-[22px] font-bold text-slate-900">Rp {{ number_format($totalKeluarBulanIni, 0, ',', '.') }}</p>
                     <div class="flex items-center gap-2 mt-3">
                         <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $persenKeluar > 0 ? 'bg-rose-50 text-rose-600' : 'badge-green' }}">
                             {{ $persenKeluar > 0 ? '↑' : '↓' }} {{ number_format(abs($persenKeluar), 1, ',', '.') }}%
                         </span>
-                        <span class="text-[11px] text-slate-400">dibanding bulan lalu</span>
+                        <span class="text-[11px] text-slate-400">vs bulan lalu</span>
                     </div>
                 </div>
 
                 <div class="stat-card">
                     <div class="flex items-start justify-between mb-4">
-                        <div>
-                            <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Total Mutasi</p>
-                            <p class="text-[10px] text-slate-500 font-semibold mt-1">Semua transaksi</p>
-                        </div>
-                        <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                            <iconify-icon icon="solar:clipboard-list-bold" class="text-slate-600 text-base"></iconify-icon>
-                        </div>
+                        <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Total Log Jurnal</p>
+                        <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
-                    <p class="text-[22px] font-bold text-slate-900">{{ $jumlahTransaksi }}</p>
+                    <p class="text-[22px] font-bold text-slate-900">{{ $jumlahTransaksi }} <span class="text-slate-400">Data</span></p>
                     <div class="flex items-center gap-2 mt-3">
-                        <span class="text-[11px] text-slate-500 font-medium">Pencatatan keseluruhan</span>
+                        <span class="text-[11px] text-slate-400">Total riwayat mutasi</span>
                     </div>
                 </div>
 
                 <div class="stat-card">
                     <div class="flex items-start justify-between mb-4">
-                        <div>
-                            <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Menunggu Verifikasi</p>
-                            <p class="text-[10px] text-amber-600 font-semibold mt-1">Pending</p>
-                        </div>
-                        <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
-                            <iconify-icon icon="solar:clock-circle-bold" class="text-amber-600 text-base"></iconify-icon>
-                        </div>
+                        <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Verifikasi Tertunda</p>
+                        <button class="arrow-btn"><iconify-icon icon="solar:arrow-right-up-linear" class="text-[14px]"></iconify-icon></button>
                     </div>
-                    <p class="text-[22px] font-bold text-amber-600">{{ $verifikasiTertunda }}</p>
+                    <p class="text-[22px] font-bold text-amber-600">{{ $verifikasiTertunda }} <span class="text-amber-500/60">Log</span></p>
                     <div class="flex items-center gap-2 mt-3">
                         <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $verifikasiTertunda > 0 ? 'badge-red' : 'badge-green' }}">{{ $verifikasiTertunda > 0 ? 'Perlu Cek' : 'Aman' }}</span>
+                        <span class="text-[11px] text-slate-400">Belum disetujui</span>
                     </div>
                 </div>
             </div>
@@ -331,13 +317,13 @@
                                     $semuaTransaksi->push((object)[
                                         'id' => $p->id,
                                         'tanggal' => $p->tanggal_bayar,
-                                        'deskripsi' => ($p->user->name ?? 'User') . ' membayar kas',
+                                        'deskripsi' => ($p->siswa->name ?? 'User') . ' membayar kas',
                                         'operator' => 'Sistem',
                                         'kategori' => 'Kas Masuk',
                                         'jenis' => 'Masuk',
                                         'nominal' => $p->jml_bayar,
                                         'status' => $p->status,
-                                        'bukti_bayar' => $p->bukti_bayar ?? null,
+                                        'bukti_bayar' => $p->bukti_bayar,
                                     ]);
                                 }
 
@@ -361,9 +347,16 @@
                             @forelse($semuaTransaksi as $trx)
                             <tr class="hover:bg-slate-50/50 transition">
                                 <td class="px-6 py-4">
-                                    <div>
-                                        <span class="font-bold text-slate-800 block text-[13px]">{{ $trx->deskripsi }}</span>
-                                        <span class="text-[10px] text-slate-400 font-medium">Operator: {{ $trx->operator }}</span>
+                                    <div class="flex items-center gap-3">
+                                        @if($trx->jenis == 'Masuk')
+                                            <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-lg shadow-sm"><iconify-icon icon="solar:long-arrow-down-left-bold"></iconify-icon></div>
+                                        @else
+                                            <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg shadow-sm"><iconify-icon icon="solar:long-arrow-up-right-bold"></iconify-icon></div>
+                                        @endif
+                                        <div>
+                                            <span class="font-bold text-slate-800 block text-[13px]">{{ $trx->deskripsi }}</span>
+                                            <span class="text-[10px] text-slate-400 font-medium">Operator: {{ $trx->operator }}</span>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
@@ -413,27 +406,11 @@
                 </div>
 
                 <div class="p-4 border-t border-slate-200 flex items-center justify-between bg-slate-50/50">
-                    <p class="text-xs text-slate-400 font-medium">Menampilkan <span class="font-semibold text-slate-700">{{ ($pembayaran->currentPage() - 1) * $pembayaran->perPage() + 1 }}-{{ min($pembayaran->currentPage() * $pembayaran->perPage(), $pembayaran->total()) }} dari {{ $pembayaran->total() }}</span> transaksi keseluruhan</p>
+                    <p class="text-xs text-slate-400 font-medium">Menampilkan <span class="font-semibold text-slate-700">1-2 dari 158</span> transaksi keseluruhan</p>
                     <div class="flex items-center gap-1">
-                        @if ($pembayaran->onFirstPage())
-                            <button disabled class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-300 text-xs font-semibold cursor-not-allowed">‹</button>
-                        @else
-                            <a href="{{ $pembayaran->previousPageUrl() }}" class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-100 text-xs font-semibold transition">‹</a>
-                        @endif
-
-                        @foreach ($pembayaran->getUrlRange(1, $pembayaran->lastPage()) as $page => $url)
-                            @if ($page == $pembayaran->currentPage())
-                                <button class="px-3 py-1.5 bg-slate-950 text-white rounded-lg text-xs font-bold shadow-sm">{{ $page }}</button>
-                            @else
-                                <a href="{{ $url }}" class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-100 text-xs font-semibold transition">{{ $page }}</a>
-                            @endif
-                        @endforeach
-
-                        @if ($pembayaran->hasMorePages())
-                            <a href="{{ $pembayaran->nextPageUrl() }}" class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-100 text-xs font-semibold transition">›</a>
-                        @else
-                            <button disabled class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-300 text-xs font-semibold cursor-not-allowed">›</button>
-                        @endif
+                        <button class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-100 text-xs font-semibold transition">‹</button>
+                        <button class="px-3 py-1.5 bg-slate-950 text-white rounded-lg text-xs font-bold shadow-sm">1</button>
+                        <button class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-100 text-xs font-semibold transition">›</button>
                     </div>
                 </div>
             </div>
@@ -465,6 +442,7 @@
         });
     }
 
+    // PERBAIKAN: Fungsi Real-time Filter Table Multi-kolom
     function filterTable() {
         const input = document.getElementById("searchInput");
         const filter = input.value.toLowerCase();
@@ -472,10 +450,13 @@
         const rows = tbody.getElementsByTagName("tr");
 
         for (let i = 0; i < rows.length; i++) {
+            // Lewati filter jika baris tersebut info data kosong
             if (rows[i].id === 'emptyRow') continue;
 
+            // Mengambil semua string teks di dalam satu baris data
             const rowText = rows[i].textContent || rows[i].innerText;
 
+            // Evaluasi string kecocokan data
             if (rowText.toLowerCase().indexOf(filter) > -1) {
                 rows[i].style.display = "";
             } else {
