@@ -86,7 +86,7 @@
                 @foreach($riwayat as $item)
                     <div class="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition">
                         
-                        <div class="flex items-start gap-4">
+                        <div class="flex items-start gap-4 min-w-0 flex-1">
                             <div class="w-12 h-12 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
                                 @if($item->metode == 'transfer')
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -98,13 +98,22 @@
                                     </svg>
                                 @endif
                             </div>
-                            <div>
+                            <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-2 flex-wrap">
                                     <h3 class="font-bold text-lg text-gray-900">Rp {{ number_format($item->jml_bayar, 0, ',', '.') }}</h3>
                                     <span class="text-[10px] uppercase bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-semibold tracking-wider">
                                         {{ $item->metode == 'transfer' ? 'QRIS' : 'Tunai Bendahara' }}
                                     </span>
                                 </div>
+                                
+                                <p class="text-sm font-medium text-gray-600 mt-0.5 truncate">
+                                    Keterangan: <span class="text-gray-900 font-semibold">{{ $item->tagihan->nama_tagihan ?? 'Tagihan Kas' }}</span>
+                                </p>
+
+                                <p class="text-xs text-gray-500 mt-0.5">
+                                    Periode: <span class="font-medium text-gray-800">{{ $item->tagihan->periode ?? '-' }}</span>
+                                </p>
+
                                 <p class="text-xs text-gray-400 mt-1">
                                     Waktu: {{ \Carbon\Carbon::parse($item->created_at)->translatedFormat('d F Y, H:i') }} WIB
                                 </p>
@@ -119,17 +128,25 @@
                                     </span>
                                 @elseif($item->status == 'pending')
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Menunggu
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pending
+                                    </span>
+                                @elseif($item->status == 'gagal' || $item->status == 'ditolak')
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-red-50 text-red-700 border border-red-100">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> {{ $item->status == 'ditolak' ? 'Ditolak' : 'Gagal' }}
+                                    </span>
+                                @elseif($item->status == 'nunggak')
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 border border-rose-100">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Nunggak
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-red-50 text-red-700 border border-red-100">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> {{ ucfirst($item->status) }}
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-50 text-gray-700 border border-gray-100">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span> {{ ucfirst($item->status) }}
                                     </span>
                                 @endif
                             </div>
 
                             <a href="{{ route('siswa.detail_transaksi', $item->id) }}" class="p-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/xl" class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
                             </a>
@@ -164,7 +181,6 @@
 @include('components.footer')
 
 <script>
-    // SCRIPT DROPDOWN PROFIL
     const accountBtn = document.getElementById('accountBtn');
     const accountMenu = document.getElementById('accountMenu');
 

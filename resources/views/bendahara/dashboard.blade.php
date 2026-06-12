@@ -165,14 +165,26 @@
 
         <main class="ml-[250px] flex-1 overflow-y-auto h-screen">
 
-            <div class="h-[70px] bg-white border-b border-slate-200 px-8 flex items-center justify-between shadow-sm">
+            <div class="h-[70px] bg-white border-b border-slate-200 px-8 flex items-center justify-between shadow-sm sticky top-0 z-10">
                 <div>
                     <p class="text-[12px] text-slate-400 font-medium">
                         Pages / Dashboard
                     </p>
-                    <h1 class="text-[20px] font-bold text-slate-800 mt-1">
+                    <h1 class="text-[20px] font-bold text-slate-800 mt-1 whitespace-nowrap">
                         Dashboard Keuangan
                     </h1>
+                </div>
+
+                <div class="flex-1 max-w-md mx-8 hidden md:block">
+                    <div class="relative flex items-center">
+                        <iconify-icon icon="solar:magnifer-linear" class="absolute left-4 text-slate-400 text-lg"></iconify-icon>
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            placeholder="Cari nama siswa atau kategori transaksi..." 
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-2 text-xs focus:outline-none focus:border-teal-500 focus:bg-white transition"
+                        />
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-4">
@@ -291,22 +303,28 @@
                                     <th class="pb-2 text-right">Jumlah</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-50 text-xs text-slate-600">
+                            <tbody id="transactionTable" class="divide-y divide-slate-50 text-xs text-slate-600">
                                 @forelse($pembayaran->take(5) as $item)
-                                <tr>
-                                    <td class="py-3 font-bold text-slate-800 flex items-center gap-2">
-                                        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><iconify-icon icon="solar:user-rounded-bold"></iconify-icon></div>
+                                <tr class="transaction-row">
+                                    <td class="py-3 font-bold text-slate-800 flex items-center gap-2 search-name">
+                                        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                            <iconify-icon icon="solar:user-rounded-bold"></iconify-icon>
+                                        </div>
                                         {{ $item->siswa->name ?? 'User' }}
                                     </td>
-                                    <td class="py-3">{{ $item->tagihan->nama_tagihan ?? 'Kas Umum' }}</td>
+                                    <td class="py-3 search-category">{{ $item->tagihan->nama_tagihan ?? 'Kas Umum' }}</td>
                                     <td class="py-3 text-slate-400">{{ \Carbon\Carbon::parse($item->tanggal_bayar)->format('d M Y') }}</td>
                                     <td class="py-3 text-right font-bold text-emerald-500">+ Rp {{ number_format($item->jml_bayar, 0, ',', '.') }}</td>
                                 </tr>
                                 @empty
-                                <tr>
+                                <tr id="emptyRow">
                                     <td colspan="4" class="py-6 text-center text-slate-400">Belum ada transaksi</td>
                                 </tr>
                                 @endforelse
+
+                                <tr id="noResultRow" class="hidden">
+                                    <td colspan="4" class="py-6 text-center text-slate-400">Transaksi tidak ditemukan</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -441,6 +459,7 @@
         }
     });
 
+    // --- LOGIKA TOGGLE DROPDOWN PROFIL ---
     function toggleDropdown() {
         document.getElementById('dropdownMenu').classList.toggle('show');
     }
@@ -449,6 +468,38 @@
         const dropdown = document.getElementById('dropdownMenu');
         if (!e.target.closest('.relative')) {
             dropdown.classList.remove('show');
+        }
+    });
+
+    // --- LOGIKA FILTER PENCARIAN REAL-TIME (BARU) ---
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const keyword = this.value.toLowerCase().trim();
+        const rows = document.querySelectorAll('.transaction-row');
+        const noResultRow = document.getElementById('noResultRow');
+        const emptyRow = document.getElementById('emptyRow');
+        let foundAny = false;
+
+        // Jika data dari backend bawaannya kosong, lewati pencarian
+        if (emptyRow) return;
+
+        rows.forEach(row => {
+            const nameText = row.querySelector('.search-name').textContent.toLowerCase();
+            const categoryText = row.querySelector('.search-category').textContent.toLowerCase();
+
+            // Cek kesesuaian kata kunci pada Kolom Nama Siswa ATAU Kategori Tagihan
+            if (nameText.includes(keyword) || categoryText.includes(keyword)) {
+                row.style.display = ''; // Tampilkan baris (menggunakan bawaan table style)
+                foundAny = true;
+            } else {
+                row.style.display = 'none'; // Sembunyikan baris
+            }
+        });
+
+        // Tampilkan pesan "Tidak ditemukan" jika semua data tersembunyi
+        if (!foundAny && keyword !== '') {
+            noResultRow.classList.remove('hidden');
+        } else {
+            noResultRow.classList.add('hidden');
         }
     });
 </script>

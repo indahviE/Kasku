@@ -93,7 +93,7 @@
         }
 
         .badge-green { background: #dcfce7; color: #16a34a; }
-        .badge-red   { background: #fee2e2; color: #dc2626; }
+        .badge-red  { background: #fee2e2; color: #dc2626; }
 
         .dropdown-menu {
             opacity: 0;
@@ -273,7 +273,7 @@
                 <div class="flex items-center gap-3 flex-1 min-w-[280px]">
                     <div class="relative flex-1 max-w-md">
                         <span class="absolute inset-y-0 left-4 flex items-center text-slate-400"><iconify-icon icon="solar:magnifer-linear" class="text-lg"></iconify-icon></span>
-                        <input type="text" placeholder="Cari barang, nota belanja atau keperluan..." class="w-full h-11 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-rose-500 outline-none transition font-medium text-slate-700">
+                        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari barang, nota belanja atau keperluan..." class="w-full h-11 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-rose-500 outline-none transition font-medium text-slate-700">
                     </div>
                     <select class="h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 outline-none focus:bg-white transition cursor-pointer">
                         <option>Semua Sektor</option>
@@ -296,7 +296,7 @@
                                 <th class="px-6 py-4 text-center">Aksi / CRUD</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100 text-xs text-slate-600 font-medium">
+                        <tbody id="tableBody" class="divide-y divide-slate-100 text-xs text-slate-600 font-medium">
                             @forelse($pengeluaran as $item)
                             <tr class="hover:bg-slate-50/50 transition">
                                 <td class="px-6 py-4">
@@ -325,7 +325,7 @@
                                 </td>
                             </tr>
                             @empty
-                            <tr>
+                            <tr id="emptyRow">
                                 <td colspan="5" class="text-center py-6 text-slate-500">Belum ada data kas keluar</td>
                             </tr>
                             @endforelse
@@ -402,6 +402,33 @@
         }, 300);
     }
 
+    // Fungsi Utama Pencatatan Kas Keluar (Search Filter)
+    function filterTable() {
+        const input = document.getElementById("searchInput");
+        const filter = input.value.toLowerCase();
+        const tbody = document.getElementById("tableBody");
+        const rows = tbody.getElementsByTagName("tr");
+
+        for (let i = 0; i < rows.length; i++) {
+            // Lewati filter jika baris tersebut menunjukkan pesan data kosong
+            if (rows[i].id === 'emptyRow') continue;
+
+            // Targetkan kolom pertama (Kebutuhan / Keperluan)
+            const keperluanCell = rows[i].getElementsByTagName("td")[0];
+            
+            if (keperluanCell) {
+                const textValue = keperluanCell.textContent || keperluanCell.innerText;
+                
+                // Menyembunyikan atau menampilkan baris berdasarkan kecocokan teks input
+                if (textValue.toLowerCase().indexOf(filter) > -1) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+    }
+
     // SweetAlert Delete
     function deleteKas(id) {
         Swal.fire({
@@ -460,7 +487,6 @@
     @endif
 </script>
 
-<!-- Modal Tambah -->
 <div id="createModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center">
     <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="createModalContent">
         <div class="flex items-center justify-between mb-6">
@@ -491,7 +517,6 @@
     </div>
 </div>
 
-<!-- Modal Edit -->
 <div id="editModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center">
     <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="editModalContent">
         <div class="flex items-center justify-between mb-6">

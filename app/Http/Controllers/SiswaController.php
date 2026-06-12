@@ -206,28 +206,38 @@ class SiswaController extends Controller
     }
 
     public function tunggakan()
-    {
-        $user = Auth::user();
+{
+    // Mengambil ID user/siswa yang sedang login (ID: 36)
+    $siswaId = auth()->user()->id; 
 
-        $tunggakan = \App\Models\Tunggakan::with('tagihan')
-            ->where('user_id', $user->id)
-            ->where('status', '!=', 'lunas') // Menampilkan yang belum lunas
-            ->orderBy('created_at', 'desc')
-            ->get();
+    $tunggakan = \App\Models\Tunggakan::with(['tagihan'])
+        ->where('user_id', $siswaId) 
+        ->get()
+        ->filter(function ($item) use ($siswaId) {
+            
+            // Cek apakah siswa sudah upload bukti/bayar dan statusnya 'pending'
+            $pembayaranPending = \App\Models\Pembayaran::where('tagihan_id', $item->tagihan_id)
+                ->where('user_id', $siswaId) 
+                ->where('status', 'pending')
+                ->exists();
 
-        return view('siswa.tunggakan', compact('tunggakan'));
-    }
+            // KUNCINYA DI SINI: 
+            // Jika ada pembayaran yang pending, kembalikan false (artinya tagihan ini dibuang/diemajukan dari daftar)
+            return !$pembayaranPending;
+        });
 
+    return view('siswa.tunggakan', compact('tunggakan')); 
+}
     public function detailTagihan($id)
     {
         $tunggakanItem = \App\Models\Tunggakan::with('tagihan')
-            ->where('user_id', auth()->id())
+            ->where('user_id', Auth::user()->id)
             ->findOrFail($id);
 
         $tagihan = $tunggakanItem->tagihan;
 
         $pembayaran = Pembayaran::where('tagihan_id', $tagihan->id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', Auth::user()->id)
             ->first();
 
         $lunas = $tunggakanItem->status === 'lunas';
@@ -346,6 +356,45 @@ class SiswaController extends Controller
 
         return back();
     }
+
+    public function search(Request $request)
+{
+    $keyword = $request->q;
+
+    $tagihan = Tagihan::where('user_id', auth()->id())
+    ->where(function ($query) use ($keyword) {
+
+        $query->where('nama_tagihan', 'like', "%{$keyword}%")
+              ->orWhere('periode', 'like', "%{$keyword}%");
+
+    })
+    ->get();
+
+    $pembayaran = Pembayaran::with('tagihan')
+        ->where('user_id', auth()->id())
+        ->where(function ($query) use ($keyword) {
+
+            $query->where('metode', 'like', "%{$keyword}%")
+                  ->orWhere('status', 'like', "%{$keyword}%")
+                  ->orWhereHas('tagihan', function ($q) use ($keyword) {
+
+                        $q->where(
+                            'nama_tagihan',
+                            'like',
+                            "%{$keyword}%"
+                        );
+
+                  });
+
+        })
+        ->latest()
+        ->get();
+
+    return response()->json([
+        'tagihan' => $tagihan,
+        'pembayaran' => $pembayaran,
+    ]);
+}
 
     public function allNotifications()
     {

@@ -194,6 +194,9 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
     Route::get('/detail-transaksi/{id}', [SiswaController::class, 'detailPembayaran'])
         ->name('siswa.detail_transaksi');
 
+     Route::get('/search', [SiswaController::class, 'search'])
+        ->name('siswa.search');
+
     Route::post('/logout', [SiswaController::class, 'logout'])
         ->name('siswa.logout');
 });

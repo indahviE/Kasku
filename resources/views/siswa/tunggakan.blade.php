@@ -85,18 +85,20 @@
         <div class="space-y-4">
             @forelse ($tunggakan as $item)
                 @php
-                    // Jika di kueri menggunakan model jembatan Tunggakan
                     $isJembatan = isset($item->tagihan);
                     
-                    // Baca status lunas dari tabel penentu masing-masing
-                    $lunas = $isJembatan ? ($item->status === 'lunas') : false;
+                    $statusTransaksi = $isJembatan ? $item->status : 'belum_bayar';
                     
-                    // Ambil detail target data berdasarkan model kueri yang aktif
+                    // Kondisi pengecekan string 'lunas' atau 'pending' asli database
+                    $lunas   = ($statusTransaksi === 'lunas');
+                    $pending = ($statusTransaksi === 'pending'); 
+                    
                     $namaTagihan = $isJembatan ? ($item->tagihan->nama_tagihan ?? '-') : $item->nama_tagihan;
                     $periode     = $isJembatan ? ($item->tagihan->periode ?? now()) : $item->periode;
                     $batasBayar  = $isJembatan ? ($item->tagihan->batas_bayar ?? now()) : $item->batas_bayar;
                     $nominal     = $isJembatan ? ($item->tagihan->nominal ?? 0) : $item->nominal;
                     $tagihanId   = $isJembatan ? ($item->tagihan->id ?? $item->id) : $item->id;
+                    $tunggakanId = $item->id; 
                 @endphp
 
                 <div class="border border-gray-200/80 rounded-3xl p-5 bg-white hover:shadow-md hover:border-gray-300/70 transition duration-200">
@@ -104,12 +106,16 @@
                         
                         {{-- LEFT: Icon & Informasi Tagihan --}}
                         <div class="flex items-center gap-4 min-w-0 md:col-span-6">
-                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 {{ $lunas ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-red-50 text-red-600 border border-red-100' }}">
+                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 {{ $lunas ? 'bg-green-50 text-green-600 border border-green-100' : ($pending ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-red-50 text-red-600 border border-red-100') }}">
                                 @if($lunas)
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
-                                @ immortality @else
+                                @elseif($pending)
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                @else
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4m0 4h.01m8.99-4a9 9 0 11-17.98 0 9 9 0 0117.98 0z" />
                                     </svg>
@@ -142,6 +148,10 @@
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-200/60 mt-1 tracking-wide uppercase">
                                     Lunas
                                 </span>
+                            @elseif($pending)
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200/60 mt-1 tracking-wide uppercase">
+                                    Menunggu Validasi
+                                </span>
                             @else
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-200/60 mt-1 tracking-wide uppercase">
                                     Belum Bayar
@@ -156,21 +166,22 @@
                                 <span class="font-extrabold text-lg text-gray-900 block">
                                     Rp {{ number_format($nominal, 0, ',', '.') }}
                                 </span>
-                                <span class="text-xs font-bold tracking-wide uppercase mt-0.5 block {{ $lunas ? 'text-green-600' : 'text-red-500' }}">
-                                    {{ $lunas ? 'Lunas' : 'Belum Bayar' }}
+                                <span class="text-xs font-bold tracking-wide uppercase mt-0.5 block {{ $lunas ? 'text-green-600' : ($pending ? 'text-amber-500' : 'text-red-500') }}">
+                                    {{ $lunas ? 'Lunas' : ($pending ? 'Menunggu Validasi' : 'Belum Bayar') }}
                                 </span>
                             </div>
 
                             {{-- Tombol Aksi Mandiri --}}
                             <div class="flex items-center gap-2 ml-auto md:ml-0">
-                                @if(!$lunas)
+                                {{-- Tombol Bayar HANYA muncul jika status tidak lunas DAN tidak pending --}}
+                                @if(!$lunas && !$pending)
                                     <a href="{{ route('siswa.transaksi', ['tagihan_id' => $tagihanId]) }}"
                                        class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-100 active:scale-95 transition-all whitespace-nowrap">
                                         Bayar (QRIS)
                                     </a>
                                 @endif
                                 
-                                <a href="{{ route('siswa.detail_tagihan', ['id' => $tagihanId]) }}"
+                                <a href="{{ route('siswa.detail_tagihan', ['id' => $tunggakanId]) }}"
                                    class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-xs font-bold hover:bg-gray-200 active:scale-95 transition-all whitespace-nowrap">
                                     Detail
                                 </a>

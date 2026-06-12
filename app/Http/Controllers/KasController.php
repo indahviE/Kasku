@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Pembayaran;
 use App\Models\Pengeluaran;
 use App\Models\Tagihan;
+use Illuminate\Support\Facades\Auth;
 
 class KasController extends Controller
 {
@@ -142,11 +143,11 @@ public function storeKasKeluar(Request $request)
     ]);
 
     Pengeluaran::create([
-        'kelas_id'    => auth()->user()->kelas_id, // ✅ Ambil dari bendahara
+        'kelas_id'    => Auth::user()->kelas_id, // ✅ Ambil dari bendahara
         'keterangan'  => $request->keterangan,
         'nominal'     => $request->nominal,
         'tanggal'     => $request->tanggal,
-        'dicatat_oleh' => auth()->id()
+        'dicatat_oleh' => Auth::user()->id
     ]);
 
     return redirect()

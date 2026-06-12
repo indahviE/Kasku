@@ -2,57 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Pembayaran;
 use App\Models\Pengeluaran;
 use App\Models\Tagihan;
+use Illuminate\Http\Request; // Sempurna di sini (Cukup satu ini saja)
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BendaharaController extends Controller
 {
     // =========================
     // DASHBOARD
     // =========================
-public function dashboard()
-{
-    $totalMasuk = Pembayaran::sum('jml_bayar') ?? 0;
-    $totalKeluar = Pengeluaran::sum('nominal') ?? 0;
-
-    $saldoAwal = 1000000;
-    $saldoKas = $totalMasuk - $totalKeluar;
-    $saldoAkhir = $saldoAwal + $saldoKas;
-
-    $jumlahTransaksi =
-        Pembayaran::count() +
-        Pengeluaran::count();
-
-    $kasSosial = Pembayaran::whereHas('tagihan', function($q) {
-        $q->where('nama_tagihan', 'like', '%sosial%')
-          ->orWhere('nama_tagihan', 'like', '%tabungan%');
-    })->sum('jml_bayar') ?? 0;
-
-    $targetKasSosial = 10000000;
-    $persenKasSosial = $targetKasSosial > 0 ? min(100, ($kasSosial / $targetKasSosial) * 100) : 0;
-
-    // ✅ TAMBAH INI:
-    $pembayaran = Pembayaran::with(['siswa', 'tagihan'])->latest()->get();
-
-    return view('bendahara.dashboard', compact(
-        'totalMasuk',
-        'totalKeluar',
-        'saldoKas',
-        'saldoAwal',
-        'saldoAkhir',
-        'jumlahTransaksi',
-        'kasSosial',
-        'persenKasSosial',
-        'pembayaran'  // ✅ TAMBAH INI
-    ));
-}
-
-    // =========================
-    // KAS MASUK
-    // =========================
-    public function kasMasuk()
+    public function dashboard()
     {
         $totalMasuk = Pembayaran::sum('jml_bayar') ?? 0;
         $totalKeluar = Pengeluaran::sum('nominal') ?? 0;
@@ -65,13 +27,80 @@ public function dashboard()
             Pembayaran::count() +
             Pengeluaran::count();
 
-        $pembayaran = Pembayaran::with(['siswa', 'tagihan'])->latest()->paginate(5);
+        $kasSosial = Pembayaran::whereHas('tagihan', function($q) {
+            $q->where('nama_tagihan', 'like', '%sosial%')
+              ->orWhere('nama_tagihan', 'like', '%tabungan%');
+        })->sum('jml_bayar') ?? 0;
+
+        $targetKasSosial = 10000000;
+        $persenKasSosial = $targetKasSosial > 0 ? min(100, ($kasSosial / $targetKasSosial) * 100) : 0;
+
+        $pembayaran = Pembayaran::with(['siswa', 'tagihan'])->latest()->get();
+
+        return view('bendahara.dashboard', compact(
+            'totalMasuk',
+            'totalKeluar',
+            'saldoKas',
+            'saldoAwal',
+            'saldoAkhir',
+            'jumlahTransaksi',
+            'kasSosial',
+            'persenKasSosial',
+            'pembayaran'
+        ));
+    }
+
+    // =========================
+    // KAS MASUK
+    // =========================
+    // ⚠️ BARIS 'use' YANG SALAH DI SINI SUDAH DIHAPUS ⚠️
+
+    public function kasMasuk(Request $request) 
+    {
+        // 1. Ambil input dari form pencarian & filter
+        $search = $request->input('search');
+        $kategori = $request->input('kategori');
+
+        // 2. Query dasar untuk tabel Pembayaran
+        $pembayaranQuery = Pembayaran::with(['siswa', 'tagihan']);
+
+        // Logika Pencarian berdasarkan Nama Siswa atau Email
+        if ($search) {
+            $pembayaranQuery->whereHas('siswa', function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Logika Filter berdasarkan Kategori Kas
+        if ($kategori) {
+            if ($kategori == 'umum') {
+                $pembayaranQuery->whereNull('tagihan_id'); 
+            } else {
+                $pembayaranQuery->where('tagihan_id', $kategori); 
+            }
+        }
+
+        // Eksekusi query dengan pagination
+        $pembayaran = $pembayaranQuery->latest()->paginate(5);
+
+        // 3. Ambil data pendukung lainnya
+        $totalMasuk = Pembayaran::sum('jml_bayar') ?? 0;
+        $totalKeluar = Pengeluaran::sum('nominal') ?? 0;
+
+        $saldoAwal = 1000000;
+        $saldoKas = $totalMasuk - $totalKeluar;
+        $saldoAkhir = $saldoAwal + $saldoKas;
+
+        $jumlahTransaksi = Pembayaran::count() + Pengeluaran::count();
+
         $siswaList = \App\Models\User::where('role', 'siswa')->get();
         $tagihanList = \App\Models\Tagihan::latest()->get();
 
         $totalMasukBulanIni = Pembayaran::whereMonth('tanggal_bayar', now()->month)
                                         ->whereYear('tanggal_bayar', now()->year)
                                         ->sum('jml_bayar') ?? 0;
+                                        
         $totalMasukBulanLalu = Pembayaran::whereMonth('tanggal_bayar', now()->subMonth()->month)
                                          ->whereYear('tanggal_bayar', now()->subMonth()->year)
                                          ->sum('jml_bayar') ?? 0;
@@ -98,9 +127,30 @@ public function dashboard()
         ));
     }
 
-    public function cetakKasMasuk()
+    public function cetakKasMasuk(Request $request)
     {
-        $pembayaran = Pembayaran::with(['siswa', 'tagihan'])->orderBy('tanggal_bayar', 'desc')->get();
+        $search = $request->input('search');
+        $kategori = $request->input('kategori');
+
+        $pembayaranQuery = Pembayaran::with(['siswa', 'tagihan']);
+
+        if ($search) {
+            $pembayaranQuery->whereHas('siswa', function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%");
+            });
+        }
+
+        if ($kategori) {
+            if ($kategori == 'umum') {
+                $pembayaranQuery->whereNull('tagihan_id');
+            } else {
+                $pembayaranQuery->where('tagihan_id', $kategori);
+            }
+        }
+
+        $pembayaran = $pembayaranQuery->orderBy('tanggal_bayar', 'desc')->get();
+
         return view('bendahara.cetak_kas_masuk', compact('pembayaran'));
     }
 
@@ -111,7 +161,7 @@ public function dashboard()
     {
         $totalKeluar = Pengeluaran::sum('nominal') ?? 0;
 
-        $pengeluaran = Pengeluaran::latest()->get();
+        $pengeluaran = Pengeluaran::where('kelas_id', Auth::user()->kelas_id)->latest()->get();
 
         $totalKeluarBulanIni = Pengeluaran::whereMonth('tanggal', now()->month)
                                           ->whereYear('tanggal', now()->year)
@@ -129,7 +179,7 @@ public function dashboard()
 
         $totalMasuk = Pembayaran::sum('jml_bayar') ?? 0;
         $kasSisa = $totalMasuk - $totalKeluar;
-        $jumlahSektor = Pengeluaran::distinct('keterangan')->count('keterangan');
+        $jumlahSektor = Pengeluaran::where('kelas_id', Auth::user()->kelas_id)->distinct('keterangan')->count('keterangan');
 
         return view('bendahara.kas_keluar', compact(
             'pengeluaran',
@@ -176,71 +226,60 @@ public function dashboard()
     // =========================
     // TAGIHAN
     // =========================
-
-    // halaman daftar tagihan
     public function tagihan()
     {
         $tagihan = Tagihan::latest()->get();
-
         return view('bendahara.tagihan', compact('tagihan'));
     }
 
-    // halaman tambah tagihan
     public function createTagihan()
     {
         return view('bendahara.tambah_tagihan');
     }
 
-    // simpan tagihan
     public function storeTagihan(Request $request)
-{
-    $request->validate([
-        'nama_tagihan' => 'required',
-        'periode'      => 'required|date',
-        'nominal'      => 'required|numeric',
-        'batas_bayar'  => 'required|date',
-        'deskripsi'    => 'nullable'
-    ]);
-
-    // 1. Simpan induk data tagihan terlebih dahulu
-    $tagihan = Tagihan::create([
-        'user_id'      => auth()->id(), // Bendahara yang membuat
-        'created_by'   => auth()->id(),
-        'nama_tagihan' => $request->nama_tagihan,
-        'periode'      => $request->periode,
-        'nominal'      => $request->nominal,
-        'batas_bayar'  => $request->batas_bayar,
-        'deskripsi'    => $request->deskripsi,
-    ]);
-
-    // 2. Ambil semua data user yang memiliki role 'siswa'
-    $daftarSiswa = \App\Models\User::where('role', 'siswa')->get();
-
-    // 3. SEBARKAN KE SELURUH SISWA (Masukkan data ke tabel tunggakan)
-    foreach ($daftarSiswa as $siswa) {
-        // Asumsi nama model jembatan Anda adalah 'Tunggakan' atau disesuaikan dengan Query Builder:
-        \DB::table('tunggakan')->insert([
-            'tagihan_id' => $tagihan->id,       // Mengambil ID dari tagihan yang baru dibuat di atas
-            'user_id'    => $siswa->id,         // ID Siswa yang mendapatkan tagihan
-            'status'     => 'belum_bayar',      // Status default sesuai struktur enum database Anda
-            'created_at' => now(),
-            'updated_at' => now(),
+    {
+        $request->validate([
+            'nama_tagihan' => 'required',
+            'periode'      => 'required|date',
+            'nominal'      => 'required|numeric',
+            'batas_bayar'  => 'required|date',
+            'deskripsi'    => 'nullable'
         ]);
+
+        $tagihan = Tagihan::create([
+            'user_id'      => Auth::user()->id, 
+            'created_by'   => Auth::user()->id,
+            'nama_tagihan' => $request->nama_tagihan,
+            'periode'      => $request->periode,
+            'nominal'      => $request->nominal,
+            'batas_bayar'  => $request->batas_bayar,
+            'deskripsi'    => $request->deskripsi,
+        ]);
+
+        $daftarSiswa = \App\Models\User::where('role', 'siswa')->get();
+
+        foreach ($daftarSiswa as $siswa) {
+            DB::table('tunggakan')->insert([
+                'tagihan_id' => $tagihan->id, 
+                'user_id'    => $siswa->id, 
+                'status'     => 'belum_bayar', 
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return redirect()
+            ->route('bendahara.tagihan')
+            ->with('success', 'Tagihan berhasil dibuat dan disebarkan ke seluruh siswa.');
     }
 
-    return redirect()
-        ->route('bendahara.tagihan')
-        ->with('success', 'Tagihan berhasil dibuat dan disebarkan ke seluruh siswa.');
-}
-
-    // edit tagihan
     public function editTagihan($id)
     {
         $tagihan = Tagihan::findOrFail($id);
         return view('bendahara.edit_tagihan', compact('tagihan'));
     }
 
-    // update tagihan
     public function updateTagihan(Request $request, $id)
     {
         $request->validate([
@@ -252,7 +291,6 @@ public function dashboard()
         ]);
 
         $tagihan = Tagihan::findOrFail($id);
-
         $tagihan->update([
             'nama_tagihan' => $request->nama_tagihan,
             'periode'      => $request->periode,
@@ -266,11 +304,9 @@ public function dashboard()
             ->with('success', 'Tagihan berhasil diupdate');
     }
 
-    // hapus tagihan
     public function destroyTagihan($id)
     {
         $tagihan = Tagihan::findOrFail($id);
-
         $tagihan->delete();
 
         return redirect()
@@ -382,6 +418,4 @@ public function dashboard()
     {
         return view('bendahara.pengaturan');
     }
-
-
 }
