@@ -17,18 +17,18 @@
             email: '{{ old('email') }}',
             get showKodeKelas() {
                 let e = this.email.toLowerCase().trim();
-                return e.endsWith('@siswa.com') || e.endsWith('@guru.com') || e.endsWith('@bendahara.com');
+                return e.endsWith('@siswa.com') || e.endsWith('@guru.com') || e.endsWith('@bendahara.com') || e.endsWith('@walikelas.com');
             },
             get labelCodeKelas() {
                 let e = this.email.toLowerCase().trim();
                 if (e.endsWith('@siswa.com')) return 'Kode Kelas (Siswa)';
                 if (e.endsWith('@guru.com')) return 'Kode Kelas (Guru)';
                 if (e.endsWith('@bendahara.com')) return 'Kode Kelas (Bendahara)';
+                if (e.endsWith('@walikelas.com')) return 'Kode Kelas (Wali Kelas)';
                 return 'Kode Kelas';
             }
          }">
 
-        {{-- LEFT SIDE DESKTOP --}}
         <div class="hidden lg:flex flex-col justify-between bg-black text-white p-14 relative overflow-hidden">
 
             <div class="flex items-center justify-between w-full">
@@ -55,18 +55,15 @@
                 <div class="w-3 h-3 rounded-full bg-zinc-700"></div>
             </div>
 
-            {{-- Decoration --}}
             <div class="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-zinc-800"></div>
             <div class="absolute top-10 right-10 w-24 h-24 rounded-full border border-zinc-700"></div>
         </div>
 
 
-        {{-- RIGHT SIDE --}}
         <div class="flex items-center justify-center px-6 py-10 lg:px-20 bg-zinc-100 overflow-y-auto max-h-screen">
 
             <div class="w-full max-w-md my-auto">
 
-                {{-- MOBILE LOGO --}}
                 <div class="lg:hidden flex items-center gap-4 mb-10">
                     <div class="w-14 h-14 rounded-2xl bg-black text-white flex items-center justify-center font-bold text-2xl">
                         K
@@ -81,7 +78,6 @@
                     </div>
                 </div>
 
-                {{-- HEADING --}}
                 <div class="mb-8">
                     <h2 class="text-5xl font-bold text-black">
                         Register
@@ -94,7 +90,6 @@
                 <form method="POST" action="{{ route('register') }}" class="space-y-5">
                     @csrf
 
-                    {{-- NAME --}}
                     <div>
                         <x-input-label for="name" :value="__('Name')" class="mb-2 text-zinc-700" />
                         <x-text-input 
@@ -111,7 +106,6 @@
                         <x-input-error :messages="$errors->get('name')" class="mt-2" />
                     </div>
 
-                    {{-- EMAIL --}}
                     <div>
                         <x-input-label for="email" :value="__('Email')" class="mb-2 text-zinc-700" />
                         <x-text-input 
@@ -127,7 +121,6 @@
                         <x-input-error :messages="$errors->get('email')" class="mt-2" />
                     </div>
 
-                    {{-- KODE KELAS (DYNAMIC VIA ALPINE.JS) --}}
                     <div x-show="showKodeKelas" x-transition style="display: none;">
                         <x-input-label for="code" ::value="labelCodeKelas" class="mb-2 text-zinc-700" />
                         <x-text-input 
@@ -142,7 +135,6 @@
                         <x-input-error :messages="$errors->get('code')" class="mt-2" />
                     </div>
 
-                    {{-- NOMOR HP (KHUSUS SISWA VIA ALPINE.JS) --}}
                     <div x-show="email.toLowerCase().trim().endsWith('@siswa.com')" x-transition style="display: none;">
                         <x-input-label for="no_hp" :value="__('Nomor HP')" class="mb-2 text-zinc-700" />
                         <x-text-input 
@@ -157,7 +149,6 @@
                         <x-input-error :messages="$errors->get('no_hp')" class="mt-2" />
                     </div>
 
-                    {{-- NISN (KHUSUS SISWA VIA ALPINE.JS) --}}
                     <div x-show="email.toLowerCase().trim().endsWith('@siswa.com')" x-transition style="display: none;">
                         <x-input-label for="nis" :value="__('NIS')" class="mb-2 text-zinc-700" />
                         <x-text-input 
@@ -172,7 +163,34 @@
                         <x-input-error :messages="$errors->get('nis')" class="mt-2" />
                     </div>
 
-                    {{-- PASSWORD --}}
+                    <div x-show="email.toLowerCase().trim().endsWith('@walikelas.com')" x-transition style="display: none;">
+                        <x-input-label for="nip" :value="__('NIP Wali Kelas')" class="mb-2 text-zinc-700" />
+                        <x-text-input 
+                            id="nip" 
+                            class="w-full rounded-2xl border border-zinc-300 bg-white px-5 py-4 focus:ring-2 focus:ring-black focus:border-black" 
+                            type="text" 
+                            name="nip" 
+                            :value="old('nip')" 
+                            ::required="email.toLowerCase().trim().endsWith('@walikelas.com')" 
+                            placeholder="Masukkan NIP Anda" 
+                        />
+                        <x-input-error :messages="$errors->get('nip')" class="mt-2" />
+                    </div>
+
+                    <div x-show="email.toLowerCase().trim().endsWith('@walikelas.com')" x-transition style="display: none;">
+                        <x-input-label for="no_hp_walkel" :value="__('Nomor HP Wali Kelas')" class="mb-2 text-zinc-700" />
+                        <x-text-input 
+                            id="no_hp_walkel" 
+                            class="w-full rounded-2xl border border-zinc-300 bg-white px-5 py-4 focus:ring-2 focus:ring-black focus:border-black" 
+                            type="text" 
+                            name="no_hp_walkel" 
+                            :value="old('no_hp_walkel')" 
+                            ::required="email.toLowerCase().trim().endsWith('@walikelas.com')" 
+                            placeholder="Contoh: 081234567890" 
+                        />
+                        <x-input-error :messages="$errors->get('no_hp_walkel')" class="mt-2" />
+                    </div>
+
                     <div>
                         <x-input-label for="password" :value="__('Password')" class="mb-2 text-zinc-700" />
                         <x-text-input 
@@ -187,7 +205,6 @@
                         <x-input-error :messages="$errors->get('password')" class="mt-2" />
                     </div>
 
-                    {{-- CONFIRM PASSWORD --}}
                     <div>
                         <x-input-label for="password_confirmation" :value="__('Confirm Password')" class="mb-2 text-zinc-700" />
                         <x-text-input 
@@ -202,7 +219,6 @@
                         <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                     </div>
 
-                    {{-- SUBMIT BUTTON --}}
                     <button
                         type="submit"
                         class="w-full bg-black text-white py-4 rounded-2xl font-semibold text-lg hover:opacity-90 transition mt-2"
