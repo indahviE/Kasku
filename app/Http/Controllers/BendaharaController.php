@@ -5,44 +5,60 @@ namespace App\Http\Controllers;
 use App\Models\Pembayaran;
 use App\Models\Pengeluaran;
 use App\Models\Tagihan;
-use Illuminate\Http\Request; // Sempurna di sini (Cukup satu ini saja)
+use App\Models\Siswa;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class BendaharaController extends Controller
 {
+    // Helper untuk dapatkan user_ids siswa di kelas bendahara
+    private function getSiswaUserIds()
+    {
+        $kelasId = auth()->user()->kelas_id;
+        return Siswa::where('kelas_id', $kelasId)->pluck('user_id');
+    }
+
     // =========================
     // DASHBOARD
     // =========================
     public function dashboard()
     {
-        $totalMasuk = Pembayaran::sum('jml_bayar') ?? 0;
-        $totalKeluar = Pengeluaran::sum('nominal') ?? 0;
+        $userIds = $this->getSiswaUserIds();
 
-        $saldoAwal = 1000000;
+        $totalMasuk = Pembayaran::whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->sum('jml_bayar') ?? 0;
+
+        $totalKeluar = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->sum('nominal') ?? 0;
+
         $saldoKas = $totalMasuk - $totalKeluar;
-        $saldoAkhir = $saldoAwal + $saldoKas;
 
-        $jumlahTransaksi =
-            Pembayaran::count() +
-            Pengeluaran::count();
+        $jumlahTransaksi = Pembayaran::whereIn('user_id', $userIds)->count() +
+                           Pengeluaran::where('kelas_id', auth()->user()->kelas_id)->count();
 
-        $kasSosial = Pembayaran::whereHas('tagihan', function($q) {
-            $q->where('nama_tagihan', 'like', '%sosial%')
-              ->orWhere('nama_tagihan', 'like', '%tabungan%');
-        })->sum('jml_bayar') ?? 0;
+        $kasSosial = Pembayaran::whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->whereHas('tagihan', function($q) {
+                $q->where('nama_tagihan', 'like', '%sosial%')
+                  ->orWhere('nama_tagihan', 'like', '%tabungan%');
+            })
+            ->sum('jml_bayar') ?? 0;
 
         $targetKasSosial = 10000000;
         $persenKasSosial = $targetKasSosial > 0 ? min(100, ($kasSosial / $targetKasSosial) * 100) : 0;
 
-        $pembayaran = Pembayaran::with(['siswa', 'tagihan'])->latest()->get();
+        $pembayaran = Pembayaran::with(['user', 'tagihan'])
+            ->whereIn('user_id', $userIds)
+            ->latest()
+            ->limit(5)
+            ->get();
 
         return view('bendahara.dashboard', compact(
             'totalMasuk',
             'totalKeluar',
             'saldoKas',
-            'saldoAwal',
-            'saldoAkhir',
             'jumlahTransaksi',
             'kasSosial',
             'persenKasSosial',
@@ -53,69 +69,76 @@ class BendaharaController extends Controller
     // =========================
     // KAS MASUK
     // =========================
-    // ⚠️ BARIS 'use' YANG SALAH DI SINI SUDAH DIHAPUS ⚠️
-
-    public function kasMasuk(Request $request) 
+    public function kasMasuk(Request $request)
     {
-        // 1. Ambil input dari form pencarian & filter
+        $userIds = $this->getSiswaUserIds();
+
         $search = $request->input('search');
         $kategori = $request->input('kategori');
 
-        // 2. Query dasar untuk tabel Pembayaran
-        $pembayaranQuery = Pembayaran::with(['siswa', 'tagihan']);
+        $pembayaranQuery = Pembayaran::with(['user', 'tagihan'])
+            ->whereIn('user_id', $userIds);
 
-        // Logika Pencarian berdasarkan Nama Siswa atau Email
         if ($search) {
-            $pembayaranQuery->whereHas('siswa', function($q) use ($search) {
+            $pembayaranQuery->whereHas('user', function($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
                   ->orWhere('email', 'LIKE', "%{$search}%");
             });
         }
 
-        // Logika Filter berdasarkan Kategori Kas
         if ($kategori) {
             if ($kategori == 'umum') {
-                $pembayaranQuery->whereNull('tagihan_id'); 
+                $pembayaranQuery->whereNull('tagihan_id');
             } else {
-                $pembayaranQuery->where('tagihan_id', $kategori); 
+                $pembayaranQuery->where('tagihan_id', $kategori);
             }
         }
 
-        // Eksekusi query dengan pagination
         $pembayaran = $pembayaranQuery->latest()->paginate(5);
 
-        // 3. Ambil data pendukung lainnya
-        $totalMasuk = Pembayaran::sum('jml_bayar') ?? 0;
-        $totalKeluar = Pengeluaran::sum('nominal') ?? 0;
+        $totalMasuk = Pembayaran::whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->sum('jml_bayar') ?? 0;
 
-        $saldoAwal = 1000000;
+        $totalKeluar = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->sum('nominal') ?? 0;
+
         $saldoKas = $totalMasuk - $totalKeluar;
-        $saldoAkhir = $saldoAwal + $saldoKas;
 
-        $jumlahTransaksi = Pembayaran::count() + Pengeluaran::count();
+        $jumlahTransaksi = Pembayaran::whereIn('user_id', $userIds)->count() +
+                           Pengeluaran::where('kelas_id', auth()->user()->kelas_id)->count();
 
-        $siswaList = \App\Models\User::where('role', 'siswa')->get();
-        $tagihanList = \App\Models\Tagihan::latest()->get();
+        $siswaList = \App\Models\User::whereIn('id', $userIds)->get();
+        $tagihanList = Tagihan::whereIn('user_id', $userIds)->latest()->get();
 
-        $totalMasukBulanIni = Pembayaran::whereMonth('tanggal_bayar', now()->month)
-                                        ->whereYear('tanggal_bayar', now()->year)
-                                        ->sum('jml_bayar') ?? 0;
-                                        
-        $totalMasukBulanLalu = Pembayaran::whereMonth('tanggal_bayar', now()->subMonth()->month)
-                                         ->whereYear('tanggal_bayar', now()->subMonth()->year)
-                                         ->sum('jml_bayar') ?? 0;
+        $totalMasukBulanIni = Pembayaran::whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->whereMonth('tanggal_bayar', now()->month)
+            ->whereYear('tanggal_bayar', now()->year)
+            ->sum('jml_bayar') ?? 0;
+
+        $totalMasukBulanLalu = Pembayaran::whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->whereMonth('tanggal_bayar', now()->subMonth()->month)
+            ->whereYear('tanggal_bayar', now()->subMonth()->year)
+            ->sum('jml_bayar') ?? 0;
 
         $persenMasuk = $totalMasukBulanLalu > 0 ? (($totalMasukBulanIni - $totalMasukBulanLalu) / $totalMasukBulanLalu) * 100 : 100;
 
-        $iuranWajib = Pembayaran::whereNotNull('tagihan_id')->sum('jml_bayar') ?? 0;
-        $dendaLainnya = Pembayaran::whereNull('tagihan_id')->sum('jml_bayar') ?? 0;
+        $iuranWajib = Pembayaran::whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->whereNotNull('tagihan_id')
+            ->sum('jml_bayar') ?? 0;
+
+        $dendaLainnya = Pembayaran::whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->whereNull('tagihan_id')
+            ->sum('jml_bayar') ?? 0;
 
         return view('bendahara.kas_masuk', compact(
             'totalMasuk',
             'totalKeluar',
             'saldoKas',
-            'saldoAwal',
-            'saldoAkhir',
             'jumlahTransaksi',
             'pembayaran',
             'siswaList',
@@ -129,13 +152,16 @@ class BendaharaController extends Controller
 
     public function cetakKasMasuk(Request $request)
     {
+        $userIds = $this->getSiswaUserIds();
         $search = $request->input('search');
         $kategori = $request->input('kategori');
 
-        $pembayaranQuery = Pembayaran::with(['siswa', 'tagihan']);
+        $pembayaranQuery = Pembayaran::with(['user', 'tagihan'])
+            ->whereIn('user_id', $userIds)
+            ->where('status', 'lunas');
 
         if ($search) {
-            $pembayaranQuery->whereHas('siswa', function($q) use ($search) {
+            $pembayaranQuery->whereHas('user', function($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
                   ->orWhere('email', 'LIKE', "%{$search}%");
             });
@@ -159,27 +185,40 @@ class BendaharaController extends Controller
     // =========================
     public function kasKeluar()
     {
-        $totalKeluar = Pengeluaran::sum('nominal') ?? 0;
+        $totalKeluar = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->sum('nominal') ?? 0;
 
-        $pengeluaran = Pengeluaran::where('kelas_id', Auth::user()->kelas_id)->latest()->get();
+        $pengeluaran = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->latest()
+            ->get();
 
-        $totalKeluarBulanIni = Pengeluaran::whereMonth('tanggal', now()->month)
-                                          ->whereYear('tanggal', now()->year)
-                                          ->sum('nominal') ?? 0;
-        $totalKeluarBulanLalu = Pengeluaran::whereMonth('tanggal', now()->subMonth()->month)
-                                           ->whereYear('tanggal', now()->subMonth()->year)
-                                           ->sum('nominal') ?? 0;
+        $totalKeluarBulanIni = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->whereMonth('tanggal', now()->month)
+            ->whereYear('tanggal', now()->year)
+            ->sum('nominal') ?? 0;
+
+        $totalKeluarBulanLalu = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->whereMonth('tanggal', now()->subMonth()->month)
+            ->whereYear('tanggal', now()->subMonth()->year)
+            ->sum('nominal') ?? 0;
 
         $persenKeluar = $totalKeluarBulanLalu > 0 ? (($totalKeluarBulanIni - $totalKeluarBulanLalu) / $totalKeluarBulanLalu) * 100 : 100;
 
-        $sektorTerbesar = Pengeluaran::selectRaw('keterangan, sum(nominal) as total')
-                                     ->groupBy('keterangan')
-                                     ->orderByDesc('total')
-                                     ->first();
+        $sektorTerbesar = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->selectRaw('keterangan, sum(nominal) as total')
+            ->groupBy('keterangan')
+            ->orderByDesc('total')
+            ->first();
 
-        $totalMasuk = Pembayaran::sum('jml_bayar') ?? 0;
+        $userIds = $this->getSiswaUserIds();
+        $totalMasuk = Pembayaran::whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->sum('jml_bayar') ?? 0;
+
         $kasSisa = $totalMasuk - $totalKeluar;
-        $jumlahSektor = Pengeluaran::where('kelas_id', Auth::user()->kelas_id)->distinct('keterangan')->count('keterangan');
+        $jumlahSektor = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->distinct('keterangan')
+            ->count('keterangan');
 
         return view('bendahara.kas_keluar', compact(
             'pengeluaran',
@@ -197,15 +236,41 @@ class BendaharaController extends Controller
     // =========================
     public function transaksi()
     {
-        $pembayaran = Pembayaran::latest()->get();
-        $pengeluaran = Pengeluaran::latest()->get();
+        $userIds = $this->getSiswaUserIds();
 
-        $totalMasukBulanIni = Pembayaran::whereMonth('tanggal_bayar', now()->month)->whereYear('tanggal_bayar', now()->year)->sum('jml_bayar') ?? 0;
-        $totalMasukBulanLalu = Pembayaran::whereMonth('tanggal_bayar', now()->subMonth()->month)->whereYear('tanggal_bayar', now()->subMonth()->year)->sum('jml_bayar') ?? 0;
+        $pembayaran = Pembayaran::with(['user', 'tagihan'])
+            ->whereIn('user_id', $userIds)
+            ->latest()
+            ->paginate(5);
+
+        $pengeluaran = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->latest()
+            ->paginate(5);
+
+        $totalMasukBulanIni = Pembayaran::whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->whereMonth('tanggal_bayar', now()->month)
+            ->whereYear('tanggal_bayar', now()->year)
+            ->sum('jml_bayar') ?? 0;
+
+        $totalMasukBulanLalu = Pembayaran::whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->whereMonth('tanggal_bayar', now()->subMonth()->month)
+            ->whereYear('tanggal_bayar', now()->subMonth()->year)
+            ->sum('jml_bayar') ?? 0;
+
         $persenMasuk = $totalMasukBulanLalu > 0 ? (($totalMasukBulanIni - $totalMasukBulanLalu) / $totalMasukBulanLalu) * 100 : 100;
 
-        $totalKeluarBulanIni = Pengeluaran::whereMonth('tanggal', now()->month)->whereYear('tanggal', now()->year)->sum('nominal') ?? 0;
-        $totalKeluarBulanLalu = Pengeluaran::whereMonth('tanggal', now()->subMonth()->month)->whereYear('tanggal', now()->subMonth()->year)->sum('nominal') ?? 0;
+        $totalKeluarBulanIni = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->whereMonth('tanggal', now()->month)
+            ->whereYear('tanggal', now()->year)
+            ->sum('nominal') ?? 0;
+
+        $totalKeluarBulanLalu = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->whereMonth('tanggal', now()->subMonth()->month)
+            ->whereYear('tanggal', now()->subMonth()->year)
+            ->sum('nominal') ?? 0;
+
         $persenKeluar = $totalKeluarBulanLalu > 0 ? (($totalKeluarBulanIni - $totalKeluarBulanLalu) / $totalKeluarBulanLalu) * 100 : 100;
 
         $jumlahTransaksi = $pembayaran->count() + $pengeluaran->count();
@@ -228,7 +293,12 @@ class BendaharaController extends Controller
     // =========================
     public function tagihan()
     {
-        $tagihan = Tagihan::latest()->get();
+        $userIds = $this->getSiswaUserIds();
+
+        $tagihan = Tagihan::whereIn('user_id', $userIds)
+            ->latest()
+            ->paginate(5);
+
         return view('bendahara.tagihan', compact('tagihan'));
     }
 
@@ -247,9 +317,11 @@ class BendaharaController extends Controller
             'deskripsi'    => 'nullable'
         ]);
 
+        $userIds = $this->getSiswaUserIds();
+
         $tagihan = Tagihan::create([
-            'user_id'      => Auth::user()->id, 
-            'created_by'   => Auth::user()->id,
+            'user_id'      => auth()->id(),
+            'created_by'   => auth()->id(),
             'nama_tagihan' => $request->nama_tagihan,
             'periode'      => $request->periode,
             'nominal'      => $request->nominal,
@@ -257,13 +329,13 @@ class BendaharaController extends Controller
             'deskripsi'    => $request->deskripsi,
         ]);
 
-        $daftarSiswa = \App\Models\User::where('role', 'siswa')->get();
+        $daftarSiswa = \App\Models\User::whereIn('id', $userIds)->get();
 
         foreach ($daftarSiswa as $siswa) {
             DB::table('tunggakan')->insert([
-                'tagihan_id' => $tagihan->id, 
-                'user_id'    => $siswa->id, 
-                'status'     => 'belum_bayar', 
+                'tagihan_id' => $tagihan->id,
+                'user_id'    => $siswa->id,
+                'status'     => 'belum_bayar',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -271,7 +343,7 @@ class BendaharaController extends Controller
 
         return redirect()
             ->route('bendahara.tagihan')
-            ->with('success', 'Tagihan berhasil dibuat dan disebarkan ke seluruh siswa.');
+            ->with('success', 'Tagihan berhasil dibuat dan disebarkan ke seluruh siswa kelas.');
     }
 
     public function editTagihan($id)
@@ -319,31 +391,63 @@ class BendaharaController extends Controller
     // =========================
     public function laporan()
     {
-        $totalMasuk = Pembayaran::where('status', 'lunas')->sum('jml_bayar') ?? 0;
-        $totalKeluar = Pengeluaran::sum('nominal') ?? 0;
+        $userIds = $this->getSiswaUserIds();
+
+        $totalMasuk = Pembayaran::whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->sum('jml_bayar') ?? 0;
+
+        $totalKeluar = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->sum('nominal') ?? 0;
+
         $saldoAkhir = $totalMasuk - $totalKeluar;
 
-        $totalMasukBulanIni = Pembayaran::where('status', 'lunas')->whereMonth('tanggal_bayar', now()->month)->whereYear('tanggal_bayar', now()->year)->sum('jml_bayar') ?? 0;
-        $totalMasukBulanLalu = Pembayaran::where('status', 'lunas')->whereMonth('tanggal_bayar', now()->subMonth()->month)->whereYear('tanggal_bayar', now()->subMonth()->year)->sum('jml_bayar') ?? 0;
+        $totalMasukBulanIni = Pembayaran::whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->whereMonth('tanggal_bayar', now()->month)
+            ->whereYear('tanggal_bayar', now()->year)
+            ->sum('jml_bayar') ?? 0;
+
+        $totalMasukBulanLalu = Pembayaran::whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->whereMonth('tanggal_bayar', now()->subMonth()->month)
+            ->whereYear('tanggal_bayar', now()->subMonth()->year)
+            ->sum('jml_bayar') ?? 0;
+
         $persenMasuk = $totalMasukBulanLalu > 0 ? (($totalMasukBulanIni - $totalMasukBulanLalu) / $totalMasukBulanLalu) * 100 : 100;
 
-        $totalKeluarBulanIni = Pengeluaran::whereMonth('tanggal', now()->month)->whereYear('tanggal', now()->year)->sum('nominal') ?? 0;
-        $totalKeluarBulanLalu = Pengeluaran::whereMonth('tanggal', now()->subMonth()->month)->whereYear('tanggal', now()->subMonth()->year)->sum('nominal') ?? 0;
+        $totalKeluarBulanIni = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->whereMonth('tanggal', now()->month)
+            ->whereYear('tanggal', now()->year)
+            ->sum('nominal') ?? 0;
+
+        $totalKeluarBulanLalu = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->whereMonth('tanggal', now()->subMonth()->month)
+            ->whereYear('tanggal', now()->subMonth()->year)
+            ->sum('nominal') ?? 0;
+
         $persenKeluar = $totalKeluarBulanLalu > 0 ? (($totalKeluarBulanIni - $totalKeluarBulanLalu) / $totalKeluarBulanLalu) * 100 : 100;
 
-        $totalTagihan = Tagihan::sum('nominal') ?? 0;
+        $totalTagihan = Tagihan::whereIn('user_id', $userIds)
+            ->sum('nominal') ?? 0;
 
-        $pembayaran = Pembayaran::with('siswa')->where('status', 'lunas')->get()->map(function($item) {
-            $item->jenis = 'masuk';
-            $item->tanggal_sort = $item->tanggal_bayar;
-            return $item;
-        });
+        $pembayaran = Pembayaran::with(['user', 'tagihan'])
+            ->whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->get()
+            ->map(function($item) {
+                $item->jenis = 'masuk';
+                $item->tanggal_sort = $item->tanggal_bayar;
+                return $item;
+            });
 
-        $pengeluaran = Pengeluaran::get()->map(function($item) {
-            $item->jenis = 'keluar';
-            $item->tanggal_sort = $item->tanggal;
-            return $item;
-        });
+        $pengeluaran = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->get()
+            ->map(function($item) {
+                $item->jenis = 'keluar';
+                $item->tanggal_sort = $item->tanggal;
+                return $item;
+            });
 
         $transaksiList = $pembayaran->concat($pengeluaran)->sortByDesc('tanggal_sort')->values();
 
@@ -360,12 +464,26 @@ class BendaharaController extends Controller
 
     public function exportPdf()
     {
-        $totalMasuk = Pembayaran::where('status', 'lunas')->sum('jml_bayar') ?? 0;
-        $totalKeluar = Pengeluaran::sum('nominal') ?? 0;
+        $userIds = $this->getSiswaUserIds();
+
+        $totalMasuk = Pembayaran::whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->sum('jml_bayar') ?? 0;
+
+        $totalKeluar = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->sum('nominal') ?? 0;
+
         $saldoAkhir = $totalMasuk - $totalKeluar;
 
-        $pembayaran = Pembayaran::with(['siswa', 'tagihan'])->where('status', 'lunas')->latest()->get();
-        $pengeluaran = Pengeluaran::latest()->get();
+        $pembayaran = Pembayaran::with(['user', 'tagihan'])
+            ->whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->latest()
+            ->get();
+
+        $pengeluaran = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->latest()
+            ->get();
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('bendahara.laporan_pdf', compact('totalMasuk', 'totalKeluar', 'saldoAkhir', 'pembayaran', 'pengeluaran'));
         return $pdf->download('Laporan_Kas_Kasku_'.date('Y-m-d').'.pdf');
@@ -373,8 +491,15 @@ class BendaharaController extends Controller
 
     public function exportExcel()
     {
-        $pembayaran = Pembayaran::with(['siswa', 'tagihan'])->where('status', 'lunas')->get();
-        $pengeluaran = Pengeluaran::get();
+        $userIds = $this->getSiswaUserIds();
+
+        $pembayaran = Pembayaran::with(['user', 'tagihan'])
+            ->whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->get();
+
+        $pengeluaran = Pengeluaran::where('kelas_id', auth()->user()->kelas_id)
+            ->get();
 
         $filename = "transaksi_kasku_" . date('Y-m-d') . ".csv";
 
@@ -393,7 +518,7 @@ class BendaharaController extends Controller
             fputcsv($file, $columns);
 
             foreach ($pembayaran as $item) {
-                $deskripsi = ($item->siswa->name ?? 'User') . ' membayar kas';
+                $deskripsi = ($item->user->name ?? 'User') . ' membayar kas';
                 $kategori = $item->tagihan->nama_tagihan ?? 'Kas Masuk';
                 $tanggal = \Carbon\Carbon::parse($item->tanggal_bayar)->format('Y-m-d H:i');
                 fputcsv($file, [$deskripsi, $kategori, $tanggal, $item->jml_bayar, 'Masuk']);

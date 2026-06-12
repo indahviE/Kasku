@@ -230,10 +230,16 @@
                     </button>
                     <div class="flex items-center gap-3">
                         <div class="text-right">
-                            <h1 class="text-[13px] font-bold text-slate-800">Nafisah Adelia Putri</h1>
-                            <p class="text-[11px] text-slate-400">Bendahara</p>
-                        </div>
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white font-bold">M</div>
+                            <h1 class="text-[13px] font-bold text-slate-800">
+                                    {{ auth()->user()->name ?? 'Bendahara' }}
+                                </h1>
+                                <p class="text-[11px] text-slate-400">
+                                    Bendahara
+                                </p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white font-bold">
+                                {{ strtoupper(substr(auth()->user()->name ?? 'B', 0, 1)) }}
+                            </div>
                     </div>
                 </div>
             </div>

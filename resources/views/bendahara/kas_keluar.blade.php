@@ -180,11 +180,17 @@
                 <div class="relative">
                     <button onclick="toggleDropdown()" class="flex items-center gap-3">
                         <div class="text-right">
-                            <h1 class="text-[13px] font-bold text-slate-800">Nafisah Adelia Putri</h1>
-                            <p class="text-[11px] text-slate-400">Bendahara</p>
-                        </div>
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white font-bold">M</div>
-                    </button>
+                                <h1 class="text-[13px] font-bold text-slate-800">
+                                    {{ auth()->user()->name ?? 'Bendahara' }}
+                                </h1>
+                                <p class="text-[11px] text-slate-400">
+                                    Bendahara
+                                </p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white font-bold">
+                                {{ strtoupper(substr(auth()->user()->name ?? 'B', 0, 1)) }}
+                            </div>
+                        </button>
 
                     <div id="dropdownMenu" class="dropdown-menu absolute right-0 top-14 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
                         <a href="{{ route('bendahara.profile') }}" class="flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-slate-50 transition">
@@ -415,10 +421,10 @@
 
             // Targetkan kolom pertama (Kebutuhan / Keperluan)
             const keperluanCell = rows[i].getElementsByTagName("td")[0];
-            
+
             if (keperluanCell) {
                 const textValue = keperluanCell.textContent || keperluanCell.innerText;
-                
+
                 // Menyembunyikan atau menampilkan baris berdasarkan kecocokan teks input
                 if (textValue.toLowerCase().indexOf(filter) > -1) {
                     rows[i].style.display = "";

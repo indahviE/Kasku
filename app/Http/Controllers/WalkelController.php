@@ -101,7 +101,7 @@ class WalkelController extends Controller
                 ->with('error', 'Maksimal 2 bendahara per kelas');
         }
 
-        User::where('id', $siswa->user_id)->update(['role' => 'bendahara']);
+        User::where('id', $siswa->user_id)->update(['role' => 'bendahara', 'kelas_id' => $wali->kelas_id]);
 
         return redirect()->route('wali.dashboard')
             ->with('success', "{$user->name} berhasil dijadikan bendahara");
@@ -113,7 +113,8 @@ class WalkelController extends Controller
         $siswa   = Siswa::with('user')->where('kelas_id', $wali->kelas_id)->get();
         $userIds = $siswa->pluck('user_id');
 
-        $masuk = Pembayaran::with(['siswa', 'tagihan'])
+        // Data Pembayaran (Kas Masuk)
+        $masuk = Pembayaran::with(['user', 'tagihan'])
             ->whereIn('user_id', $userIds)
             ->where('status', 'lunas')
             ->get()
@@ -122,11 +123,12 @@ class WalkelController extends Controller
                 'nominal'    => $p->jml_bayar,
                 'tanggal'    => $p->tanggal_bayar,
                 'keterangan' => $p->tagihan->nama_tagihan ?? 'Pembayaran kas',
-                'nama'       => $p->siswa->name ?? '-',
+                'nama'       => $p->user->name ?? '-',
                 'metode'     => $p->metode,
             ]);
 
-        $keluar = Pengeluaran::with('pencatat')
+        // Data Pengeluaran (Kas Keluar)
+        $keluar = Pengeluaran::with('user')
             ->where('kelas_id', $wali->kelas_id)
             ->get()
             ->map(fn($p) => [
@@ -134,7 +136,7 @@ class WalkelController extends Controller
                 'nominal'    => $p->nominal,
                 'tanggal'    => $p->tanggal,
                 'keterangan' => $p->keterangan,
-                'nama'       => 'Bendahara (' . ($p->pencatat->name ?? 'Tidak Diketahui') . ')',
+                'nama'       => 'Bendahara (' . ($p->user->name ?? 'Tidak Diketahui') . ')',
                 'metode'     => '-',
             ]);
 
@@ -292,5 +294,45 @@ class WalkelController extends Controller
         );
 
         return view('admin.wali_kelas.tunggakan', compact('wali', 'tunggakan'));
+    }
+
+    public function cetakTransaksiPdf()
+    {
+        $wali    = WaliKelas::where('user_id', Auth::id())->firstOrFail();
+        $siswa   = Siswa::with('user')->where('kelas_id', $wali->kelas_id)->get();
+        $userIds = $siswa->pluck('user_id');
+
+        $masuk = Pembayaran::with(['user', 'tagihan'])
+            ->whereIn('user_id', $userIds)
+            ->where('status', 'lunas')
+            ->get()
+            ->map(fn($p) => [
+                'tipe'       => 'masuk',
+                'nominal'    => $p->jml_bayar,
+                'tanggal'    => $p->tanggal_bayar,
+                'keterangan' => $p->tagihan->nama_tagihan ?? 'Pembayaran kas',
+                'nama'       => $p->user->name ?? '-',
+                'metode'     => $p->metode,
+            ]);
+
+        $keluar = Pengeluaran::with('user')
+            ->where('kelas_id', $wali->kelas_id)
+            ->get()
+            ->map(fn($p) => [
+                'tipe'       => 'keluar',
+                'nominal'    => $p->nominal,
+                'tanggal'    => $p->tanggal,
+                'keterangan' => $p->keterangan,
+                'nama'       => 'Bendahara (' . ($p->user->name ?? 'Tidak Diketahui') . ')',
+                'metode'     => '-',
+            ]);
+
+        $transaksi = $masuk->concat($keluar)->sortByDesc('tanggal')->values();
+
+        $totalMasuk  = $masuk->sum('nominal');
+        $totalKeluar = $keluar->sum('nominal');
+        $saldo       = $totalMasuk - $totalKeluar;
+
+        return view('admin.wali_kelas.cetak-transaksi', compact('wali', 'transaksi', 'totalMasuk', 'totalKeluar', 'saldo'));
     }
 }

@@ -180,11 +180,17 @@
                 <div class="relative">
                     <button onclick="toggleDropdown()" class="flex items-center gap-3">
                         <div class="text-right">
-                            <h1 class="text-[13px] font-bold text-slate-800">Nafisah Adelia Putri</h1>
-                            <p class="text-[11px] text-slate-400">Bendahara</p>
-                        </div>
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white font-bold">M</div>
-                    </button>
+                                <h1 class="text-[13px] font-bold text-slate-800">
+                                    {{ auth()->user()->name ?? 'Bendahara' }}
+                                </h1>
+                                <p class="text-[11px] text-slate-400">
+                                    Bendahara
+                                </p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white font-bold">
+                                {{ strtoupper(substr(auth()->user()->name ?? 'B', 0, 1)) }}
+                            </div>
+                        </button>
 
                     <div id="dropdownMenu" class="dropdown-menu absolute right-0 top-14 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
                         <a href="{{ route('bendahara.profile') }}" class="flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-slate-50 transition">
@@ -274,7 +280,7 @@
                         </span>
                         <input type="text" name="search" id="searchInput" value="{{ request('search') }}" placeholder="Cari nama siswa atau email..." class="w-full h-11 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-teal-500 outline-none transition font-medium text-slate-700">
                     </div>
-                    
+
                     <select name="kategori" onchange="this.form.submit()" class="h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 outline-none focus:bg-white transition cursor-pointer">
                         <option value="">Semua Kategori</option>
                         <option value="umum" {{ request('kategori') == 'umum' ? 'selected' : '' }}>Kas Umum</option>
@@ -283,7 +289,7 @@
                         @endforeach
                     </select>
                 </div>
-                
+
                 <div class="flex items-center gap-2">
                     @if(request('search') || request('kategori'))
                         <a href="{{ route('bendahara.kas_masuk') }}" class="h-11 px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-sm transition flex items-center justify-center">
